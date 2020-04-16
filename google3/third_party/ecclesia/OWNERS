@@ -1,0 +1,8 @@
+kaushikpatel
+dchanman
+jadmanski
+mdb-group: platforms-gsys
+
+# Inverness will use the "inverness" mockup server
+per-file redfish_mockups/inverness/...=kunyi
+per-file redfish_mockups/inverness/...=rhanley

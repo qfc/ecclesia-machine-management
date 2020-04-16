@@ -1,0 +1,15 @@
+{
+    "@odata.context": "/redfish/v1/$metadata#SoftwareInventory.SoftwareInventory",
+    "@odata.id": "/redfish/v1/UpdateService/FirmwareInventory/haven",
+    "@odata.type": "#SoftwareInventory.v1_1_0.SoftwareInventory",
+    "Description": "Compute Node Haven FW",
+    "Id": "haven",
+    "Name": "firmware-haven-indus",
+    "RelatedItem": [
+        {
+            "@odata.id": "/redfish/v1/Managers/haven"
+        }
+    ],
+    "Updateable": false,
+    "Version": "0.0.900.1"
+}

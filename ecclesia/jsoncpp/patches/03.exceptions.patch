@@ -1,0 +1,87 @@
+diff --git a/google3/third_party/jsoncpp/config.h b/google3/third_party/jsoncpp/config.h
+index f0cea44..312a7c4 100644
+--- a/google3/third_party/jsoncpp/config.h
++++ b/google3/third_party/jsoncpp/config.h
+@@ -30,7 +30,7 @@
+ // If non-zero, the library uses exceptions to report bad input instead of C
+ // assertion macros. The default is to use exceptions.
+ #ifndef JSON_USE_EXCEPTION
+-#define JSON_USE_EXCEPTION 1
++// #define JSON_USE_EXCEPTION 1
+ #endif
+ 
+ /// If defined, indicates that the source file is amalgated
+diff --git a/google3/third_party/jsoncpp/json_reader.cc b/google3/third_party/jsoncpp/json_reader.cc
+index 99df586..05304e6 100644
+--- a/google3/third_party/jsoncpp/json_reader.cc
++++ b/google3/third_party/jsoncpp/json_reader.cc
+@@ -161,15 +161,19 @@ bool Reader::parse(const char* beginDoc,
+ }
+ 
+ bool Reader::readValue() {
++  Token token;
++  skipCommentTokens(token);
++
+   // This is a non-reentrant way to support a stackLimit. Terrible!
+   // But this deprecated class has a security problem: Bad input can
+   // cause a seg-fault. This seems like a fair, binary-compatible way
+   // to prevent the problem.
+-  if (stackDepth_g >= stackLimit_g) throwRuntimeError("Exceeded stackLimit in readValue().");
++  if (stackDepth_g >= stackLimit_g) {
++    addError("Exceeded stackLimit in readValue().", token);
++    return false;
++  }
+   ++stackDepth_g;
+ 
+-  Token token;
+-  skipCommentTokens(token);
+   bool successful = true;
+ 
+   if (collectComments_ && !commentsBefore_.empty()) {
+@@ -1092,10 +1096,14 @@ bool OurReader::parse(const char* beginDoc,
+ }
+ 
+ bool OurReader::readValue() {
+-  if (stackDepth_ >= features_.stackLimit_) throwRuntimeError("Exceeded stackLimit in readValue().");
+-  ++stackDepth_;
+   Token token;
+   skipCommentTokens(token);
++
++  if (stackDepth_ >= features_.stackLimit_) {
++    addError("Exceeded stackLimit in readValue().", token);
++    return false;
++  }
++  ++stackDepth_;
+   bool successful = true;
+ 
+   if (collectComments_ && !commentsBefore_.empty()) {
+diff --git a/google3/third_party/jsoncpp/unit_tests/jsoncpp_test.cc b/google3/third_party/jsoncpp/unit_tests/jsoncpp_test.cc
+index c5125f7..4596c0b 100644
+--- a/google3/third_party/jsoncpp/unit_tests/jsoncpp_test.cc
++++ b/google3/third_party/jsoncpp/unit_tests/jsoncpp_test.cc
+@@ -1952,9 +1952,10 @@ JSONTEST_FIXTURE(CharReaderTest, parseWithStackLimit) {
+   b.settings_["stackLimit"] = 1;
+   Json::CharReader* reader(b.newCharReader());
+   JSONCPP_STRING errs;
+-  JSONTEST_ASSERT_THROWS(reader->parse(
++  bool ok = reader->parse(
+       doc, doc + std::strlen(doc),
+-      &root, &errs));
++      &root, &errs);
++  JSONTEST_ASSERT(!ok);
+   delete reader;
+   }
+ }
+@@ -2471,10 +2472,12 @@ JSONTEST_FIXTURE(IteratorTest, indexes) {
+ }
+ 
+ JSONTEST_FIXTURE(IteratorTest, const) {
++#if JSON_USE_EXCEPTION
+   Json::Value const v;
+   JSONTEST_ASSERT_THROWS(
+     Json::Value::iterator it(v.begin()) // Compile, but throw.
+   );
++#endif
+ 
+   Json::Value value;
+ 

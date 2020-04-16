@@ -1,0 +1,75 @@
+{
+    "@odata.id": "/redfish/v1/Chassis/chassis/Assembly",
+    "@odata.type": "#Assembly.v1_2_0.Assembly",
+    "Id": "Assembly",
+    "Name": "diorite_imc",
+    "Assemblies": [
+        {
+            "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0",
+            "MemberId": "0",
+            "Name": "diorite_imc",
+            "Oem": {
+                "Google": {
+                    "Components": [
+                        {
+                            "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/0",
+                            "MemberId": "0",
+                            "Name": "diorite_imc",
+                            "PhysicalContext": "SystemBoard"
+                        },
+                        {
+                            "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/1",
+                            "MemberId": "1",
+                            "Name": "SYS_FAN0",
+                            "PhysicalContext": "Connector"
+                        },
+                        {
+                            "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/2",
+                            "MemberId": "2",
+                            "Name": "SYS_FAN1",
+                            "PhysicalContext": "Connector"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+          "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/1",
+          "MemberId": "1",
+          "Name": "fan_40mm",
+          "Oem": {
+            "Google": {
+              "AttachedTo": [
+                { "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/1" }
+              ],
+              "Components": [
+                {
+                  "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/1/Oem/Google/Components/0",
+                  "MemberId": "0",
+                  "Name": "fan_40mm"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/2",
+          "MemberId": "2",
+          "Name": "fan_40mm",
+          "Oem": {
+            "Google": {
+              "AttachedTo": [
+                { "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/2" }
+              ],
+              "Components": [
+                {
+                  "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/2/Oem/Google/Components/0",
+                  "MemberId": "0",
+                  "Name": "fan_40mm"
+                }
+              ]
+            }
+          }
+        }
+    ]
+}

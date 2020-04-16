@@ -1,0 +1,128 @@
+diff --git a/google3/third_party/jsoncpp/golden_tests/golden_test.py b/google3/third_party/jsoncpp/golden_tests/golden_test.py
+index d21c02f..e3d1664 100644
+--- a/google3/third_party/jsoncpp/golden_tests/golden_test.py
++++ b/google3/third_party/jsoncpp/golden_tests/golden_test.py
+@@ -1,3 +1,5 @@
++#!/usr/bin/python2
++#
+ # Copyright 2007 Baptiste Lepilleur
+ # Distributed under MIT license, or public domain if desired and
+ # recognized in your jurisdiction.
+@@ -11,6 +13,15 @@ import sys
+ import os
+ import os.path
+ import optparse
++import shutil
++
++from google3.testing.pybase import googletest
++from google3.pyglib import flags
++FLAGS = flags.FLAGS
++
++################################################
++# jsoncpp original code
++################################################
+ 
+ VALGRIND_CMD = 'valgrind --tool=memcheck --leak-check=yes --undef-value-errors=yes '
+ 
+@@ -130,45 +141,32 @@ def runAllTests(jsontest_executable_path, input_dir = None,
+         print('All %d tests passed.' % len(tests))
+         return 0
+ 
+-def main():
+-    from optparse import OptionParser
+-    parser = OptionParser(usage="%prog [options] <path to jsontestrunner.exe> [test case directory]")
+-    parser.add_option("--valgrind",
+-                  action="store_true", dest="valgrind", default=False,
+-                  help="run all the tests using valgrind to detect memory leaks")
+-    parser.add_option("-c", "--with-json-checker",
+-                  action="store_true", dest="with_json_checker", default=False,
+-                  help="run all the tests from the official JSONChecker test suite of json.org")
+-    parser.enable_interspersed_args()
+-    options, args = parser.parse_args()
++################################################
++# Google code
++################################################
+ 
+-    if len(args) < 1 or len(args) > 2:
+-        parser.error('Must provides at least path to jsontestrunner executable.')
+-        sys.exit(1)
++class JsonCppTest(googletest.TestCase):
++  def testThirdPartyCode(self):
++    # Find the location of the test data.
++    test_data_dir = FLAGS.test_srcdir + '/google3/third_party/jsoncpp/golden_tests/data'
++    assert(os.path.exists(test_data_dir))
+ 
+-    jsontest_executable_path = os.path.normpath(os.path.abspath(args[0]))
+-    if len(args) > 1:
+-        input_path = os.path.normpath(os.path.abspath(args[1]))
+-    else:
+-        input_path = None
+-    status = runAllTests(jsontest_executable_path, input_path,
+-                         use_valgrind=options.valgrind,
+-                         with_json_checker=options.with_json_checker,
+-                         writerClass='StyledWriter')
+-    if status:
+-        sys.exit(status)
+-    status = runAllTests(jsontest_executable_path, input_path,
+-                         use_valgrind=options.valgrind,
+-                         with_json_checker=options.with_json_checker,
+-                         writerClass='StyledStreamWriter')
+-    if status:
+-        sys.exit(status)
+-    status = runAllTests(jsontest_executable_path, input_path,
+-                         use_valgrind=options.valgrind,
+-                         with_json_checker=options.with_json_checker,
+-                         writerClass='BuiltStyledStreamWriter')
+-    if status:
+-        sys.exit(status)
++    # Copy it to a mutable location, since runAllTests wants to write to the
++    # directory.
++    mutable_test_data_dir = FLAGS.test_tmpdir
++    for filename in os.listdir(test_data_dir):
++      source_file = test_data_dir + '/' + filename
++      dest_file = mutable_test_data_dir + '/' + filename
++
++      shutil.copy(source_file, dest_file)
++
++    # Find the location to the jsontest binary.
++    jsontest_executable_path = (FLAGS.test_srcdir +
++                                '/google3/third_party/jsoncpp/golden_tests/test_runner')
++
++    # Use the third-party code to run the tests.
++    self.assertEquals(0, runAllTests(jsontest_executable_path,
++                                     mutable_test_data_dir))
+ 
+ if __name__ == '__main__':
+-    main()
++    googletest.main()
+diff --git a/google3/third_party/jsoncpp/golden_tests/test_runner.cc b/google3/third_party/jsoncpp/golden_tests/test_runner.cc
+index 45db464..7d2a03d 100644
+--- a/google3/third_party/jsoncpp/golden_tests/test_runner.cc
++++ b/google3/third_party/jsoncpp/golden_tests/test_runner.cc
+@@ -6,7 +6,7 @@
+ /* This executable is used for testing parser/writer using real JSON files.
+  */
+ 
+-#include <json/json.h>
++#include "third_party/jsoncpp/json.h"
+ #include <algorithm> // sort
+ #include <sstream>
+ #include <stdio.h>
+@@ -311,7 +311,7 @@ static int runTest(Options const& opts)
+ }
+ int main(int argc, const char* argv[]) {
+   Options opts;
+-  try {
++  {
+   int exitCode = parseCommandLine(argc, argv, &opts);
+   if (exitCode != 0) {
+     printf("Failed to parse command-line.");
+@@ -319,8 +319,4 @@ int main(int argc, const char* argv[]) {
+   }
+     return runTest(opts);
+   }
+-  catch (const std::exception& e) {
+-    printf("Unhandled exception:\n%s\n", e.what());
+-    return 1;
+-  }
+ }

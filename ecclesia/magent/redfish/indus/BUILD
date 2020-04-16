@@ -1,0 +1,62 @@
+licenses(["notice"])
+
+cc_library(
+    name = "indus",
+    srcs = [
+        "memory_metrics.cc",
+        "processor_metrics.cc",
+    ],
+    hdrs = [
+        "chassis.h",
+        "memory.h",
+        "memory_collection.h",
+        "memory_metrics.h",
+        "processor.h",
+        "processor_collection.h",
+        "processor_metrics.h",
+        "redfish_service.h",
+        "root.h",
+        "service_root.h",
+        "system.h",
+        "systems.h",
+    ],
+    visibility = ["//:magent_frontend_users"],
+    deps = [
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/time",
+        "@com_google_absl//absl/types:variant",
+        "//magent/lib/event_logger:indus_cpu_topology",
+        "//magent/lib/event_logger:indus_system_event_visitors",
+        "//magent/lib/event_logger:system_event_visitors",
+        "//magent/redfish/core:redfish_core",
+        "//magent/sysmodel",
+        "//magent/sysmodel:cpu",
+        "//magent/sysmodel:dimm",
+        "//jsoncpp:json",
+        "@com_google_tensorflow_serving//tensorflow_serving/util/net_http/server/public:http_server_api",
+    ],
+)
+
+cc_test(
+    name = "service_root_test",
+    srcs = ["service_root_test.cc"],
+    data = [
+        ":test_data/service_root.json",
+    ],
+    deps = [
+        ":indus",
+        "//devtools/build/runtime:get_runfiles_dir",
+        "//net/util:ports",
+        "//testing/base/public:gunit_main",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/time",
+        "//magent/lib/thread_pool",
+        "//magent/redfish/core:redfish_core",
+        "//jsoncpp:json",
+        "@com_google_tensorflow_serving//tensorflow_serving/util/net_http/server/public:http_server",
+        "@com_google_tensorflow_serving//tensorflow_serving/util/net_http/server/public:http_server_api",
+        "//webutil/http:httpfetcher",
+    ],
+)

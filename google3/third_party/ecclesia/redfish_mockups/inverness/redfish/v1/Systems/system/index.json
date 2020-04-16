@@ -1,0 +1,71 @@
+{
+    "@odata.context": "/redfish/v1/$metadata#ComputerSystem.ComputerSystem",
+    "@odata.id": "/redfish/v1/Systems/system",
+    "@odata.type": "#ComputerSystem.v1_6_0.ComputerSystem",
+    "Actions": {
+        "#ComputerSystem.Reset": {
+            "ResetType@Redfish.AllowableValues": [
+                "On",
+                "ForceOff",
+                "ForceOn",
+                "ForceRestart",
+                "GracefulRestart",
+                "GracefulShutdown",
+                "PowerCycle",
+                "Nmi"
+            ],
+            "target": "/redfish/v1/Systems/system/Actions/ComputerSystem.Reset"
+        }
+    },
+    "Boot": {
+        "BootSourceOverrideEnabled": "Disabled",
+        "BootSourceOverrideMode": "Legacy",
+        "BootSourceOverrideTarget": "None",
+        "BootSourceOverrideTarget@Redfish.AllowableValues": [
+            "None",
+            "Pxe",
+            "Hdd",
+            "Cd",
+            "Diags",
+            "BiosSetup"
+        ]
+    },
+    "Description": "Computer System",
+    "Id": "system",
+    "Links": {
+        "ManagedBy": [
+            {
+                "@odata.id": "/redfish/v1/Managers/bmc"
+            }
+        ]
+    },
+    "LogServices": {
+        "@odata.id": "/redfish/v1/Systems/system/LogServices"
+    },
+    "Memory": {
+        "@odata.id": "/redfish/v1/Systems/system/Memory"
+    },
+    "MemorySummary": {
+        "Status": {
+            "State": "Disabled"
+        },
+        "TotalSystemMemoryGiB": 0
+    },
+    "Name": "Computer System",
+    "PowerState": "Off",
+    "ProcessorSummary": {
+        "Count": 0,
+        "Status": {
+            "State": "Disabled"
+        }
+    },
+    "Processors": {
+        "@odata.id": "/redfish/v1/Systems/system/Processors"
+    },
+    "Status": {
+        "Health": "OK",
+        "HealthRollup": "OK",
+        "State": "Disabled"
+    },
+    "SystemType": "Physical"
+}

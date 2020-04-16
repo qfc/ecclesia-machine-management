@@ -1,0 +1,92 @@
+load("//devtools/copybara/library/cc_transform", "CC_FILE_SUFFIXES", "cc_replace_integral_types")
+load("//devtools/copybara/library/workflow", "piper_sot_to_gerrit", "presubmit_config")
+
+whitelisted_authors = {
+    "dchanman": "Derek Chan <dchanman@google.com>",
+    "jadmanski": "John Admanski <jadmanski@google.com>",
+    "kaushikpatel": "Kaushik Patel <kaushikpatel@google.com>",
+}
+
+def cc_replace_paths(
+        before,
+        after,
+        regex_groups = {},
+        paths_glob = glob(CC_FILE_SUFFIXES + ["**/BUILD"]),
+        multiline = False):
+    return core.replace(
+        before = before,
+        after = after,
+        regex_groups = regex_groups,
+        paths = paths_glob,
+        multiline = multiline,
+    )
+
+transformations = [
+    # Move files from //third_party/ecclesia to //ecclesia
+    core.copy("google3/third_party/ecclesia", "ecclesia"),
+    core.copy("google3/third_party/jsoncpp", "ecclesia/jsoncpp"),
+    core.copy("google3/third_party/ecclesia/oss/jsoncpp.BUILD", "ecclesia/jsoncpp/BUILD", overwrite = True),
+    core.copy("google3/third_party/ecclesia/oss/libevent.BUILD", "ecclesia/oss/libevent/BUILD"),
+    # Transform the header guards
+    core.replace(
+        before = "THIRD_PARTY_ECCLESIA_${suffix}",
+        after = "ECCLESIA_${suffix}",
+        regex_groups = {"suffix": "\\w+_H_"},
+    ),
+    cc_replace_paths("//third_party/ecclesia:", "//:"),
+    cc_replace_paths("third_party/ecclesia/", ""),
+    cc_replace_paths("//third_party/absl", "@com_google_absl//absl"),
+    cc_replace_paths("third_party/absl", "absl"),
+    cc_replace_paths("//third_party/emboss:", "@com_google_emboss//:"),
+    cc_replace_paths("//third_party/emboss/", "@com_google_emboss//"),
+    cc_replace_paths("third_party/emboss/", ""),
+    cc_replace_paths("//third_party/tensorflow_serving", "@com_google_tensorflow_serving//tensorflow_serving"),
+    cc_replace_paths("third_party/tensorflow_serving", "tensorflow_serving"),
+    cc_replace_paths("//third_party/jsoncpp:", "//jsoncpp:"),
+    cc_replace_paths("third_party/jsoncpp/", "jsoncpp/"),
+    cc_replace_paths("//util/regexp/re2", "@com_googlesource_code_re2//:re2"),
+    cc_replace_paths("util/regexp/re2", "re2"),
+    buildozer.modify(
+        target = "ecclesia/magent:*",
+        commands = ["remove features"],
+    ),
+    leakr.check(),
+]
+
+google3_files = glob(
+    include = [
+        "google3/third_party/ecclesia/**",
+        "google3/third_party/jsoncpp/**",
+    ],
+)
+
+# Create a local copy of ecclesia source with full OSS transforms based on a specified local folder.
+# Usage, from a CitC client root:
+# copybara google3/third_party/ecclesia/copy.bara.sky folder_to_folder \
+# [src directory] --folder-dir [destination directory]
+core.workflow(
+    name = "folder_to_folder",
+    origin = folder.origin(),
+    origin_files = google3_files,
+    destination = folder.destination(),
+    destination_files = glob(["**"]),
+    mode = "SQUASH",
+    authoring = authoring.overwrite("Googler <noreply@google.com>"),
+    transformations = transformations,
+)
+
+# Use piper_sot_to_gerrit for staging the code for review
+# To add piper_sot_to_git when open sourcing
+
+piper_sot_to_gerrit(
+    google3_files = google3_files,
+    default_author = "Ecclesia team <ecclesia-team@google.com>",
+    whitelisted_authors = whitelisted_authors,
+    contact_email = "ecclesia-team@google.com",
+    url = "rpc://user/kaushikpatel/ecclesia",
+    transformations = transformations,
+    owner_mdb = "platforms-gsys",
+    # Do not create Gerrit changes during presubmit yet
+    presubmit_cfg = presubmit_config(dry_run = True),
+    ci_labels = [],
+)

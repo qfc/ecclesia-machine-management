@@ -1,0 +1,21 @@
+{
+    "@odata.context": "/redfish/v1/$metadata#SoftwareInventoryCollection.SoftwareInventoryCollection",
+    "@odata.id": "/redfish/v1/UpdateService/FirmwareInventory",
+    "@odata.type": "#SoftwareInventoryCollection.SoftwareInventoryCollection",
+    "Members": [
+        {
+            "@odata.id": "/redfish/v1/UpdateService/FirmwareInventory/bios"
+        },
+        {
+            "@odata.id": "/redfish/v1/UpdateService/FirmwareInventory/cpld"
+        },
+        {
+            "@odata.id": "/redfish/v1/UpdateService/FirmwareInventory/ec"
+        },
+        {
+            "@odata.id": "/redfish/v1/UpdateService/FirmwareInventory/haven"
+        }
+    ],
+    "Members@odata.count": 4,
+    "Name": "Firmware Inventory Collection"
+}

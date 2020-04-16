@@ -1,0 +1,6 @@
+{
+  "@odata.id": "/redfish/v1/Systems/system/LogServices/ConsoleLog/message",
+  "Message": "0xdead\nbeef\n",
+  "Created": "2020-04-09T16:18:55.631Z",
+  "EntryType": "Event"
+}

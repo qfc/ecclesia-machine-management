@@ -1,0 +1,22 @@
+{
+    "@odata.context": "/redfish/v1/$metadata#Certificate.Certificate",
+    "@odata.id": "/redfish/v1/Managers/bmc/NetworkProtocol/HTTPS/Certificates/1",
+    "@odata.type": "#Certificate.v1_0_0.Certificate",
+    "CertificateString": "-----BEGIN CERTIFICATE-----\nMIIBTTCB9QIEhZud3jAKBggqhkjOPQQDAjAyMQswCQYDVQQGEwJVUzEQMA4GA1UE\nCgwHT3BlbkJNQzERMA8GA1UEAwwIdGVzdGhvc3QwHhcNMTkwNzIyMDg1MTIzWhcN\nMjkwNzE5MDg1MTIzWjAyMQswCQYDVQQGEwJVUzEQMA4GA1UECgwHT3BlbkJNQzER\nMA8GA1UEAwwIdGVzdGhvc3QwWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAASNfCST\nkHtf0AOX5Ug53sYAn19ZuPWYbGr/ktIg2jlbO3SBpmTBpDMfVi84e1SCVlT5Fkz+\ncBldaZX+3BIKfN8IMAoGCCqGSM49BAMCA0cAMEQCIBi9mXbZb1UgZmp8LT6OCPRC\nja5ZySp3hqAexPCtFE9VAiAaN2XATsERWnfw9ulS96Ee9/Cj3O/d/6v6RyBTD9Td\neQ==\n-----END CERTIFICATE-----\n",
+    "Description": "HTTPS Certificate",
+    "Id": "1",
+    "Issuer": {
+        "CommonName": "testhost",
+        "Country": "US",
+        "Organization": "OpenBMC"
+    },
+    "KeyUsage": [],
+    "Name": "HTTPS Certificate",
+    "Subject": {
+        "CommonName": "testhost",
+        "Country": "US",
+        "Organization": "OpenBMC"
+    },
+    "ValidNotAfter": "2029-07-18T20:51:23+00:00",
+    "ValidNotBefore": "2019-07-21T20:51:23+00:00"
+}

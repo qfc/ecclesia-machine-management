@@ -1,0 +1,11 @@
+--- /google/src/files/173609196/depot/google3/third_party/jsoncpp/json_reader.cc        2017-10-26 16:36:11.000000000 -0700                                                                                  
++++ /google/src/cloud/fischman/fuzz-78163301/google3/third_party/jsoncpp/json_reader.cc 2018-04-17 08:50:51.000000000 -0700
+@@ -97,7 +97,7 @@
+ 
+ bool
+ Reader::parse(const std::string& document, Value& root, bool collectComments) {
+-  JSONCPP_STRING documentCopy(document.data(), document.data() + document.capacity());
++  JSONCPP_STRING documentCopy(document.data(), document.data() + document.size());
+   std::swap(documentCopy, document_);
+   const char* begin = document_.c_str();
+   const char* end = begin + document_.length();

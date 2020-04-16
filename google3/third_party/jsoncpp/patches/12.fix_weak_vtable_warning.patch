@@ -1,0 +1,61 @@
+--- a/google3/third_party/jsoncpp/json_reader.cc
++++ b/google3/third_party/jsoncpp/json_reader.cc
+@@ -897,6 +897,13 @@
+   return !errors_.size();
+ }
+ 
++// Class CharReader
++// Dummy key methods to avoid weak vtables.
++// //////////////////////////////////////////////////////////////////
++
++void CharReader::UnusedKeyMethod() {}
++void CharReader::Factory::UnusedKeyMethod() {}
++
+ // exact copy of Features
+ class OurFeatures {
+ public:
+@@ -1914,17 +1921,19 @@
+   : collectComments_(collectComments)
+   , reader_(features)
+   {}
+-  bool parse(
+-      char const* beginDoc, char const* endDoc,
+-      Value* root, JSONCPP_STRING* errs) JSONCPP_OVERRIDE {
+-    bool ok = reader_.parse(beginDoc, endDoc, *root, collectComments_);
+-    if (errs) {
+-      *errs = reader_.getFormattedErrorMessages();
+-    }
+-    return ok;
+-  }
++  bool parse(char const* beginDoc, char const* endDoc, Value* root,
++             JSONCPP_STRING* errs) JSONCPP_OVERRIDE;
+ };
+ 
++bool OurCharReader::parse(char const* beginDoc, char const* endDoc, Value* root,
++                          JSONCPP_STRING* errs) {
++  bool ok = reader_.parse(beginDoc, endDoc, *root, collectComments_);
++  if (errs) {
++    *errs = reader_.getFormattedErrorMessages();
++  }
++  return ok;
++}
++
+ CharReaderBuilder::CharReaderBuilder()
+ {
+   setDefaults(&settings_);
+--- a/google3/third_party/jsoncpp/reader.h
++++ b/google3/third_party/jsoncpp/reader.h
+@@ -276,7 +276,13 @@
+      * \throw std::exception if something goes wrong (e.g. invalid settings)
+      */
+     virtual CharReader* newCharReader() const = 0;
++
++  private:
++    virtual void UnusedKeyMethod();  // Dummy key method to avoid weak vtable.
+   };  // Factory
++
++private:
++  virtual void UnusedKeyMethod();  // Dummy key method to avoid weak vtable.
+ };  // CharReader
+ 
+ /** \brief Build a CharReader implementation.

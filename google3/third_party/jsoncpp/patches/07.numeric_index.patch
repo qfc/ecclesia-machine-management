@@ -1,0 +1,13 @@
+diff --git a/google3/third_party/jsoncpp/json_reader.cc b/google3/third_party/jsoncpp/json_reader.cc
+index 95d3974..99df586 100644
+--- a/google3/third_party/jsoncpp/json_reader.cc
++++ b/google3/third_party/jsoncpp/json_reader.cc
+@@ -481,7 +481,7 @@ bool Reader::readObject(Token& tokenStart) {
+       Value numberName;
+       if (!decodeNumber(tokenName, numberName))
+         return recoverFromError(tokenObjectEnd);
+-      name = JSONCPP_STRING(numberName.asCString());
++      name = numberName.asString();
+     } else {
+       break;
+     }

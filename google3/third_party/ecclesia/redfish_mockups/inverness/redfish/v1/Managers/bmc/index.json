@@ -1,0 +1,68 @@
+{
+    "@odata.context": "/redfish/v1/$metadata#Manager.Manager",
+    "@odata.id": "/redfish/v1/Managers/bmc",
+    "@odata.type": "#Manager.v1_3_0.Manager",
+    "Actions": {
+        "#Manager.Reset": {
+            "ResetType@Redfish.AllowableValues": [
+                "GracefulRestart"
+            ],
+            "target": "/redfish/v1/Managers/bmc/Actions/Manager.Reset"
+        }
+    },
+    "DateTime": "2019-08-01T17:54:36+00:00",
+    "Description": "Baseboard Management Controller",
+    "EthernetInterfaces": {
+        "@odata.id": "/redfish/v1/Managers/bmc/EthernetInterfaces"
+    },
+    "FirmwareVersion": "2.8.0-dev-164-g873543c-dirty",
+    "GraphicalConsole": {
+        "ConnectTypesSupported": [
+            "KVMIP"
+        ],
+        "ServiceEnabled": true
+    },
+    "Id": "bmc",
+    "Links": {
+        "ManagerForServers": [
+            {
+                "@odata.id": "/redfish/v1/Systems/system"
+            }
+        ],
+        "ManagerForServers@odata.count": 1
+    },
+    "LogServices": {
+        "@odata.id": "/redfish/v1/Managers/bmc/LogServices"
+    },
+    "ManagerType": "BMC",
+    "Model": "OpenBmc",
+    "Name": "OpenBmc Manager",
+    "NetworkProtocol": {
+        "@odata.id": "/redfish/v1/Managers/bmc/NetworkProtocol"
+    },
+    "Oem": {
+        "@odata.context": "/redfish/v1/$metadata#OemManager.Oem",
+        "@odata.id": "/redfish/v1/Managers/bmc#/Oem",
+        "@odata.type": "#OemManager.Oem",
+        "OpenBmc": {
+            "@odata.context": "/redfish/v1/$metadata#OemManager.OpenBmc",
+            "@odata.id": "/redfish/v1/Managers/bmc#/Oem/OpenBmc",
+            "@odata.type": "#OemManager.OpenBmc"
+        }
+    },
+    "PowerState": "On",
+    "SerialConsole": {
+        "ConnectTypesSupported": [
+            "IPMI",
+            "SSH"
+        ],
+        "ServiceEnabled": true
+    },
+    "ServiceEntryPointUUID": "526654a4-898a-4dca-9acf-483e7e8a21af",
+    "Status": {
+        "Health": "OK",
+        "HealthRollup": "OK",
+        "State": "Enabled"
+    },
+    "UUID": "05f85b1f-8a0e-4af8-95f9-7f5a0a06378c"
+}

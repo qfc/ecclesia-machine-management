@@ -1,0 +1,14 @@
+# proto-file: devtools/metadata/metadata.proto
+# proto-message: MetaData
+
+# Common METADATA used both inside and outside of third_party. Definitions
+# should only go in here if they make sense to use in BOTH places.
+
+presubmit {
+  review_notify: "ecclesia-dev+piper"
+
+  check_tests {
+    failure_status: ERROR
+    project: "ecclesia"
+  }
+}

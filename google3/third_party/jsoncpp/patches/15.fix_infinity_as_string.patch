@@ -1,0 +1,40 @@
+--- /google/src/files/233134685/depot/google3/third_party/jsoncpp/json_writer.cc	2016-10-07 11:45:10.000000000 -0700
++++ /google/src/cloud/yeminghua/nascar/google3/third_party/jsoncpp/json_writer.cc	2019-02-08 19:58:16.000000000 -0800
+@@ -153,11 +153,11 @@
+   } else {
+     // IEEE standard states that NaN values will not compare to themselves
+     if (value != value) {
+-      len = snprintf(buffer, sizeof(buffer), useSpecialFloats ? "NaN" : "null");
++      len = snprintf(buffer, sizeof(buffer), useSpecialFloats ? "\"NaN\"" : "null");
+     } else if (value < 0) {
+-      len = snprintf(buffer, sizeof(buffer), useSpecialFloats ? "-Infinity" : "-1e+9999");
++      len = snprintf(buffer, sizeof(buffer), useSpecialFloats ? "\"-Infinity\"" : "-1e+9999");
+     } else {
+-      len = snprintf(buffer, sizeof(buffer), useSpecialFloats ? "Infinity" : "1e+9999");
++      len = snprintf(buffer, sizeof(buffer), useSpecialFloats ? "\"Infinity\"" : "1e+9999");
+     }
+     // For those, we do not need to call fixNumLoc, but it is fast.
+   }
+--- /google/src/files/233134685/depot/google3/third_party/jsoncpp/unit_tests/jsoncpp_test.cc	2018-10-11 10:35:27.000000000 -0700
++++ /google/src/cloud/yeminghua/nascar/google3/third_party/jsoncpp/unit_tests/jsoncpp_test.cc	2019-02-11 13:39:19.000000000 -0800
+@@ -1660,17 +1660,17 @@
+   b.settings_["useSpecialFloats"] = true;
+ 
+   Json::Value v = std::numeric_limits<double>::quiet_NaN();
+-  JSONCPP_STRING expected = "NaN";
++  JSONCPP_STRING expected = "\"NaN\"";
+   JSONCPP_STRING result = Json::writeString(b, v);
+   JSONTEST_ASSERT_STRING_EQUAL(expected, result);
+ 
+   v = std::numeric_limits<double>::infinity();
+-  expected = "Infinity";
++  expected = "\"Infinity\"";
+   result = Json::writeString(b, v);
+   JSONTEST_ASSERT_STRING_EQUAL(expected, result);
+ 
+   v = -std::numeric_limits<double>::infinity();
+-  expected = "-Infinity";
++  expected = "\"-Infinity\"";
+   result = Json::writeString(b, v);
+   JSONTEST_ASSERT_STRING_EQUAL(expected, result);
+ }

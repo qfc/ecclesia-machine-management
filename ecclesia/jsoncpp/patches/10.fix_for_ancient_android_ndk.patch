@@ -1,0 +1,21 @@
+This google3-only fix is needed to build this test:
+
+  //java/com/google/android/apps/plusone:PlusOne
+
+This test builds the G+ photoeditor, an obsolete component which
+requires an ancient Android NDK. The Bionic libc in this NDK has
+an incomplete definition of struct lconv and thus fails to build
+when locale is enabled.
+
+diff --git a/google3/third_party/jsoncpp/Android.mk b/google3/third_party/jsoncpp/Android.mk
+index ed9c0a9..328d827 100644
+--- a/google3/third_party/jsoncpp/Android.mk
++++ b/google3/third_party/jsoncpp/Android.mk
+@@ -10,4 +10,6 @@ LOCAL_C_INCLUDES  += $(APP_GOOGLE3_PATH)
+ 
+ LOCAL_CPP_EXTENSION := .cc
+ 
++LOCAL_CPPFLAGS := -DNO_LOCALE_SUPPORT
++
+ include $(BUILD_STATIC_LIBRARY)
+\ No newline at end of file

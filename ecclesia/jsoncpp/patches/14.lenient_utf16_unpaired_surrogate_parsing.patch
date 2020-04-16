@@ -1,0 +1,111 @@
+--- a/google3/third_party/jsoncpp/features.h
++++ b/google3/third_party/jsoncpp/features.h
+25a26
+>    * - Replaces unpaired UTF-16 surrogates with the (U+FFFD) character.
+28a30,33
+>   // Local google3 patch for lenient parsing. This includes all() and replaces
+>   // unpaired UTF-16 surrogates with the (U+FFFD) character.
+>   static Features lenient();
+> 
+63a69,74
+> 
+>   // Local google3 patch for replacing unpaired UTF-16 surrogates with the
+>   // (U+FFFD) character. If not set, unpaired surrogates trigger a hard error
+>   // and parsing fails.
+>   int replaceUnpairedSurrogatesWithFFFD_;
+> 
+--- a/google3/third_party/jsoncpp/json_reader.cc
++++ b/google3/third_party/jsoncpp/json_reader.cc
+61c61,62
+<       stackLimit_(1000), rejectDupKeys_(false) {}
+---
+>       stackLimit_(1000), rejectDupKeys_(false),
+>       replaceUnpairedSurrogatesWithFFFD_(false) {}
+64a66,71
+> Features Features::lenient() {
+>   Features features;
+>   features.replaceUnpairedSurrogatesWithFFFD_ = true;
+>   return features;
+> }
+> 
+707c714,718
+<     if (end - current < 6)
+---
+>     if (end - current < 6) {
+>       if (features_.replaceUnpairedSurrogatesWithFFFD_) {
+>         unicode = 0xFFFD;
+>         return true;
+>       } else {
+711a723,724
+>       }
+>     }
+717a731,733
+>     } else if (features_.replaceUnpairedSurrogatesWithFFFD_) {
+>       unicode = 0xFFFD;
+>       return true;
+--- a/google3/third_party/jsoncpp/unit_tests/jsoncpp_test.cc
++++ b/google3/third_party/jsoncpp/unit_tests/jsoncpp_test.cc
+1849a1850,1913
+> JSONTEST_FIXTURE(ReaderTest, parseWithSurrogatePairError) {
+>   Json::Reader reader;
+>   Json::Value root;
+>   bool ok = reader.parse("{ \"\\uD83C______\" : 0 }", root);
+>   JSONTEST_ASSERT(!ok);
+>   printf("%s\n", reader.getFormattedErrorMessages().c_str());
+>   JSONTEST_ASSERT(reader.getFormattedErrorMessages() ==
+>                   "* Line 1, Column 3\n  expecting another \\u token to begin "
+>                   "the second half of a unicode surrogate pair\n"
+>                   "See Line 1, Column 11 for detail.\n");
+>   std::vector<Json::Reader::StructuredError> errors =
+>       reader.getStructuredErrors();
+>   JSONTEST_ASSERT(errors.size() == 1);
+>   printf("offset_start = %d\n", static_cast<int32_t>(errors.at(0).offset_start));
+>   printf("offset_limit = %d\n", static_cast<int32_t>(errors.at(0).offset_limit));
+>   printf("message = %s\n", errors.at(0).message.c_str());
+>   JSONTEST_ASSERT(errors.at(0).offset_start == 2);
+>   JSONTEST_ASSERT(errors.at(0).offset_limit == 16);
+>   JSONTEST_ASSERT(errors.at(0).message ==
+>                   "expecting another \\u token to begin the second half of a "
+>                   "unicode surrogate pair");
+> }
+> 
+> JSONTEST_FIXTURE(ReaderTest, parseWithSurrogatePairErrorAtStringEnd) {
+>   Json::Reader reader;
+>   Json::Value root;
+>   bool ok = reader.parse("{ \"\\uD83C\" : 0 }", root);
+>   JSONTEST_ASSERT(!ok);
+>   printf("%s\n", reader.getFormattedErrorMessages().c_str());
+>   JSONTEST_ASSERT(reader.getFormattedErrorMessages() ==
+>                   "* Line 1, Column 3\n  additional six characters expected "
+>                   "to parse unicode surrogate pair.\n"
+>                   "See Line 1, Column 10 for detail.\n");
+>   std::vector<Json::Reader::StructuredError> errors =
+>       reader.getStructuredErrors();
+>   JSONTEST_ASSERT(errors.size() == 1);
+>   printf("offset_start = %d\n", static_cast<int32_t>(errors.at(0).offset_start));
+>   printf("offset_limit = %d\n", static_cast<int32_t>(errors.at(0).offset_limit));
+>   printf("message = %s\n", errors.at(0).message.c_str());
+>   JSONTEST_ASSERT(errors.at(0).offset_start == 2);
+>   JSONTEST_ASSERT(errors.at(0).offset_limit == 10);
+>   JSONTEST_ASSERT(errors.at(0).message ==
+>                   "additional six characters expected to parse unicode "
+>                   "surrogate pair.");
+> }
+> 
+> JSONTEST_FIXTURE(ReaderTest, parseLenientWithSurrogatePairErrorAtStringEnd) {
+>   Json::Reader reader(Json::Features::lenient());
+>   Json::Value root;
+>   bool ok = reader.parse("{ \"\\uD83C______\" : 0 }", root);
+>   JSONTEST_ASSERT(ok);
+> }
+> JSONTEST_FIXTURE(ReaderTest, parseLenientWithSurrogatePairError) {
+>   Json::Reader reader(Json::Features::lenient());
+>   Json::Value root;
+>   bool ok = reader.parse("{ \"\\uD83C\" : 0 }", root);
+>   JSONTEST_ASSERT(ok);
+> }
+> 
+2556a2621,2623
+>   JSONTEST_REGISTER_FIXTURE(runner, ReaderTest, parseWithSurrogatePairError);
+>   JSONTEST_REGISTER_FIXTURE(runner, ReaderTest, parseWithSurrogatePairErrorAtStringEnd);
+>   JSONTEST_REGISTER_FIXTURE(runner, ReaderTest, parseLenientWithSurrogatePairError);

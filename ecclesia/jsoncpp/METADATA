@@ -1,0 +1,35 @@
+# Format: google3/devtools/metadata/metadata.proto (go/google3metadata)
+
+name: "jsoncpp"
+description:
+  "jsoncpp is an implementation of a JSON (http://json.org) reader and "
+  "writer in C++. JSON (JavaScript Object Notation) is a lightweight "
+  "data-interchange format. It is easy for humans to read and write. It is "
+  "easy for machines to parse and generate. [From website] "
+  " "
+  "While google3/net/proto/json/ already contains some code for parsing "
+  "JSON, it is very JSON <-> PB-centric and requires the user to extend the "
+  "parser class to implement his own storage. jsoncpp provides an easy an "
+  "intuitive way to manipulate JSON structures. "
+  " "
+  "The homepage of the project is: "
+  "https://github.com/open-source-parsers/jsoncpp"
+
+third_party {
+  url {
+    type: GIT
+    value: "https://github.com/open-source-parsers/jsoncpp/"
+  }
+  version: "1.7.6"
+  last_upgrade_date { year: 2016 month: 9 day: 28 }
+  security: {
+    category: SANDBOXED_ONLY
+    note: "Version 1.7.6 (Nov 2016) was reviewed in b/31915365"
+    tag: "NVD-CPE2.3:cpe:/a:jsoncpp_project:jsoncpp"
+  }
+
+  # NOTE: The "local_modifications" field is entirely optional and may be
+  # removed if it's not useful for the package.
+  #     See go/thirdparty-metadata-local-modifications
+  local_modifications: "http://google3/third_party/jsoncpp/README.google?cl=86022174"
+}

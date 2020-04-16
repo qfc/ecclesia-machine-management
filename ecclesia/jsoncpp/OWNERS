@@ -1,0 +1,5 @@
+thaloun
+juberti
+
+# suggest: aiuto@ for CLs changing json.gyp and nothing else.
+per-file json.gyp=mdb-group:gyp-reviewers
