@@ -44,8 +44,8 @@ cc_library(
     deps = [
         ":elog_emb",
         ":event_reader",
-        "//magent/lib/smbios:reader",
-        "//magent/lib/smbios:structures_emb",
+        "//lib/smbios:reader",
+        "//lib/smbios:structures_emb",
         "@com_google_emboss//runtime/cpp:cpp_utils",
     ],
 )
@@ -62,6 +62,7 @@ cc_test(
     deps = [
         ":event_reader",
         ":mced_reader",
+        "//strings",
         "//testing/base/public:gunit_main",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/time",
@@ -82,8 +83,8 @@ cc_test(
         "//devtools/build/runtime:get_runfiles_dir",
         "//testing/base/public:gunit_main",
         "@com_google_absl//absl/strings",
-        "//magent/lib/smbios:reader",
-        "//magent/lib/smbios:structures_emb",
+        "//lib/smbios:reader",
+        "//lib/smbios:structures_emb",
         "@com_google_emboss//runtime/cpp:cpp_utils",
     ],
 )

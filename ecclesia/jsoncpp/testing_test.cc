@@ -87,7 +87,7 @@ TEST(EqualsJsonTest, NestedUnEqualJSONValuesDifferentTypes) {
   const std::string actual = "[[11]]";
 
   EXPECT_THAT(actual, Not(EqualsJson(expected)));
-  EXPECT_EQ("with value at [0] which is [ 11 ] (expected 10)",
+  EXPECT_EQ("with value at [0] which is of type array (expected integer)",
             Explain(EqualsJson(expected), actual));
 }
 
@@ -96,7 +96,7 @@ TEST(EqualsJsonTest, NestedUnEqualJSONValuesDifferentTypesReverse) {
   const std::string actual = "[11]";
 
   EXPECT_THAT(actual, Not(EqualsJson(expected)));
-  EXPECT_EQ("with value at [0] which is 11 (expected [ 10 ])",
+  EXPECT_EQ("with value at [0] which is of type integer (expected array)",
             Explain(EqualsJson(expected), actual));
 }
 

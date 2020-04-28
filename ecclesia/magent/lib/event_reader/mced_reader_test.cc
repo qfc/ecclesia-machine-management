@@ -21,9 +21,9 @@
 #include <string>
 #include <variant>
 
+#include "strings/util.h"
 #include "testing/base/public/gmock.h"
 #include "testing/base/public/gunit.h"
-#include "absl/strings/util.h"
 #include "absl/time/clock.h"
 #include "absl/time/time.h"
 #include "magent/lib/event_reader/event_reader.h"

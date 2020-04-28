@@ -20,10 +20,10 @@
 
 #include "absl/memory/memory.h"
 #include "absl/strings/string_view.h"
-#include "magent/lib/smbios/memory_device.h"
-#include "magent/lib/smbios/platform_translator.h"
-#include "magent/lib/smbios/reader.h"
-#include "magent/lib/smbios/structures.emb.h"
+#include "lib/smbios/memory_device.h"
+#include "lib/smbios/platform_translator.h"
+#include "lib/smbios/reader.h"
+#include "lib/smbios/structures.emb.h"
 #include "runtime/cpp/emboss_cpp_util.h"
 #include "runtime/cpp/emboss_prelude.h"
 

@@ -62,19 +62,22 @@ class Sysmodel {
   }
 
   // The following Query definitions invokes result_callback with (devpath,
-  // value) for Redfish Assembly Components providing the desired property.
-  // When invoking the Query templates, only the PropertyDefinitionT must be
-  // provided; CallbackF is intended to be inferred.
+  // value) for Redfish Assembly Components providing the desired property from
+  // the desired resource. When invoking the Query templates, only
+  // ResourceDefinitionT and PropertyDefinitionT must be provided; CallbackF is
+  // intended to be inferred.
   //
   // CallbackF is a functor with signature void(PropertyDefinitionT::type r)
   // where r is a single Result<PropertyDefinitionT::type> for the query.
 
   // QueryAll will check all components in the system.
-  template <typename PropertyDefinitionT, typename CallbackF>
+  template <typename ResourceDefinitionT, typename PropertyDefinitionT,
+            typename CallbackF>
   void QueryAll(const CallbackF &result_callback) {
     auto now = clock_->Now();
     for (auto *component : GetAllComponents()) {
-      auto maybe_val = CachedRead<PropertyDefinitionT>(component, now);
+      auto maybe_val =
+          CachedRead<ResourceDefinitionT, PropertyDefinitionT>(component, now);
       if (maybe_val.has_value()) {
         result_callback(Result<typename PropertyDefinitionT::type>{
             component->local_devpath, maybe_val.value()});
@@ -83,7 +86,8 @@ class Sysmodel {
   }
 
   // Query only checks all components matching the provided devpaths.
-  template <typename PropertyDefinitionT, typename CallbackF>
+  template <typename ResourceDefinitionT, typename PropertyDefinitionT,
+            typename CallbackF>
   void Query(absl::Span<const absl::string_view> devpaths,
              const CallbackF &result_callback) {
     auto now = clock_->Now();
@@ -92,7 +96,8 @@ class Sysmodel {
       if (component == topology_.devpath_to_component_map.end()) {
         continue;
       }
-      auto maybe_val = CachedRead<PropertyDefinitionT>(component->second, now);
+      auto maybe_val = CachedRead<ResourceDefinitionT, PropertyDefinitionT>(
+          component->second, now);
       if (maybe_val.has_value()) {
         result_callback(Result<typename PropertyDefinitionT::type>{
             component->second->local_devpath, maybe_val.value()});
@@ -102,22 +107,24 @@ class Sysmodel {
 
  private:
   // CachedRead will try to retrieve the cached value of a given
-  // PropertyDefinitionT from the provided component. The provided timestamp
-  // (now) is used to determine if the read value is stale. If the value is
-  // stale, the property will be updated by refetching the URI which provides
-  // the data. As a side effect, all other components with properties derived
-  // from the same URI will be updated as well. Returns a valid value if
-  // successful. Returns nullopt if the component does not have the value or an
-  // up-to-date value could not be retrieved.
-  template <typename PropertyDefinitionT>
+  // ResourceDefinitionT and PropertyDefinitionT from the provided component.
+  // The provided timestamp (now) is used to determine if the read value is
+  // stale. If the value is stale, the property will be updated by refetching
+  // the URI which provides the data. As a side effect, all other components
+  // with properties derived from the same URI will be updated as well. Returns
+  // a valid value if successful. Returns nullopt if the component does not have
+  // the value or an up-to-date value could not be retrieved.
+  template <typename ResourceDefinitionT, typename PropertyDefinitionT>
   absl::optional<typename PropertyDefinitionT::type> CachedRead(
       Component *component, absl::Time now) {
-    auto result = component->properties.Get<PropertyDefinitionT>();
+    auto result =
+        component->properties.Get<ResourceDefinitionT, PropertyDefinitionT>();
     if (result.has_value()) {
       auto property = result.value();
       if (property.IsStale(now)) {
         UpdateAllComponentsFromUri(property.SourceUri(), now);
-        result = component->properties.Get<PropertyDefinitionT>();
+        result = component->properties
+                     .Get<ResourceDefinitionT, PropertyDefinitionT>();
         if (result.has_value() && !result.value().IsStale(now)) {
           return result.value().Value();
         }

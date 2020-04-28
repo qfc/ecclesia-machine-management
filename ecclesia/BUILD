@@ -14,6 +14,7 @@ package_group(
     name = "library_users",
     packages = [
         "//platforms/ecclesia/...",
+        "//third_party/blt/...",
         "//...",
     ],
 )

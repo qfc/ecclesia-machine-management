@@ -37,6 +37,9 @@ namespace {
 
 using testing::ElementsAre;
 
+DEFINE_REDFISH_RESOURCE(BaseResource, "Base");
+DEFINE_REDFISH_RESOURCE(SensorResource, "Sensor");
+
 DEFINE_REDFISH_PROPERTY(IntProperty, int, "IntProperty",
                         absl::InfiniteDuration());
 DEFINE_REDFISH_PROPERTY(StringProperty, std::string, "StringProperty",
@@ -47,22 +50,22 @@ DEFINE_REDFISH_PROPERTY(UncacheableInt, int, "UncacheableInt",
                         absl::ZeroDuration());
 
 // Helper for calling sysmodel->QueryAll and returning all results in an array.
-template <typename PropertyDefinitionT>
+template <typename ResourceDefinitionT, typename PropertyDefinitionT>
 std::vector<libredfish::Result<typename PropertyDefinitionT::type>>
 QueryAllToArray(libredfish::Sysmodel *sysmodel) {
   std::vector<libredfish::Result<typename PropertyDefinitionT::type>> results;
-  sysmodel->QueryAll<PropertyDefinitionT>(
+  sysmodel->QueryAll<ResourceDefinitionT, PropertyDefinitionT>(
       [&results](auto r) { results.push_back(std::move(r)); });
   return std::move(results);
 }
 
 // Helper for calling sysmodel->Query and returning all results in an array.
-template <typename PropertyDefinitionT>
+template <typename ResourceDefinitionT, typename PropertyDefinitionT>
 std::vector<libredfish::Result<typename PropertyDefinitionT::type>>
 QueryToArray(libredfish::Sysmodel *sysmodel,
              absl::Span<const absl::string_view> devpaths) {
   std::vector<libredfish::Result<typename PropertyDefinitionT::type>> results;
-  sysmodel->Query<PropertyDefinitionT>(
+  sysmodel->Query<ResourceDefinitionT, PropertyDefinitionT>(
       devpaths, [&results](auto r) { results.push_back(std::move(r)); });
   return std::move(results);
 }
@@ -122,7 +125,7 @@ TEST(Sysmodel, NoAssemblyQueriesEmpty) {
 
   Sysmodel sysmodel(redfish_intf.get(), &property_registry, &clock,
                     std::move(topology));
-  auto results = QueryAllToArray<IntProperty>(&sysmodel);
+  auto results = QueryAllToArray<BaseResource, IntProperty>(&sysmodel);
   EXPECT_TRUE(results.empty());
 }
 
@@ -131,12 +134,15 @@ TEST(Sysmodel, ConstantQueryWorks) {
 
   auto component1 = absl::make_unique<Component>();
   component1->local_devpath = "/phys/thing1";
-  component1->properties.Set<IntProperty>(42, "uri_source", now);
-  component1->properties.Set<StringProperty>("p1", "uri_source", now);
+  component1->properties.Set<IntProperty>(42, BaseResource::Name, "uri_source",
+                                          now);
+  component1->properties.Set<StringProperty>("p1", BaseResource::Name,
+                                             "uri_source", now);
 
   auto component2 = absl::make_unique<Component>();
   component2->local_devpath = "/phys/thing2";
-  component2->properties.Set<IntProperty>(43, "uri_source", now);
+  component2->properties.Set<IntProperty>(43, BaseResource::Name, "uri_source",
+                                          now);
 
   Assembly assembly;
   assembly.components.push_back(std::move(component1));
@@ -153,14 +159,14 @@ TEST(Sysmodel, ConstantQueryWorks) {
                     std::move(topology));
 
   // Query for something that no components have
-  sysmodel.QueryAll<UncacheableInt>(
+  sysmodel.QueryAll<BaseResource, UncacheableInt>(
       [&](auto r) { FAIL() << "Unexpected element: " << r; });
 
   // Query for something which only 1 component has
-  EXPECT_THAT(QueryAllToArray<StringProperty>(&sysmodel),
+  EXPECT_THAT((QueryAllToArray<BaseResource, StringProperty>(&sysmodel)),
               ElementsAre(Result<std::string>{"/phys/thing1", "p1"}));
   // Query for something which all components have
-  EXPECT_THAT(QueryAllToArray<IntProperty>(&sysmodel),
+  EXPECT_THAT((QueryAllToArray<BaseResource, IntProperty>(&sysmodel)),
               ElementsAre(Result<int>{"/phys/thing1", 42},
                           Result<int>{"/phys/thing2", 43}));
 }
@@ -171,13 +177,16 @@ TEST(Sysmodel, DevpathQueryWorks) {
 
   auto component1 = absl::make_unique<Component>();
   component1->local_devpath = "/phys/thing1";
-  component1->properties.Set<IntProperty>(42, "uri_source", now);
-  component1->properties.Set<StringProperty>("p1", "uri_source", now);
+  component1->properties.Set<IntProperty>(42, BaseResource::Name, "uri_source",
+                                          now);
+  component1->properties.Set<StringProperty>("p1", BaseResource::Name,
+                                             "uri_source", now);
   topology.devpath_to_component_map["/phys/thing1"] = component1.get();
 
   auto component2 = absl::make_unique<Component>();
   component2->local_devpath = "/phys/thing2";
-  component2->properties.Set<IntProperty>(43, "uri_source", now);
+  component2->properties.Set<IntProperty>(43, BaseResource::Name, "uri_source",
+                                          now);
   topology.devpath_to_component_map["/phys/thing2"] = component2.get();
 
   Assembly assembly;
@@ -194,34 +203,37 @@ TEST(Sysmodel, DevpathQueryWorks) {
                     std::move(topology));
 
   // Query for a single property on a devpath
-  EXPECT_THAT(QueryToArray<StringProperty>(&sysmodel, {"/phys/thing1"}),
-              ElementsAre(Result<std::string>{"/phys/thing1", "p1"}));
-  EXPECT_THAT(QueryToArray<IntProperty>(&sysmodel, {"/phys/thing2"}),
-              ElementsAre(Result<int>{"/phys/thing2", 43}));
+  EXPECT_THAT(
+      (QueryToArray<BaseResource, StringProperty>(&sysmodel, {"/phys/thing1"})),
+      ElementsAre(Result<std::string>{"/phys/thing1", "p1"}));
+  EXPECT_THAT(
+      (QueryToArray<BaseResource, IntProperty>(&sysmodel, {"/phys/thing2"})),
+      ElementsAre(Result<int>{"/phys/thing2", 43}));
   // Query for missing property on a devpath
-  EXPECT_THAT(QueryToArray<StringProperty>(&sysmodel, {"/phys/thing2"}),
-              ElementsAre());
+  EXPECT_THAT(
+      (QueryToArray<BaseResource, StringProperty>(&sysmodel, {"/phys/thing2"})),
+      ElementsAre());
 
   // Query for something that no components have
-  EXPECT_THAT(
-      QueryToArray<UncacheableInt>(&sysmodel, {"/phys/thing1", "/phys/thing2"}),
-      ElementsAre());
+  EXPECT_THAT((QueryToArray<BaseResource, UncacheableInt>(
+                  &sysmodel, {"/phys/thing1", "/phys/thing2"})),
+              ElementsAre());
   // Query for something which only 1 component has
-  EXPECT_THAT(
-      QueryToArray<StringProperty>(&sysmodel, {"/phys/thing1", "/phys/thing2"}),
-      ElementsAre(Result<std::string>{"/phys/thing1", "p1"}));
-  EXPECT_THAT(
-      QueryToArray<StringProperty>(&sysmodel, {"/phys/thing2", "/phys/thing1"}),
-      ElementsAre(Result<std::string>{"/phys/thing1", "p1"}));
+  EXPECT_THAT((QueryToArray<BaseResource, StringProperty>(
+                  &sysmodel, {"/phys/thing1", "/phys/thing2"})),
+              ElementsAre(Result<std::string>{"/phys/thing1", "p1"}));
+  EXPECT_THAT((QueryToArray<BaseResource, StringProperty>(
+                  &sysmodel, {"/phys/thing2", "/phys/thing1"})),
+              ElementsAre(Result<std::string>{"/phys/thing1", "p1"}));
   // Query for something which all components have
-  EXPECT_THAT(
-      QueryToArray<IntProperty>(&sysmodel, {"/phys/thing1", "/phys/thing2"}),
-      ElementsAre(Result<int>{"/phys/thing1", 42},
-                  Result<int>{"/phys/thing2", 43}));
-  EXPECT_THAT(
-      QueryToArray<IntProperty>(&sysmodel, {"/phys/thing2", "/phys/thing1"}),
-      ElementsAre(Result<int>{"/phys/thing2", 43},
-                  Result<int>{"/phys/thing1", 42}));
+  EXPECT_THAT((QueryToArray<BaseResource, IntProperty>(
+                  &sysmodel, {"/phys/thing1", "/phys/thing2"})),
+              ElementsAre(Result<int>{"/phys/thing1", 42},
+                          Result<int>{"/phys/thing2", 43}));
+  EXPECT_THAT((QueryToArray<BaseResource, IntProperty>(
+                  &sysmodel, {"/phys/thing2", "/phys/thing1"})),
+              ElementsAre(Result<int>{"/phys/thing2", 43},
+                          Result<int>{"/phys/thing1", 42}));
 }
 
 TEST(Sysmodel, StaleDataIsRefreshed) {
@@ -232,7 +244,8 @@ TEST(Sysmodel, StaleDataIsRefreshed) {
 
   auto component = absl::make_unique<Component>();
   component->local_devpath = "/phys/thing";
-  component->properties.Set<VolatileInt>(7, "Sensor", now);
+  component->properties.Set<VolatileInt>(7, SensorResource::Name, "Sensor",
+                                         now);
   topology.uri_to_associated_component_map["Sensor"].push_back(component.get());
 
   Assembly assembly;
@@ -243,6 +256,7 @@ TEST(Sysmodel, StaleDataIsRefreshed) {
     {
       "Sensor": {
         "@odata.id": "Sensor",
+        "@odata.type": "#Sensor.v1_0_0.Sensor",
         "VolatileInt": 8
       }
     }
@@ -254,15 +268,15 @@ TEST(Sysmodel, StaleDataIsRefreshed) {
                     std::move(topology));
 
   // Before the value goes stale, we should read the cached value
-  EXPECT_THAT(QueryAllToArray<VolatileInt>(&sysmodel),
+  EXPECT_THAT((QueryAllToArray<SensorResource, VolatileInt>(&sysmodel)),
               ElementsAre(Result<int>{"/phys/thing", 7}));
   clock.AdvanceTime(absl::Seconds(3));
-  EXPECT_THAT(QueryAllToArray<VolatileInt>(&sysmodel),
+  EXPECT_THAT((QueryAllToArray<SensorResource, VolatileInt>(&sysmodel)),
               ElementsAre(Result<int>{"/phys/thing", 7}));
 
   // After the value goes stale, we should read the new value
   clock.AdvanceTime(absl::Seconds(3));
-  EXPECT_THAT(QueryAllToArray<VolatileInt>(&sysmodel),
+  EXPECT_THAT((QueryAllToArray<SensorResource, VolatileInt>(&sysmodel)),
               ElementsAre(Result<int>{"/phys/thing", 8}));
 }
 
@@ -274,7 +288,8 @@ TEST(Sysmodel, UncacheableDataCanBeFetched) {
 
   auto component = absl::make_unique<Component>();
   component->local_devpath = "/phys/thing";
-  component->properties.Set<UncacheableInt>(7, "Sensor", now);
+  component->properties.Set<UncacheableInt>(7, SensorResource::Name, "Sensor",
+                                            now);
   topology.uri_to_associated_component_map["Sensor"].push_back(component.get());
 
   Assembly assembly;
@@ -285,6 +300,7 @@ TEST(Sysmodel, UncacheableDataCanBeFetched) {
     {
       "Sensor": {
         "@odata.id": "Sensor",
+        "@odata.type": "#Sensor.v1_0_0.Sensor",
         "UncacheableInt": 8
       }
     }
@@ -298,11 +314,11 @@ TEST(Sysmodel, UncacheableDataCanBeFetched) {
   // Make sure the edge condition where the collection timestamp and expiry
   // timestamp are equal doesn't cause strange behaviour. In this case, we still
   // consider the value as valid
-  EXPECT_THAT(QueryAllToArray<UncacheableInt>(&sysmodel),
+  EXPECT_THAT((QueryAllToArray<SensorResource, UncacheableInt>(&sysmodel)),
               ElementsAre(Result<int>{"/phys/thing", 7}));
   // Any change in time should immediately invalidate this value
   clock.AdvanceTime(absl::Nanoseconds(1));
-  EXPECT_THAT(QueryAllToArray<UncacheableInt>(&sysmodel),
+  EXPECT_THAT((QueryAllToArray<SensorResource, UncacheableInt>(&sysmodel)),
               ElementsAre(Result<int>{"/phys/thing", 8}));
 }
 
@@ -314,45 +330,8 @@ TEST(Sysmodel, MissingDataOnRefreshIsNotReturned) {
 
   auto component = absl::make_unique<Component>();
   component->local_devpath = "/phys/thing";
-  component->properties.Set<VolatileInt>(7, "Sensor", now);
-  topology.uri_to_associated_component_map["Sensor"].push_back(component.get());
-
-  Assembly assembly;
-  assembly.components.push_back(std::move(component));
-  topology.assemblies.push_back(std::move(assembly));
-
-  auto redfish_intf = NewJsonMockupInterface(R"json(
-    {
-      "Sensor": {
-        "@odata.id": "Sensor"
-      }
-    }
-  )json");
-  PropertyRegistry property_registry;
-  property_registry.Register<VolatileInt>();
-  Sysmodel sysmodel(redfish_intf.get(), &property_registry, &clock,
-                    std::move(topology));
-
-  // Before the value goes stale, we should read the cached value
-  EXPECT_THAT(QueryAllToArray<VolatileInt>(&sysmodel),
-              ElementsAre(Result<int>{"/phys/thing", 7}));
-
-  // After the value goes stale, the new value is missing so nothing is returned
-  clock.AdvanceTime(absl::Seconds(6));
-  EXPECT_THAT(QueryAllToArray<VolatileInt>(&sysmodel), ElementsAre());
-}
-
-TEST(Sysmodel, FetchingStaleDataUpdatesOtherDataToo) {
-  ecclesia::FakeClock clock;
-  absl::Time now = clock.Now();
-
-  Topology topology;
-
-  auto component = absl::make_unique<Component>();
-  component->local_devpath = "/phys/thing";
-  component->properties.Set<IntProperty>(5, "Sensor", now);
-  component->properties.Set<VolatileInt>(6, "Sensor", now);
-  component->properties.Set<UncacheableInt>(7, "Sensor", now);
+  component->properties.Set<VolatileInt>(7, SensorResource::Name, "Sensor",
+                                         now);
   topology.uri_to_associated_component_map["Sensor"].push_back(component.get());
 
   Assembly assembly;
@@ -363,6 +342,50 @@ TEST(Sysmodel, FetchingStaleDataUpdatesOtherDataToo) {
     {
       "Sensor": {
         "@odata.id": "Sensor",
+        "@odata.type": "#Sensor.v1_0_0.Sensor"
+      }
+    }
+  )json");
+  PropertyRegistry property_registry;
+  property_registry.Register<VolatileInt>();
+  Sysmodel sysmodel(redfish_intf.get(), &property_registry, &clock,
+                    std::move(topology));
+
+  // Before the value goes stale, we should read the cached value
+  EXPECT_THAT((QueryAllToArray<SensorResource, VolatileInt>(&sysmodel)),
+              ElementsAre(Result<int>{"/phys/thing", 7}));
+
+  // After the value goes stale, the new value is missing so nothing is returned
+  clock.AdvanceTime(absl::Seconds(6));
+  EXPECT_THAT((QueryAllToArray<SensorResource, VolatileInt>(&sysmodel)),
+              ElementsAre());
+}
+
+TEST(Sysmodel, FetchingStaleDataUpdatesOtherDataToo) {
+  ecclesia::FakeClock clock;
+  absl::Time now = clock.Now();
+
+  Topology topology;
+
+  auto component = absl::make_unique<Component>();
+  component->local_devpath = "/phys/thing";
+  component->properties.Set<IntProperty>(5, SensorResource::Name, "Sensor",
+                                         now);
+  component->properties.Set<VolatileInt>(6, SensorResource::Name, "Sensor",
+                                         now);
+  component->properties.Set<UncacheableInt>(7, SensorResource::Name, "Sensor",
+                                            now);
+  topology.uri_to_associated_component_map["Sensor"].push_back(component.get());
+
+  Assembly assembly;
+  assembly.components.push_back(std::move(component));
+  topology.assemblies.push_back(std::move(assembly));
+
+  auto redfish_intf = NewJsonMockupInterface(R"json(
+    {
+      "Sensor": {
+        "@odata.id": "Sensor",
+        "@odata.type": "#Sensor.v1_0_0.Sensor",
         "IntProperty": 8,
         "VolatileInt": 9,
         "UncacheableInt": 10
@@ -379,19 +402,19 @@ TEST(Sysmodel, FetchingStaleDataUpdatesOtherDataToo) {
                     std::move(topology));
 
   // Cacheable values should return the cached value since they're still valid
-  EXPECT_THAT(QueryAllToArray<IntProperty>(&sysmodel),
+  EXPECT_THAT((QueryAllToArray<SensorResource, IntProperty>(&sysmodel)),
               ElementsAre(Result<int>{"/phys/thing", 5}));
-  EXPECT_THAT(QueryAllToArray<VolatileInt>(&sysmodel),
+  EXPECT_THAT((QueryAllToArray<SensorResource, VolatileInt>(&sysmodel)),
               ElementsAre(Result<int>{"/phys/thing", 6}));
 
   // Querying the uncacheable value will trigger a GET on all data
-  EXPECT_THAT(QueryAllToArray<UncacheableInt>(&sysmodel),
+  EXPECT_THAT((QueryAllToArray<SensorResource, UncacheableInt>(&sysmodel)),
               ElementsAre(Result<int>{"/phys/thing", 10}));
 
   // Previously cached data will now be updated
-  EXPECT_THAT(QueryAllToArray<IntProperty>(&sysmodel),
+  EXPECT_THAT((QueryAllToArray<SensorResource, IntProperty>(&sysmodel)),
               ElementsAre(Result<int>{"/phys/thing", 8}));
-  EXPECT_THAT(QueryAllToArray<VolatileInt>(&sysmodel),
+  EXPECT_THAT((QueryAllToArray<SensorResource, VolatileInt>(&sysmodel)),
               ElementsAre(Result<int>{"/phys/thing", 9}));
 }
 
@@ -403,13 +426,15 @@ TEST(Sysmodel, FetchingStaleDataUpdatesOtherComponentsToo) {
 
   auto component1 = absl::make_unique<Component>();
   component1->local_devpath = "/phys/thing1";
-  component1->properties.Set<IntProperty>(5, "Sensor", now);
+  component1->properties.Set<IntProperty>(5, SensorResource::Name, "Sensor",
+                                          now);
   topology.uri_to_associated_component_map["Sensor"].push_back(
       component1.get());
 
   auto component2 = absl::make_unique<Component>();
   component2->local_devpath = "/phys/thing2";
-  component2->properties.Set<UncacheableInt>(7, "Sensor", now);
+  component2->properties.Set<UncacheableInt>(7, SensorResource::Name, "Sensor",
+                                             now);
   topology.uri_to_associated_component_map["Sensor"].push_back(
       component2.get());
 
@@ -422,6 +447,7 @@ TEST(Sysmodel, FetchingStaleDataUpdatesOtherComponentsToo) {
     {
       "Sensor": {
         "@odata.id": "Sensor",
+        "@odata.type": "#Sensor.v1_0_0.Sensor",
         "IntProperty": 6,
         "UncacheableInt": 8
       }
@@ -436,7 +462,7 @@ TEST(Sysmodel, FetchingStaleDataUpdatesOtherComponentsToo) {
                     std::move(topology));
 
   // Cacheable values should return the cached value since they're still valid
-  EXPECT_THAT(QueryAllToArray<IntProperty>(&sysmodel),
+  EXPECT_THAT((QueryAllToArray<SensorResource, IntProperty>(&sysmodel)),
               ElementsAre(Result<int>{"/phys/thing1", 5}));
 
   // Querying the stale value will trigger a GET on all data
@@ -445,15 +471,15 @@ TEST(Sysmodel, FetchingStaleDataUpdatesOtherComponentsToo) {
   // differing properties? Is it okay for us to have the query return incomplete
   // data in this case? On a subsequent query, the components should be
   // reconciled. Relevant bugs: b/146008362, b/145775513
-  EXPECT_THAT(QueryAllToArray<UncacheableInt>(&sysmodel),
+  EXPECT_THAT((QueryAllToArray<SensorResource, UncacheableInt>(&sysmodel)),
               ElementsAre(Result<int>{"/phys/thing2", 8}));
-  EXPECT_THAT(QueryAllToArray<UncacheableInt>(&sysmodel),
+  EXPECT_THAT((QueryAllToArray<SensorResource, UncacheableInt>(&sysmodel)),
               ElementsAre(Result<int>{"/phys/thing1", 8},
                           Result<int>{"/phys/thing2", 8}));
 
   // Previously cached data will now be updated. The scraper will extract all
   // data onto both Components.
-  EXPECT_THAT(QueryAllToArray<IntProperty>(&sysmodel),
+  EXPECT_THAT((QueryAllToArray<SensorResource, IntProperty>(&sysmodel)),
               ElementsAre(Result<int>{"/phys/thing1", 6},
                           Result<int>{"/phys/thing2", 6}));
 }

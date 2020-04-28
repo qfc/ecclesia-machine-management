@@ -22,14 +22,16 @@
 #include <vector>
 
 #include "absl/synchronization/mutex.h"
+#include "absl/types/span.h"
+#include "lib/smbios/reader.h"
 #include "lib/time/clock.h"
 #include "magent/lib/event_logger/event_logger.h"
 #include "magent/lib/event_reader/elog_reader.h"
 #include "magent/lib/event_reader/event_reader.h"
 #include "magent/lib/event_reader/mced_reader.h"
-#include "magent/lib/smbios/reader.h"
 #include "magent/sysmodel/cpu.h"
 #include "magent/sysmodel/dimm.h"
+#include "magent/sysmodel/fru.h"
 
 namespace ecclesia {
 
@@ -59,6 +61,20 @@ absl::optional<Cpu> SystemModel::GetCpu(std::size_t index) {
   return absl::nullopt;
 }
 
+std::size_t SystemModel::NumFrus() const {
+  absl::ReaderMutexLock ml(&frus_lock_);
+  return frus_.size();
+}
+
+absl::optional<Fru> SystemModel::GetFru(absl::string_view fru_name) const {
+  absl::ReaderMutexLock ml(&frus_lock_);
+  auto fru = frus_.find(fru_name);
+  if (fru != frus_.end()) {
+    return fru->second;
+  }
+  return absl::nullopt;
+}
+
 SystemModel::SystemModel(SysmodelParams params)
     : smbios_reader_(absl::make_unique<SmbiosReader>(
           params.smbios_entry_point_path, params.smbios_tables_path)),
@@ -74,6 +90,12 @@ SystemModel::SystemModel(SysmodelParams params)
   {
     absl::WriterMutexLock ml(&cpus_lock_);
     cpus_ = std::move(cpus);
+  }
+
+  auto frus = CreateFrus(absl::MakeSpan(params.frus));
+  {
+    absl::WriterMutexLock ml(&frus_lock_);
+    frus_ = std::move(frus);
   }
 
   // Create event readers to feed into the event logger

@@ -21,10 +21,10 @@
 #include "absl/strings/string_view.h"
 #include "lib/io/constants.h"
 #include "lib/io/msr.h"
+#include "lib/smbios/processor_information.h"
+#include "lib/smbios/reader.h"
+#include "lib/smbios/structures.emb.h"
 #include "magent/lib/event_logger/indus_cpu_topology.h"
-#include "magent/lib/smbios/processor_information.h"
-#include "magent/lib/smbios/reader.h"
-#include "magent/lib/smbios/structures.emb.h"
 #include "runtime/cpp/emboss_prelude.h"
 #include "re2/re2.h"
 

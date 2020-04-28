@@ -23,9 +23,10 @@
 #include "absl/flags/flag.h"
 #include "absl/flags/parse.h"
 #include "absl/memory/memory.h"
-#include "magent/lib/smbios/platform_translator.h"
+#include "lib/smbios/platform_translator.h"
 #include "magent/main_common.h"
 #include "magent/redfish/indus/redfish_service.h"
+#include "magent/sysmodel/fru.h"
 #include "magent/sysmodel/sysmodel.h"
 #include "tensorflow_serving/util/net_http/server/public/httpserver_interface.h"
 
@@ -55,9 +56,21 @@ int main(int argc, char **argv) {
   }
 
   ecclesia::SysmodelParams params = {
-      absl::make_unique<ecclesia::IndusSmbiosFieldTranslator>(),
-      kSmbiosEntryPointPath, kSmbiosTablesPath,
-      absl::GetFlag(FLAGS_mced_socket_path), kSysfsMemFilePath};
+      .field_translator =
+          absl::make_unique<ecclesia::IndusSmbiosFieldTranslator>(),
+      .smbios_entry_point_path = kSmbiosEntryPointPath,
+      .smbios_tables_path = kSmbiosTablesPath,
+      .mced_socket_path = absl::GetFlag(FLAGS_mced_socket_path),
+      .sysfs_mem_file_path = kSysfsMemFilePath,
+      .frus = {ecclesia::FruInstance{
+          .fru_name = "motherboard",
+          // TODO(dwangsf): Update this hardcoded FRU information with SMBUS
+          // addrs for accessing the FRU.
+          .info = ecclesia::FruInfo{
+              .manufacturer = "Quanta",
+              .serial_number = "MBBQTW194201573",
+              .part_number = "1043652-02",
+          }}}};
 
   std::unique_ptr<ecclesia::SystemModel> system_model =
       absl::make_unique<ecclesia::SystemModel>(std::move(params));

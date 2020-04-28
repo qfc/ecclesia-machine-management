@@ -109,6 +109,11 @@ inline constexpr char kUpperThresholdCritical[] = "UpperThresholdCritical";
 inline constexpr char kUpperThresholdFatal[] = "UpperThresholdFatal";
 inline constexpr char kPhysicalContext[] = "PhysicalContext";
 inline constexpr char kTemperatures[] = "Temperatures";
+inline constexpr char kEthernetIntf[] = "EthernetInterfaces";
+inline constexpr char kRdmaSupported[] = "RdmaSupported";
+inline constexpr char kMACAddress[] = "MACAddress";
+inline constexpr char kLinkStatus[] = "LinkStatus";
+inline constexpr char kSpeedMbps[] = "SpeedMbps";
 
 // Redfish resource URIs
 inline constexpr char kServiceRootUri[] = "/redfish/v1";
@@ -137,6 +142,10 @@ inline constexpr char kPowerControlUri[] =
     "/redfish/v1/Chassis/chassis/Power#/PowerControl/0";
 inline constexpr char kTemperaturesUri[] =
     "/redfish/v1/Chassis/chassis/Thermal#/Temperatures/0";
+inline constexpr char kEthernetInterfaceCollectionUri[] =
+    "/redfish/v1/Systems/system/EthernetInterfaces";
+inline constexpr char kEthernetInterfaceUri[] =
+    "/redfish/v1/Systems/system/EthernetInterfaces/0";
 
 }  // namespace ecclesia
 

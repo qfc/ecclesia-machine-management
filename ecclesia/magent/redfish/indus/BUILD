@@ -3,6 +3,7 @@ licenses(["notice"])
 cc_library(
     name = "indus",
     srcs = [
+        "chassis.cc",
         "memory_metrics.cc",
         "processor_metrics.cc",
     ],
@@ -33,6 +34,7 @@ cc_library(
         "//magent/sysmodel",
         "//magent/sysmodel:cpu",
         "//magent/sysmodel:dimm",
+        "//magent/sysmodel:fru",
         "//jsoncpp:json",
         "@com_google_tensorflow_serving//tensorflow_serving/util/net_http/server/public:http_server_api",
     ],

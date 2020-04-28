@@ -21,8 +21,8 @@
 #include <vector>
 
 #include "absl/types/optional.h"
-#include "magent/lib/smbios/processor_information.h"
-#include "magent/lib/smbios/reader.h"
+#include "lib/smbios/processor_information.h"
+#include "lib/smbios/reader.h"
 
 namespace ecclesia {
 

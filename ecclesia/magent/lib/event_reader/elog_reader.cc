@@ -25,10 +25,10 @@
 #include <queue>
 #include <string>
 
+#include "lib/smbios/structures.emb.h"
+#include "lib/smbios/system_event_log.h"
 #include "magent/lib/event_reader/elog.emb.h"
 #include "magent/lib/event_reader/event_reader.h"
-#include "magent/lib/smbios/structures.emb.h"
-#include "magent/lib/smbios/system_event_log.h"
 #include "runtime/cpp/emboss_enum_view.h"
 #include "runtime/cpp/emboss_prelude.h"
 

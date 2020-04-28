@@ -32,6 +32,11 @@ using testing::Eq;
 template <typename T>
 using CachedValue = PropertyContainer::CachedValue<T>;
 
+DEFINE_REDFISH_RESOURCE(BaseResource, "Base");
+// Technically the EmptyResource shouldn't exist, but for testing, it is useful
+// in order to query properties when no resource could be parsed.
+DEFINE_REDFISH_RESOURCE(EmptyResource, "");
+
 DEFINE_REDFISH_PROPERTY(StringProperty, std::string, "StringProperty",
                         absl::InfiniteDuration());
 DEFINE_REDFISH_PROPERTY(IntProperty, int, "IntProperty",
@@ -50,20 +55,21 @@ TEST(PropertyContainer, TypedGetWorks) {
   PropertyContainer container;
   auto now = absl::Now();
 
-  container.Set<StringProperty>("stringval", "string_uri", now);
-  container.Set<IntProperty>(7, "int_uri", now);
-  container.Set<DoubleProperty>(4.2, "double_uri", now);
-  container.Set<BoolProperty>(true, "bool_uri", now);
+  container.Set<StringProperty>("stringval", BaseResource::Name, "string_uri",
+                                now);
+  container.Set<IntProperty>(7, BaseResource::Name, "int_uri", now);
+  container.Set<DoubleProperty>(4.2, BaseResource::Name, "double_uri", now);
+  container.Set<BoolProperty>(true, BaseResource::Name, "bool_uri", now);
 
-  EXPECT_THAT(container.Get<StringProperty>(),
+  EXPECT_THAT((container.Get<BaseResource, StringProperty>()),
               Eq(CachedValue<std::string>("stringval", "string_uri",
                                           absl::InfiniteFuture())));
-  EXPECT_THAT(container.Get<IntProperty>(),
+  EXPECT_THAT((container.Get<BaseResource, IntProperty>()),
               Eq(CachedValue<int>(7, "int_uri", absl::InfiniteFuture())));
   EXPECT_THAT(
-      container.Get<DoubleProperty>(),
+      (container.Get<BaseResource, DoubleProperty>()),
       Eq(CachedValue<double>(4.2, "double_uri", absl::InfiniteFuture())));
-  EXPECT_THAT(container.Get<BoolProperty>(),
+  EXPECT_THAT((container.Get<BaseResource, BoolProperty>()),
               Eq(CachedValue<bool>(true, "bool_uri", absl::InfiniteFuture())));
 }
 
@@ -71,19 +77,19 @@ TEST(PropertyContainer, ExpirationCorrectlySet) {
   PropertyContainer container;
   auto now = absl::Now();
 
-  container.Set<VolatileInt>(7, "int_uri", now);
-  container.Set<UncacheableInt>(8, "int_uri", now);
+  container.Set<VolatileInt>(7, BaseResource::Name, "int_uri", now);
+  container.Set<UncacheableInt>(8, BaseResource::Name, "int_uri", now);
 
-  EXPECT_THAT(container.Get<VolatileInt>(),
+  EXPECT_THAT((container.Get<BaseResource, VolatileInt>()),
               Eq(CachedValue<int>(7, "int_uri", now + absl::Minutes(5))));
-  EXPECT_THAT(container.Get<UncacheableInt>(),
+  EXPECT_THAT((container.Get<BaseResource, UncacheableInt>()),
               Eq(CachedValue<int>(8, "int_uri", now)));
 }
 
 TEST(PropertyContainer, MissingElementFails) {
   PropertyContainer container;
 
-  auto s1 = container.Get<IntProperty>();
+  auto s1 = container.Get<BaseResource, IntProperty>();
   EXPECT_FALSE(s1.has_value())
       << "Getting a property which has not been set should fail.";
 }
@@ -99,6 +105,7 @@ TEST(PropertyExtraction, RegisteredExtractFunctionsWork) {
   auto json_intf = libredfish::NewJsonMockupInterface(R"json(
   {
     "@odata.id": "/redfish/v1/SomeResource",
+    "@odata.type": "Base.v1_0_0.Base",
     "IntProperty": 75,
     "DoubleProperty": 4.2,
     "StringProperty": "Lalala",
@@ -111,18 +118,40 @@ TEST(PropertyExtraction, RegisteredExtractFunctionsWork) {
   PropertyContainer container;
 
   registry.ExtractAllProperties(root_obj.get(), now, &container);
-  EXPECT_THAT(container.Get<IntProperty>(),
+  EXPECT_THAT((container.Get<BaseResource, IntProperty>()),
               Eq(CachedValue<int>(75, "/redfish/v1/SomeResource",
                                   absl::InfiniteFuture())));
-  EXPECT_THAT(container.Get<DoubleProperty>(),
+  EXPECT_THAT((container.Get<BaseResource, DoubleProperty>()),
               Eq(CachedValue<double>(4.2, "/redfish/v1/SomeResource",
                                      absl::InfiniteFuture())));
-  EXPECT_THAT(container.Get<StringProperty>(),
+  EXPECT_THAT((container.Get<BaseResource, StringProperty>()),
               Eq(CachedValue<std::string>("Lalala", "/redfish/v1/SomeResource",
                                           absl::InfiniteFuture())));
-  EXPECT_THAT(container.Get<BoolProperty>(),
+  EXPECT_THAT((container.Get<BaseResource, BoolProperty>()),
               Eq(CachedValue<bool>(true, "/redfish/v1/SomeResource",
                                    absl::InfiniteFuture())));
+}
+
+TEST(PropertyExtraction, ExtractWithoutTypeWorks) {
+  PropertyRegistry registry;
+  auto now = absl::Now();
+  registry.Register<IntProperty>();
+
+  auto json_intf = libredfish::NewJsonMockupInterface(R"json(
+  {
+    "@odata.id": "/redfish/v1/SomeResource",
+    "IntProperty": 75
+  }
+  )json");
+  auto root_obj = json_intf->GetRoot().AsObject();
+  ASSERT_TRUE(root_obj);
+
+  PropertyContainer container;
+
+  registry.ExtractAllProperties(root_obj.get(), now, &container);
+  EXPECT_THAT((container.Get<EmptyResource, IntProperty>()),
+              Eq(CachedValue<int>(75, "/redfish/v1/SomeResource",
+                                  absl::InfiniteFuture())));
 }
 
 TEST(PropertyExtraction, MissingPropertiesAreIgnored) {
@@ -135,6 +164,7 @@ TEST(PropertyExtraction, MissingPropertiesAreIgnored) {
   auto json_intf = libredfish::NewJsonMockupInterface(R"json(
   {
     "@odata.id": "/redfish/v1/SomeResource",
+    "@odata.type": "Base.v1_0_0.Base",
     "IntProperty": 75,
     "BoolProperty": false
   }
@@ -145,11 +175,11 @@ TEST(PropertyExtraction, MissingPropertiesAreIgnored) {
   PropertyContainer container;
 
   registry.ExtractAllProperties(root_obj.get(), now, &container);
-  EXPECT_THAT(container.Get<IntProperty>(),
+  EXPECT_THAT((container.Get<BaseResource, IntProperty>()),
               Eq(CachedValue<int>(75, "/redfish/v1/SomeResource",
                                   absl::InfiniteFuture())));
-  EXPECT_FALSE(container.Get<StringProperty>().has_value());
-  EXPECT_THAT(container.Get<BoolProperty>(),
+  EXPECT_FALSE((container.Get<BaseResource, StringProperty>().has_value()));
+  EXPECT_THAT((container.Get<BaseResource, BoolProperty>()),
               Eq(CachedValue<bool>(false, "/redfish/v1/SomeResource",
                                    absl::InfiniteFuture())));
 }
@@ -160,6 +190,8 @@ TEST(PropertyExtraction, UnregisteredPropertiesAreIgnored) {
 
   auto json_intf = libredfish::NewJsonMockupInterface(R"json(
   {
+    "@odata.id": "/redfish/v1/SomeResource",
+    "@odata.type": "Base.v1_0_0.Base",
     "IgnoredProperty": 75,
     "IntProperty": 76
   }
@@ -170,8 +202,8 @@ TEST(PropertyExtraction, UnregisteredPropertiesAreIgnored) {
   PropertyContainer container;
 
   registry.ExtractAllProperties(root_obj.get(), now, &container);
-  EXPECT_FALSE(container.Get<IgnoredProperty>().has_value());
-  EXPECT_FALSE(container.Get<IntProperty>().has_value());
+  EXPECT_FALSE((container.Get<BaseResource, IgnoredProperty>()).has_value());
+  EXPECT_FALSE((container.Get<BaseResource, IntProperty>()).has_value());
 }
 
 TEST(PropertyExtraction, ExpirationCorrectlySet) {
@@ -184,6 +216,7 @@ TEST(PropertyExtraction, ExpirationCorrectlySet) {
   auto json_intf = libredfish::NewJsonMockupInterface(R"json(
   {
     "@odata.id": "/redfish/v1/SomeResource",
+    "@odata.type": "Base.v1_0_0.Base",
     "IntProperty": 75,
     "VolatileInt": 76,
     "UncacheableInt": 77
@@ -195,13 +228,13 @@ TEST(PropertyExtraction, ExpirationCorrectlySet) {
   PropertyContainer container;
 
   registry.ExtractAllProperties(root_obj.get(), now, &container);
-  EXPECT_THAT(container.Get<IntProperty>(),
+  EXPECT_THAT((container.Get<BaseResource, IntProperty>()),
               Eq(CachedValue<int>(75, "/redfish/v1/SomeResource",
                                   absl::InfiniteFuture())));
-  EXPECT_THAT(container.Get<VolatileInt>(),
+  EXPECT_THAT((container.Get<BaseResource, VolatileInt>()),
               Eq(CachedValue<int>(76, "/redfish/v1/SomeResource",
                                   now + absl::Minutes(5))));
-  EXPECT_THAT(container.Get<UncacheableInt>(),
+  EXPECT_THAT((container.Get<BaseResource, UncacheableInt>()),
               Eq(CachedValue<int>(77, "/redfish/v1/SomeResource", now)));
 }
 

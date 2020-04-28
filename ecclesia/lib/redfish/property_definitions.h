@@ -58,6 +58,10 @@ inline constexpr char kRfOemPropertyComponents[] = "Components";
 // and extraction methods defined.
 std::unique_ptr<PropertyRegistry> MakeDefaultPropertyRegistry();
 
+DEFINE_REDFISH_RESOURCE(ResourceChassis, "Chassis");
+DEFINE_REDFISH_RESOURCE(ResourceMemory, "Memory");
+DEFINE_REDFISH_RESOURCE(ResourceProcessor, "Processor");
+
 DEFINE_REDFISH_PROPERTY(PropertyOdataId, std::string, "@odata.id",
                         absl::InfiniteDuration());
 DEFINE_REDFISH_PROPERTY(PropertyCapacityMiB, int, "CapacityMiB",

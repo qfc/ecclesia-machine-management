@@ -23,6 +23,7 @@
 
 #include "base/logging.h"
 #include "testing/base/public/gmock.h"
+#include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "jsoncpp/json.h"
 
@@ -46,13 +47,37 @@ inline Value MakeJsonOrDie(const absl::string_view s) {
 
 namespace internal {
 
+inline std::string ValueTypeName(ValueType type) {
+  switch (type) {
+    case nullValue:
+      return "null";
+    case intValue:
+      return "integer";
+    case uintValue:
+      return "unsigned integer";
+    case realValue:
+      return "floating piont";
+    case stringValue:
+      return "string";
+    case booleanValue:
+      return "boolean";
+    case arrayValue:
+      return "array";
+    case objectValue:
+      return "object";
+    default:
+      return "unknown";
+  }
+}
+
 inline std::string ExplainFailure(const Value& actual, const Value& expected,
                                   std::ostream* path) {
   if (expected.isArray() && actual.isArray()) {
     ArrayIndex actual_size = actual.size();
     if (actual_size != expected.size())
-      return "which is an array of length " + std::to_string(actual_size) +
-             " (expected length " + std::to_string(expected.size()) + ")";
+      return absl::StrCat("which is an array of length ",
+                          std::to_string(actual_size) + " (expected length ",
+                          std::to_string(expected.size()), ")");
     for (ArrayIndex index = 0; index < actual_size; ++index) {
       if (actual[index] == expected[index]) continue;
       *path << "[" << ::testing::PrintToString(index) << "]";
@@ -61,19 +86,23 @@ inline std::string ExplainFailure(const Value& actual, const Value& expected,
   } else if (expected.isObject() && actual.isObject()) {
     for (const auto& name : expected.getMemberNames()) {
       if (!actual.isMember(name))
-        return "which has no member named " + ::testing::PrintToString(name);
+        return absl::StrCat("which has no member named ",
+                            ::testing::PrintToString(name));
       if (actual[name] == expected[name]) continue;
       *path << "[" << ::testing::PrintToString(name) << "]";
       return ExplainFailure(actual[name], expected[name], path);
     }
     for (const auto& name : actual.getMemberNames()) {
       if (!expected.isMember(name))
-        return "which has an unexpected member named " +
-               ::testing::PrintToString(name);
+        return absl::StrCat("which has an unexpected member named " +
+                            ::testing::PrintToString(name));
     }
+  } else if (expected.type() != actual.type()) {
+    return absl::StrCat("which is of type ", ValueTypeName(actual.type()),
+                        " (expected ", ValueTypeName(expected.type()), ")");
   }
-  return "which is " + ::testing::PrintToString(actual) + " (expected " +
-         ::testing::PrintToString(expected) + ")";
+  return absl::StrCat("which is ", ::testing::PrintToString(actual),
+                      " (expected " + ::testing::PrintToString(expected), ")");
 }
 
 class EqualsJsonMatcher {

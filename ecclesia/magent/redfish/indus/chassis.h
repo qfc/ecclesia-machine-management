@@ -24,6 +24,7 @@
 #include "magent/redfish/core/json_helper.h"
 #include "magent/redfish/core/redfish_keywords.h"
 #include "magent/redfish/core/resource.h"
+#include "magent/sysmodel/sysmodel.h"
 #include "jsoncpp/value.h"
 #include "tensorflow_serving/util/net_http/server/public/server_request_interface.h"
 
@@ -51,26 +52,13 @@ class ChassisCollection : public Resource {
 
 class Chassis : public Resource {
  public:
-  Chassis() : Resource(kChassisUri) {}
+  Chassis(SystemModel *system_model)
+      : Resource(kChassisUri), system_model_(system_model) {}
 
  private:
-  void Get(ServerRequestInterface *req, const ParamsType &params) override {
-    Json::Value json;
-    json[kOdataType] = "#Chassis.v1_5_0.Chassis";
-    json[kOdataId] = std::string(Uri());
-    json[kOdataContext] = "/redfish/v1/$metadata#Chassis.Chassis";
-    // TODO: Get platform name via SysmodelParams
-    json[kName] = "Indus Chassis";
-    json[kId] = "chassis";
+  void Get(ServerRequestInterface *req, const ParamsType &params) override;
 
-    auto *assembly = GetJsonObject(&json, "Assembly");
-    (*assembly)[kOdataId] = absl::StrCat(Uri(), "/Assembly");
-
-    auto *links = GetJsonObject(&json, "Links");
-    auto *computer_systems = GetJsonObject(links, "ComputerSystems");
-    (*computer_systems)[kOdataId] = kComputerSystemUri;
-    JSONResponseOK(json, req);
-  }
+  SystemModel *const system_model_;
 };
 
 }  // namespace ecclesia

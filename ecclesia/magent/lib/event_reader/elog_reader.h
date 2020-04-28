@@ -22,8 +22,8 @@
 #include <queue>
 #include <string>
 
+#include "lib/smbios/system_event_log.h"
 #include "magent/lib/event_reader/event_reader.h"
-#include "magent/lib/smbios/system_event_log.h"
 
 namespace ecclesia {
 

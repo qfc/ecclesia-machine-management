@@ -24,13 +24,16 @@
 #include <vector>
 
 #include "absl/base/thread_annotations.h"
+#include "absl/container/flat_hash_map.h"
+#include "absl/strings/string_view.h"
 #include "absl/synchronization/mutex.h"
 #include "absl/types/optional.h"
+#include "lib/smbios/platform_translator.h"
+#include "lib/smbios/reader.h"
 #include "magent/lib/event_logger/event_logger.h"
-#include "magent/lib/smbios/platform_translator.h"
-#include "magent/lib/smbios/reader.h"
 #include "magent/sysmodel/cpu.h"
 #include "magent/sysmodel/dimm.h"
+#include "magent/sysmodel/fru.h"
 
 namespace ecclesia {
 
@@ -41,6 +44,10 @@ struct SysmodelParams {
   std::string smbios_tables_path;
   std::string mced_socket_path;
   std::string sysfs_mem_file_path;
+
+  // TODO(dwangsf): Update this parameter to point to a FRU using SMBUS addrs
+  // Otherwise for now, just hardcode a bunch of FRU ids and data.
+  std::vector<FruInstance> frus;
 };
 
 // The SystemModel must be thread safe
@@ -54,6 +61,16 @@ class SystemModel {
 
   std::size_t NumCpus() const;
   absl::optional<Cpu> GetCpu(std::size_t index);
+
+  std::size_t NumFrus() const;
+  template <typename IteratorF>
+  void GetFrus(IteratorF iterator) const {
+    absl::ReaderMutexLock ml(&frus_lock_);
+    for (const auto &f : frus_) {
+      iterator(f.first, f.second);
+    }
+  }
+  absl::optional<Fru> GetFru(absl::string_view fru_name) const;
 
   // The event logger logs all of the system events with respect to cpu and dimm
   // errors. This method provides a mechanism to process the events for error
@@ -75,6 +92,9 @@ class SystemModel {
 
   mutable absl::Mutex cpus_lock_;
   std::vector<Cpu> cpus_ ABSL_GUARDED_BY(cpus_lock_);
+
+  mutable absl::Mutex frus_lock_;
+  absl::flat_hash_map<std::string, Fru> frus_ ABSL_GUARDED_BY(frus_lock_);
 
   std::unique_ptr<SystemEventLogger> event_logger_;
 };

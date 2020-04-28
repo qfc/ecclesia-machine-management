@@ -1,8 +1,0 @@
-{
-    "@odata.context": "/redfish/v1/$metadata#MemoryCollection.MemoryCollection",
-    "@odata.id": "/redfish/v1/Systems/system/Memory/",
-    "@odata.type": "#MemoryCollection.MemoryCollection",
-    "Members": [],
-    "Members@odata.count": 0,
-    "Name": "Memory Module Collection"
-}

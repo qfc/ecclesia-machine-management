@@ -23,6 +23,7 @@
 
 #include "base/logging.h"
 #include "absl/container/flat_hash_map.h"
+#include "absl/strings/str_split.h"
 #include "absl/strings/string_view.h"
 #include "absl/time/time.h"
 #include "absl/types/optional.h"
@@ -31,6 +32,8 @@
 
 namespace libredfish {
 
+inline constexpr absl::string_view kRfPropertyOdataTypeName = "@odata.type";
+
 // PropertyContainer is a hashmap which stores a variant. This class's purpose
 // is to abstract the typed Set and Get operations which are used with the
 // Property definitions. The class also stores caching metadata in order for
@@ -38,14 +41,19 @@ namespace libredfish {
 // not implement the mechanism for refreshing cached values, but provides
 // sufficient information for the caller to detect cache staleness and update
 // the stored value.
+//
+// PropertyContainer can store multiple properties sourced from multiple
+// resources. For example, a "PartNumber" property can be sourced from a
+// "Memory" resource as well as a "Processor" resource. The PropertyContainer
+// API will provide mechanisms for specifying the desired resource.
 class PropertyContainer {
  public:
   // Set only supports PropertyDefinitionT types which are one of the underlying
   // supported types in the hashmap implementation.
   template <typename PropertyDefinitionT>
-  void Set(typename PropertyDefinitionT::type value, std::string source_uri,
-           const absl::Time &collection_time) {
-    properties_[PropertyDefinitionT::Name] = InternalCachedValue{
+  void Set(typename PropertyDefinitionT::type value, std::string resource,
+           std::string source_uri, const absl::Time &collection_time) {
+    properties_[resource][PropertyDefinitionT::Name] = InternalCachedValue{
         value, std::move(source_uri),
         collection_time + PropertyDefinitionT::CacheInterval};
   }
@@ -68,6 +76,7 @@ class PropertyContainer {
     }
     // Returns the value.
     const T &Value() { return value_; }
+
     // Returns a Redfish URI where the value can be updated.
     absl::string_view SourceUri() { return source_uri_; }
     // Returns true if the value is stale at the provided time.
@@ -78,24 +87,29 @@ class PropertyContainer {
     std::string source_uri_;
     absl::Time expiration_time_;
   };
+
   // Get returns the typed CachedValue of PropertyDefinitionT from the
-  // PropertyContainer. nullopt is returned if the PropertyDefinitionT does not
-  // have a stored value.
-  template <typename PropertyDefinitionT>
+  // PropertyContainer scraped from all ResourceDefinitionT. nullopt is returned
+  // if the PropertyDefinitionT does not have a stored value.
+  template <typename ResourceDefinitionT, typename PropertyDefinitionT>
   absl::optional<CachedValue<typename PropertyDefinitionT::type>> Get() const {
-    auto itr = properties_.find(PropertyDefinitionT::Name);
-    if (itr == properties_.end()) return absl::nullopt;
+    auto resource_itr = properties_.find(ResourceDefinitionT::Name);
+    if (resource_itr == properties_.end()) return absl::nullopt;
+
+    auto property_itr = resource_itr->second.find(PropertyDefinitionT::Name);
+    if (property_itr == resource_itr->second.end()) return absl::nullopt;
+    const InternalCachedValue &cached_value = property_itr->second;
 
     if (!absl::holds_alternative<typename PropertyDefinitionT::type>(
-            itr->second.value)) {
+            cached_value.value)) {
       LOG(DFATAL) << "Type mismatch for property: "
                   << PropertyDefinitionT::Name;
       return absl::nullopt;
     }
 
     return CachedValue<typename PropertyDefinitionT::type>{
-        absl::get<typename PropertyDefinitionT::type>(itr->second.value),
-        itr->second.source_uri, itr->second.expiration_time};
+        absl::get<typename PropertyDefinitionT::type>(cached_value.value),
+        cached_value.source_uri, cached_value.expiration_time};
   }
 
  private:
@@ -111,7 +125,13 @@ class PropertyContainer {
     absl::Time expiration_time;
   };
 
-  absl::flat_hash_map<std::string, InternalCachedValue> properties_;
+  // Properties are stored in two-level hashmap: map[ResourceName][Property]
+  // ResourceName keys should be accessed by resources defined by the
+  // DEFINE_REDFISH_RESOURCE macro. Property keys should be accessed by
+  // resources defined by the DEFINE_REDFISH_PROPERTY macro.
+  absl::flat_hash_map<std::string,
+                      absl::flat_hash_map<std::string, InternalCachedValue>>
+      properties_;
 };
 
 // ExtractIntoContainer extracts the value of the Property PropertyDefinitionT
@@ -120,6 +140,16 @@ class PropertyContainer {
 template <typename PropertyDefinitionT>
 void ExtractIntoContainer(RedfishObject *object, PropertyContainer *container,
                           const absl::Time &collection_time) {
+  auto maybe_type = object->GetNodeValue<std::string>(kRfPropertyOdataTypeName);
+  std::string resource;
+  if (maybe_type.has_value()) {
+    absl::string_view last_elem;
+    for (absl::string_view split : absl::StrSplit(*maybe_type, '.')) {
+      last_elem = split;
+    }
+    resource = std::string(last_elem);
+  }
+
   auto maybe_val = object->GetNodeValue<typename PropertyDefinitionT::type>(
       PropertyDefinitionT::Name);
   if (maybe_val.has_value()) {
@@ -129,8 +159,8 @@ void ExtractIntoContainer(RedfishObject *object, PropertyContainer *container,
                       "value will not be able to be fetched again.";
     }
     container->Set<PropertyDefinitionT>(
-        std::move(maybe_val.value()), std::move(object->GetUri().value_or("")),
-        collection_time);
+        std::move(maybe_val.value()), std::move(resource),
+        std::move(object->GetUri().value_or("")), collection_time);
   }
 }
 
@@ -172,15 +202,24 @@ struct PropertyDefinition {
   using type = PropertyType;
 };
 
-// Macros for defining a Redfish property.
+// Macro for defining a Redfish property.
 //
 // This macro creates a PropertyDefinition subclass with the required static
 // members to satisfy the CRTP expectations for new property definitions.
-#define DEFINE_REDFISH_PROPERTY(classname, type, property_name,            \
-                                cache_interval)                            \
-  struct classname : PropertyDefinition<classname, type> {                 \
-    static inline constexpr char Name[] = property_name;                   \
-    static inline constexpr absl::Duration CacheInterval = cache_interval; \
+#define DEFINE_REDFISH_PROPERTY(classname, type, property_name,     \
+                                cache_interval)                     \
+  struct classname : PropertyDefinition<classname, type> {          \
+    static constexpr char Name[] = property_name;                   \
+    static constexpr absl::Duration CacheInterval = cache_interval; \
+  }
+
+// Macro for defining a Redfish resource.
+//
+// This macro creates a ResourceDefinition subclass with the required static
+// members to satisfy the static member expectations for resource definitions.
+#define DEFINE_REDFISH_RESOURCE(classname, resource_name) \
+  struct classname {                                      \
+    static constexpr char Name[] = resource_name;         \
   }
 }  // namespace libredfish
 

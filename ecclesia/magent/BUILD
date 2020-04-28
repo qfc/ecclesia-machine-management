@@ -8,9 +8,10 @@ cc_binary(
     visibility = ["//:magent_library_users"],
     deps = [
         ":magent_hdr",
-        "//magent/lib/smbios:reader",
+        "//lib/smbios:reader",
         "//magent/redfish/indus",
         "//magent/sysmodel",
+        "//magent/sysmodel:fru",
         "@com_google_absl//absl/flags:flag",
         "@com_google_absl//absl/flags:parse",
         "@com_google_absl//absl/memory",

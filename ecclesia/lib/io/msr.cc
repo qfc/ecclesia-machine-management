@@ -28,7 +28,7 @@
 #include "absl/status/status.h"
 #include "absl/types/span.h"
 #include "lib/apifs/apifs.h"
-#include "lib/endian/endian.h"
+#include "lib/codec/endian.h"
 
 namespace ecclesia {
 

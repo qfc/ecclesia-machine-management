@@ -21,9 +21,9 @@
 #include <string>
 #include <vector>
 
-#include "magent/lib/smbios/memory_device.h"
-#include "magent/lib/smbios/platform_translator.h"
-#include "magent/lib/smbios/reader.h"
+#include "lib/smbios/memory_device.h"
+#include "lib/smbios/platform_translator.h"
+#include "lib/smbios/reader.h"
 
 namespace ecclesia {
 
