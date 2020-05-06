@@ -18,6 +18,21 @@ http_archive(
     urls = ["https://github.com/google/emboss/archive/26fac66f7e295145715306a26068a9c8dc334f7b.zip"],
 )
 
+# Protocol buffers. Official release 3.11.4.
+http_archive(
+    name = "com_google_protobuf",
+    sha256 = "a79d19dcdf9139fa4b81206e318e33d245c4c9da1ffed21c87288ed4380426f9",
+    strip_prefix = "protobuf-3.11.4",
+    urls = ["https://github.com/protocolbuffers/protobuf/archive/v3.11.4.tar.gz"],
+)
+
+http_archive(
+    name = "rules_python",
+    sha256 = "e5470e92a18aa51830db99a4d9c492cc613761d5bdb7131c04bd92b9834380f6",
+    strip_prefix = "rules_python-4b84ad270387a7c439ebdccfd530e2339601ef27",
+    urls = ["https://github.com/bazelbuild/rules_python/archive/4b84ad270387a7c439ebdccfd530e2339601ef27.tar.gz"],
+)
+
 http_archive(
     name = "bazel_skylib",
     sha256 = "ea5dc9a1d51b861d27608ad3bd6c177bc88d54e946cb883e9163e53c607a9b4c",
@@ -39,7 +54,7 @@ http_archive(
 
 http_archive(
     name = "com_github_libevent_libevent",
-    build_file = "@//oss/libevent:BUILD",
+    build_file = "@//oss:libevent.BUILD",
     sha256 = "70158101eab7ed44fd9cc34e7f247b3cae91a8e4490745d9d6eb7edc184e4d96",
     strip_prefix = "libevent-release-2.1.8-stable",
     urls = [
@@ -80,12 +95,13 @@ load("@com_google_tensorflow_serving//tensorflow_serving:workspace.bzl", "tf_ser
 
 tf_serving_workspace()
 
-#jsoncpp. Official release 0.10.7 from Dec 3, 2018
+#jsoncpp. Official release 1.9.2.
 http_archive(
     name = "com_jsoncpp",
-    sha256 = "8b1001adf9c88c809ff613ea29caa898353a3691f63cff553dc11227fb02b0e6",
-    strip_prefix = "jsoncpp-781eec4da8049c56f1c5d53d14cbed55b2f42895",
-    urls = ["https://github.com/open-source-parsers/jsoncpp/archive/ba3fd412929ec4822788b401298e8d9e4950cbab1.zip"],
+    build_file = "@//oss:jsoncpp.BUILD",
+    sha256 = "77a402fb577b2e0e5d0bdc1cf9c65278915cdb25171e3452c68b6da8a561f8f0",
+    strip_prefix = "jsoncpp-1.9.2",
+    urls = ["https://github.com/open-source-parsers/jsoncpp/archive/1.9.2.tar.gz"],
 )
 
 http_archive(

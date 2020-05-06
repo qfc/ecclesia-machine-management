@@ -23,10 +23,7 @@ cc_library(
     ],
     visibility = ["//:magent_frontend_users"],
     deps = [
-        "@com_google_absl//absl/container:flat_hash_map",
-        "@com_google_absl//absl/strings",
-        "@com_google_absl//absl/time",
-        "@com_google_absl//absl/types:variant",
+        "//lib/mcedecoder:cpu_topology",
         "//magent/lib/event_logger:indus_cpu_topology",
         "//magent/lib/event_logger:indus_system_event_visitors",
         "//magent/lib/event_logger:system_event_visitors",
@@ -34,31 +31,12 @@ cc_library(
         "//magent/sysmodel",
         "//magent/sysmodel:cpu",
         "//magent/sysmodel:dimm",
-        "//magent/sysmodel:fru",
-        "//jsoncpp:json",
-        "@com_google_tensorflow_serving//tensorflow_serving/util/net_http/server/public:http_server_api",
-    ],
-)
-
-cc_test(
-    name = "service_root_test",
-    srcs = ["service_root_test.cc"],
-    data = [
-        ":test_data/service_root.json",
-    ],
-    deps = [
-        ":indus",
-        "//devtools/build/runtime:get_runfiles_dir",
-        "//net/util:ports",
-        "//testing/base/public:gunit_main",
-        "@com_google_absl//absl/memory",
+        "//magent/sysmodel:sysmodel_fru",
+        "@com_google_absl//absl/container:flat_hash_map",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/time",
-        "//magent/lib/thread_pool",
-        "//magent/redfish/core:redfish_core",
-        "//jsoncpp:json",
-        "@com_google_tensorflow_serving//tensorflow_serving/util/net_http/server/public:http_server",
+        "@com_google_absl//absl/types:variant",
         "@com_google_tensorflow_serving//tensorflow_serving/util/net_http/server/public:http_server_api",
-        "//webutil/http:httpfetcher",
+        "@com_jsoncpp//:json",
     ],
 )

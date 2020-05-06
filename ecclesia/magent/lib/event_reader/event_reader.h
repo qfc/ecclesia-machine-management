@@ -18,8 +18,8 @@
 #define ECCLESIA_MAGENT_LIB_EVENT_READER_EVENT_READER_H_
 
 #include <assert.h>
-#include <stdint.h>
 
+#include <cstdint>
 #include <vector>
 
 #include "absl/time/time.h"

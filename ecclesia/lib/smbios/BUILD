@@ -41,21 +41,3 @@ cc_library(
         "@com_googlesource_code_re2//:re2",
     ],
 )
-
-cc_test(
-    name = "reader_test",
-    srcs = ["reader_test.cc"],
-    data = [
-        ":test_data/DMI",
-        ":test_data/smbios_entry_point",
-    ],
-    deps = [
-        ":reader",
-        ":structures_emb",
-        "//devtools/build/runtime:get_runfiles_dir",
-        "//testing/base/public:gunit_main",
-        "@com_google_absl//absl/memory",
-        "@com_google_absl//absl/strings",
-        "@com_google_emboss//runtime/cpp:cpp_utils",
-    ],
-)

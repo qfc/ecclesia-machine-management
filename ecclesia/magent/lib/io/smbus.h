@@ -20,64 +20,91 @@
 
 #include <stddef.h>
 
-#include <string>
+#include <cstdint>
+#include <iosfwd>
+#include <tuple>
 #include <utility>
 
-#include "absl/base/integral_types.h"
 #include "absl/status/status.h"
+#include "absl/strings/str_format.h"
 #include "absl/types/span.h"
+#include "lib/types/fixed_range_int.h"
 
 namespace ecclesia {
 
-// Bus location information for an I2C/SMBus bus. A bus can be identified with
-// just a number so we just use a typedef instead of an explicit class.
-struct SmbusBus {
-  int loc;
+// An indentifier representing an I2C/SMBus. These are identifiers used and
+// allocated by the kernel; they have no meaning at the protocol level.
+class SmbusBus : public FixedRangeInteger<SmbusBus, int, 0, 255> {
+ public:
+  explicit constexpr SmbusBus(BaseType value) : BaseType(value) {}
 };
 
-struct SmbusAddress {
-  int addr;
+// An I2C/SMBus address. This corresponds to the actual address on the wire.
+// Uses the 7-bit form of the address.
+class SmbusAddress : public FixedRangeInteger<SmbusAddress, int, 0x00, 0x7f> {
+ public:
+  explicit constexpr SmbusAddress(BaseType value) : BaseType(value) {}
 };
 
-// Device location information for an I2C/SMBus device.  It's POD-like,
-// but the methods and constructor make it friendlier to use. Because it
-// is not *really* POD, it can not be used as a static instance.
-struct SmbusLocation {
-  // Constants for bounds checking.
-  static constexpr int kBusMax = 256;
-  static constexpr int kAddressMax = 128;
+// Device location information for an I2C/SMBus device.
+class SmbusLocation {
+ public:
+  constexpr SmbusLocation(SmbusBus bus, SmbusAddress address)
+      : bus_(bus), address_(address) {}
 
-  // Number of the bus the device is attached to. [0-255]
-  SmbusBus bus;
+  SmbusLocation(const SmbusLocation &) = default;
+  SmbusLocation &operator=(const SmbusLocation &) = default;
 
-  // 7-bit address of the device on the bus. [0-127]
-  SmbusAddress address;
+  // Create an SmbusLocation whose range is statically checked at compile time.
+  template <int bus, int address>
+  static constexpr SmbusLocation Make() {
+    return SmbusLocation(SmbusBus::Make<bus>(), SmbusAddress::Make<address>());
+  }
 
-  // Support hashing of locations for use as a key in hash maps.
+  // Accessors for reading the bus and address.
+  SmbusBus bus() const { return bus_; }
+  SmbusAddress address() const { return address_; }
+
+  // Relational operators. Order is equivalent to <bus, address> tuple.
+  friend bool operator==(const SmbusLocation &lhs, const SmbusLocation &rhs) {
+    return std::tuple(lhs.bus_.value(), lhs.address_.value()) ==
+           std::tuple(rhs.bus_.value(), rhs.address_.value());
+  }
+  friend bool operator!=(const SmbusLocation &lhs, const SmbusLocation &rhs) {
+    return !(lhs == rhs);
+  }
+  friend bool operator<(const SmbusLocation &lhs, const SmbusLocation &rhs) {
+    return std::tuple(lhs.bus_.value(), lhs.address_.value()) <
+           std::tuple(rhs.bus_.value(), rhs.address_.value());
+  }
+  friend bool operator>(const SmbusLocation &lhs, const SmbusLocation &rhs) {
+    return rhs < lhs;
+  }
+  friend bool operator<=(const SmbusLocation &lhs, const SmbusLocation &rhs) {
+    return !(rhs < lhs);
+  }
+  friend bool operator>=(const SmbusLocation &lhs, const SmbusLocation &rhs) {
+    return !(lhs < rhs);
+  }
+
+  // Support hashing of locations.
   template <typename H>
   friend H AbslHashValue(H h, const SmbusLocation &loc) {
-    return H::combine(std::move(h), loc.bus, loc.address);
+    return H::combine(std::move(h), loc.bus_.value(), loc.address_.value());
   }
+
+  // String conversion. This deliberately follows the bus+address format that
+  // the kernel uses in sysfs.
+  friend std::ostream &operator<<(std::ostream &os,
+                                  const SmbusLocation &location) {
+    return os << absl::StreamFormat("%d-%04x", location.bus_.value(),
+                                    location.address_.value());
+  }
+
+ private:
+  SmbusBus bus_;
+  SmbusAddress address_;
 };
-
-std::ostream &operator<<(std::ostream &os, const SmbusLocation &location);
-
-// SmbusLocation relational operators.
-// Order is equivalent to that of a <bus, address> tuple.
-bool operator==(const SmbusLocation &lhs, const SmbusLocation &rhs);
-inline bool operator!=(const SmbusLocation &lhs, const SmbusLocation &rhs) {
-  return !(lhs == rhs);
-}
-bool operator<(const SmbusLocation &lhs, const SmbusLocation &rhs);
-inline bool operator>(const SmbusLocation &lhs, const SmbusLocation &rhs) {
-  return rhs < lhs;
-}
-inline bool operator<=(const SmbusLocation &lhs, const SmbusLocation &rhs) {
-  return !(rhs < lhs);
-}
-inline bool operator>=(const SmbusLocation &lhs, const SmbusLocation &rhs) {
-  return !(lhs < rhs);
-}
 
 // An interface to access SMBus devices.
 class SmbusAccessInterface {
@@ -114,12 +141,63 @@ class SmbusAccessInterface {
   //   command: command code or register location
   //   data: buffer to put/receive data
   //   len: output parameter for number of bytes read
-  virtual absl::Status WriteBlock(
+  virtual absl::Status WriteBlockI2C(
       const SmbusLocation &loc, int command,
       absl::Span<const unsigned char> data) const = 0;
-  virtual absl::Status ReadBlock(const SmbusLocation &loc, int command,
-                                 absl::Span<unsigned char> data,
-                                 size_t *len) const = 0;
+  virtual absl::Status ReadBlockI2C(const SmbusLocation &loc, int command,
+                                    absl::Span<unsigned char> data,
+                                    size_t *len) const = 0;
+};
+
+// A class to encapsulate a single Smbus device at a specified location.
+class SmbusDevice {
+ public:
+  // Create an SMBus device using the provided AccessInterface for all device
+  // accesses.  The AccessInterface must not be NULL.
+  SmbusDevice(SmbusLocation location, const SmbusAccessInterface *access)
+      : location_(std::move(location)), access_(access) {}
+
+  // Get a pointer to this Device's AccessInterface.
+  const SmbusAccessInterface *access() const { return access_; }
+
+  // Get this Device's address. Subclasses might generate this dynamically.
+  const SmbusLocation &location() const { return location_; }
+
+  // Using SmbusAccessInterface to access a SMBus device
+  // specifying the command code (or register location).
+  absl::Status WriteQuick(uint8_t data) const {
+    return access()->WriteQuick(location(), data);
+  }
+  absl::Status SendByte(uint8_t data) const {
+    return access()->SendByte(location(), data);
+  }
+  absl::Status ReceiveByte(uint8_t *data) const {
+    return access()->ReceiveByte(location(), data);
+  }
+  absl::Status Write8(int command, uint8_t data) const {
+    return access()->Write8(location(), command, data);
+  }
+  absl::Status Read8(int command, uint8_t *data) const {
+    return access()->Read8(location(), command, data);
+  }
+  absl::Status Write16(int command, uint16_t data) const {
+    return access()->Write16(location(), command, data);
+  }
+  absl::Status Read16(int command, uint16_t *data) const {
+    return access()->Read16(location(), command, data);
+  }
+  absl::Status WriteBlockI2C(int command,
+                             absl::Span<const unsigned char> data) const {
+    return access()->WriteBlockI2C(location(), command, data);
+  }
+  absl::Status ReadBlockI2C(int command, absl::Span<unsigned char> data,
+                            size_t *len) const {
+    return access()->ReadBlockI2C(location(), command, data, len);
+  }
+
+ private:
+  SmbusLocation location_;
+  const SmbusAccessInterface *access_;
 };
 
 }  // namespace ecclesia

@@ -13,6 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+// Helper RAII objects for doing automatic cleanup when scopes are exited.
+
 #ifndef ECCLESIA_LIB_UTIL_FD_CLEANUP_H_
 #define ECCLESIA_LIB_UTIL_FD_CLEANUP_H_
 

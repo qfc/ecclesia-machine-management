@@ -21,17 +21,17 @@
 #ifndef ECCLESIA_MAGENT_LIB_FRU_FRU_H_
 #define ECCLESIA_MAGENT_LIB_FRU_FRU_H_
 
+#include <stddef.h>
 #include <time.h>
 
-#include <list>
+#include <algorithm>
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <vector>
 
 #include "absl/status/status.h"
-#include "absl/strings/cord.h"
-#include "absl/strings/string_view.h"
-#include "magent/lib/fru/common_header.emb.h"
+#include "absl/types/span.h"
 
 namespace ecclesia {
 
@@ -59,9 +59,9 @@ uint8_t FruChecksumFromBytes(const uint8_t *image, size_t offset, size_t len);
 // Forward declarations.
 class BoardInfoArea;
 class ChassisInfoArea;
-class ProductInfoArea;
-class MultiRecordArea;
 class FruImageSource;
+class MultiRecordArea;
+class ProductInfoArea;
 
 // This class represents the data encapsulated by a single FRU field (e.g.
 // "product name," "serial number," etc. In most cases, fields contain

@@ -18,8 +18,8 @@
 #define ECCLESIA_LIB_SMBIOS_PROCESSOR_INFORMATION_H_
 
 #include <stddef.h>
-#include <stdint.h>
 
+#include <cstdint>
 #include <string>
 
 #include "absl/strings/string_view.h"

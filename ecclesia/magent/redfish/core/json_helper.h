@@ -21,7 +21,7 @@
 #include <string>
 
 #include "magent/redfish/core/redfish_keywords.h"
-#include "jsoncpp/value.h"
+#include "json/value.h"
 
 namespace ecclesia {
 

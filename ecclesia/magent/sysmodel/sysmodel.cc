@@ -18,11 +18,13 @@
 
 #include <memory>
 #include <optional>
+#include <string>
 #include <utility>
 #include <vector>
 
+#include "absl/container/flat_hash_map.h"
+#include "absl/strings/string_view.h"
 #include "absl/synchronization/mutex.h"
-#include "absl/types/span.h"
 #include "lib/smbios/reader.h"
 #include "lib/time/clock.h"
 #include "magent/lib/event_logger/event_logger.h"
@@ -66,7 +68,8 @@ std::size_t SystemModel::NumFrus() const {
   return frus_.size();
 }
 
-absl::optional<Fru> SystemModel::GetFru(absl::string_view fru_name) const {
+absl::optional<SysmodelFru> SystemModel::GetFru(
+    absl::string_view fru_name) const {
   absl::ReaderMutexLock ml(&frus_lock_);
   auto fru = frus_.find(fru_name);
   if (fru != frus_.end()) {
@@ -78,7 +81,8 @@ absl::optional<Fru> SystemModel::GetFru(absl::string_view fru_name) const {
 SystemModel::SystemModel(SysmodelParams params)
     : smbios_reader_(absl::make_unique<SmbiosReader>(
           params.smbios_entry_point_path, params.smbios_tables_path)),
-      field_translator_(std::move(params.field_translator)) {
+      field_translator_(std::move(params.field_translator)),
+      eeprom_options_(std::move(params.eeprom_options)) {
   // Construct system model objects
   auto dimms = CreateDimms(smbios_reader_.get(), field_translator_.get());
   {
@@ -92,7 +96,7 @@ SystemModel::SystemModel(SysmodelParams params)
     cpus_ = std::move(cpus);
   }
 
-  auto frus = CreateFrus(absl::MakeSpan(params.frus));
+  auto frus = CreateFrus(eeprom_options_);
   {
     absl::WriterMutexLock ml(&frus_lock_);
     frus_ = std::move(frus);

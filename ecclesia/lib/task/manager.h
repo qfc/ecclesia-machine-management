@@ -27,6 +27,7 @@
 #define ECCLESIA_LIB_TASK_MANAGER_H_
 
 #include <memory>
+#include <utility>
 
 #include "lib/task/task.h"
 
@@ -39,6 +40,11 @@ class BackgroundTaskManager {
   template <typename TaskType>
   class Remover {
    public:
+    // Default constructor. This will be associated a null task and so
+    // destroying it will do nothing.
+    Remover() : manager_(nullptr), task_(nullptr) {}
+    // Normal constructor. This will remove the given task from the provided
+    // background manager when the Remover object is destroyed.
     Remover(BackgroundTaskManager *manager, TaskType *task)
         : manager_(manager), task_(task) {}
 
@@ -47,13 +53,14 @@ class BackgroundTaskManager {
     // ensure that the stored task is nulled out in the moved-from object.
     Remover(const Remover &other) = delete;
     Remover &operator=(const Remover &other) = delete;
-    Remover(Remover &&other) : manager_(other.manager_), task_(other.task) {
-      other.task = nullptr;
+    Remover(Remover &&other) : manager_(other.manager_), task_(other.task_) {
+      other.task_ = nullptr;
     }
     Remover &operator=(Remover &&other) {
       manager_ = other.manager_;
       task_ = other.task_;
       other.task_ = nullptr;
+      return *this;
     }
 
     ~Remover() {
@@ -62,6 +69,13 @@ class BackgroundTaskManager {
 
     // The underlying task that this remover will remove.
     TaskType *task() const { return task_; }
+
+    // Carry out the removal of the task this remover is managing. After calling
+    // this the remover will contain a null task.
+    void Invoke() {
+      if (task_) manager_->RemoveTaskImpl(task_);
+      task_ = nullptr;
+    }
 
    private:
     BackgroundTaskManager *manager_;

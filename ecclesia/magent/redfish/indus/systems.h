@@ -23,7 +23,7 @@
 #include "magent/redfish/core/json_helper.h"
 #include "magent/redfish/core/redfish_keywords.h"
 #include "magent/redfish/core/resource.h"
-#include "jsoncpp/value.h"
+#include "json/value.h"
 #include "tensorflow_serving/util/net_http/server/public/server_request_interface.h"
 
 namespace ecclesia {

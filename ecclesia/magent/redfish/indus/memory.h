@@ -30,7 +30,7 @@
 #include "magent/redfish/core/resource.h"
 #include "magent/sysmodel/dimm.h"
 #include "magent/sysmodel/sysmodel.h"
-#include "jsoncpp/value.h"
+#include "json/value.h"
 #include "tensorflow_serving/util/net_http/server/public/response_code_enum.h"
 #include "tensorflow_serving/util/net_http/server/public/server_request_interface.h"
 

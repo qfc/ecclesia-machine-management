@@ -18,8 +18,7 @@
 #ifndef ECCLESIA_LIB_IO_MSR_H_
 #define ECCLESIA_LIB_IO_MSR_H_
 
-#include <stdint.h>
-
+#include <cstdint>
 #include <filesystem>
 #include <string>
 

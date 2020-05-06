@@ -6,8 +6,8 @@ licenses(["notice"])
 package_group(
     name = "mcedecoder_users",
     packages = [
-        "//platforms/baremetal/healthagent/...",
         "//magent/...",
+        "//platforms/baremetal/healthagent/...",
     ],
 )
 
@@ -57,51 +57,5 @@ cc_library(
         ":bit_operator",
         ":dimm_translator",
         ":mce_messages",
-    ],
-)
-
-cc_library(
-    name = "cpu_topology_mock",
-    testonly = 1,
-    hdrs = ["cpu_topology_mock.h"],
-    visibility = [":mcedecoder_users"],
-    deps = [
-        ":cpu_topology",
-        "//testing/base/public:gunit_main",
-    ],
-)
-
-cc_library(
-    name = "mce_decode_mock",
-    testonly = 1,
-    hdrs = ["mce_decode_mock.h"],
-    visibility = [":mcedecoder_users"],
-    deps = [
-        ":mce_decode",
-        ":mce_messages",
-        "//testing/base/public:gunit_main",
-    ],
-)
-
-cc_test(
-    name = "bit_operator_test",
-    srcs = ["bit_operator_test.cc"],
-    deps = [
-        ":bit_operator",
-        "//base",
-        "//testing/base/public:gunit_main",
-    ],
-)
-
-cc_test(
-    name = "mce_decode_test",
-    srcs = ["mce_decode_test.cc"],
-    deps = [
-        ":cpu_topology",
-        ":cpu_topology_mock",
-        ":dimm_translator",
-        ":mce_decode",
-        ":mce_messages",
-        "//testing/base/public:gunit_main",
     ],
 )

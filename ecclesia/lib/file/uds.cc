@@ -24,8 +24,6 @@
 #include <functional>
 #include <string>
 
-#include "base/logging.h"
-
 namespace ecclesia {
 
 bool IsSafeUnixDomainSocketRoot(const std::string &root_path) {
@@ -45,8 +43,6 @@ bool SetUpUnixDomainSocket(
 
   // Fail immediately if the socket root is not safe.
   if (!is_root_safe(socket_root.string())) {
-    LOG(ERROR) << "domain socket root " << socket_root.string()
-               << " is not considered safe";
     return false;
   }
 
@@ -60,23 +56,15 @@ bool SetUpUnixDomainSocket(
       // lstat to make sure we don't follow a symlink to a directory.
       struct stat socket_dir_stat;
       if (lstat(socket_directory.c_str(), &socket_dir_stat) != 0) {
-        PLOG(ERROR) << "unable to stat the domain socket directory "
-                    << socket_directory.string();
         return false;
       }
       if (!S_ISDIR(socket_dir_stat.st_mode)) {
-        LOG(ERROR) << "domain socket directory " << socket_directory.string()
-                   << " is not a directory";
         return false;
       }
       if ((socket_dir_stat.st_mode & 0777) != S_IRWXU) {
-        LOG(ERROR) << "domain socket directory " << socket_directory.string()
-                   << " does not have S_IRWXU permissions";
         return false;
       }
     } else {
-      PLOG(ERROR) << "unable to create the domain socket directory "
-                  << socket_directory.string();
       return false;
     }
   }
@@ -86,8 +74,6 @@ bool SetUpUnixDomainSocket(
   // remove to fail because the file already doesn't exist, but any other
   // failure is an error.
   if (unlink(socket.c_str()) != 0 && errno != ENOENT) {
-    PLOG(ERROR) << "unable to remove the domain socket file "
-                << socket.string();
     return false;
   }
 

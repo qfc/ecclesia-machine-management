@@ -16,34 +16,34 @@
 
 #include <stddef.h>
 
-#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
 
-#include "google/protobuf/field_mask.proto.h"
-#include "net/proto2/public/descriptor.h"
-#include "net/proto2/public/message.h"
-#include "net/proto2/util/public/field_mask_util.h"
+#include "google/protobuf/field_mask.pb.h"
+#include "google/protobuf/descriptor.h"
+#include "google/protobuf/message.h"
+#include "google/protobuf/util/field_mask_util.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_split.h"
 #include "absl/strings/string_view.h"
+#include "absl/types/optional.h"
 
 namespace ecclesia {
 namespace {
 
 // A slightly modified version of
-// ::proto2::util::FieldMaskUtil::GetFieldDescriptors() to allow diving into
+// ::google::protobuf::util::FieldMaskUtil::GetFieldDescriptors() to allow diving into
 // repeated sub-messages.
 bool GetFieldDescriptors(
-    const ::proto2::Descriptor *descriptor, absl::string_view path,
-    std::vector<const ::proto2::FieldDescriptor *> *field_descriptors) {
+    const ::google::protobuf::Descriptor *descriptor, absl::string_view path,
+    std::vector<const ::google::protobuf::FieldDescriptor *> *field_descriptors) {
   std::vector<std::string> parts = absl::StrSplit(path, '.');
   for (const std::string &field_name : parts) {
     if (descriptor == nullptr) {
       return false;
     }
-    const ::proto2::FieldDescriptor *field =
+    const ::google::protobuf::FieldDescriptor *field =
         descriptor->FindFieldByName(field_name);
     if (field == nullptr) {
       return false;
@@ -51,7 +51,7 @@ bool GetFieldDescriptors(
     if (field_descriptors != nullptr) {
       field_descriptors->push_back(field);
     }
-    if (field->cpp_type() == ::proto2::FieldDescriptor::CPPTYPE_MESSAGE) {
+    if (field->cpp_type() == ::google::protobuf::FieldDescriptor::CPPTYPE_MESSAGE) {
       descriptor = field->message_type();
     } else {
       descriptor = nullptr;
@@ -87,18 +87,18 @@ class FieldPath {
   // `path_mask` and construct a FieldPath object for them. If the path is not
   // a valid one this will return null.
   static absl::optional<FieldPath> FindPath(
-      const ::proto2::Descriptor *msg_type, const absl::string_view path_mask);
+      const ::google::protobuf::Descriptor *msg_type, const absl::string_view path_mask);
 
   bool HasField() const { return field_ != nullptr; }
 
-  const ::proto2::FieldDescriptor *field() const { return field_; }
+  const ::google::protobuf::FieldDescriptor *field() const { return field_; }
 
   // Given a message, find the sub-messages that are denoted by the
   // msg path. Suppose the field path is ".bb.cc.c", calling its
   // GetMutableLeafMessages with a message of type A as root gives all
   // the message of type C that are nested in it.
-  void GetMutableLeafMessages(::proto2::Message *root,
-                              std::vector<::proto2::Message *> *result) const;
+  void GetMutableLeafMessages(::google::protobuf::Message *root,
+                              std::vector<::google::protobuf::Message *> *result) const;
   // Return the string representation of the field path. Example: .bb.cc.c
   std::string AsString() const;
 
@@ -108,7 +108,7 @@ class FieldPath {
   // desc_vec: Given a vector of field descriptors, set the field to its last
   // element, and append all elements before last to the msg path (after
   // `path`). This is used to construct a FieldPath from result of
-  // proto2::util::GetFieldDescriptors(), which does not distinguish between
+  // google::protobuf::util::GetFieldDescriptors(), which does not distinguish between
   // field and msg path.
   //
   // Note that GetFieldDescriptors() only returns a nested path (with multiple
@@ -117,22 +117,22 @@ class FieldPath {
   // GetFieldDescriptors() would not be able to find any fields given a message
   // of type A. However if the mask is "bb.b,bb.cc.c", it would be able to find
   // both fields.
-  explicit FieldPath(std::vector<const ::proto2::FieldDescriptor *> desc_vec)
+  explicit FieldPath(std::vector<const ::google::protobuf::FieldDescriptor *> desc_vec)
       : msg_path_(std::move(desc_vec)), field_(msg_path_.back()) {
     msg_path_.pop_back();  // The last element is stored in field_.
   }
 
   void GetMutableLeafMessagesRecurse(
-      ::proto2::Message *root, size_t level,
-      std::vector<::proto2::Message *> *result) const;
+      ::google::protobuf::Message *root, size_t level,
+      std::vector<::google::protobuf::Message *> *result) const;
 
-  std::vector<const ::proto2::FieldDescriptor *> msg_path_;
-  const ::proto2::FieldDescriptor *field_;
+  std::vector<const ::google::protobuf::FieldDescriptor *> msg_path_;
+  const ::google::protobuf::FieldDescriptor *field_;
 };
 
 absl::optional<FieldPath> FieldPath::FindPath(
-    const ::proto2::Descriptor *msg_type, const absl::string_view path_mask) {
-  std::vector<const ::proto2::FieldDescriptor *> path;
+    const ::google::protobuf::Descriptor *msg_type, const absl::string_view path_mask) {
+  std::vector<const ::google::protobuf::FieldDescriptor *> path;
   if (GetFieldDescriptors(msg_type, path_mask, &path)) {
     return FieldPath(std::move(path));
   }
@@ -140,19 +140,19 @@ absl::optional<FieldPath> FieldPath::FindPath(
 }
 
 void FieldPath::GetMutableLeafMessages(
-    ::proto2::Message *root, std::vector<::proto2::Message *> *result) const {
+    ::google::protobuf::Message *root, std::vector<::google::protobuf::Message *> *result) const {
   return GetMutableLeafMessagesRecurse(root, 0, result);
 }
 
 void FieldPath::GetMutableLeafMessagesRecurse(
-    ::proto2::Message *root, size_t level,
-    std::vector<::proto2::Message *> *result) const {
+    ::google::protobuf::Message *root, size_t level,
+    std::vector<::google::protobuf::Message *> *result) const {
   if (level == msg_path_.size()) {
     result->push_back(root);
     return;
   }
 
-  const ::proto2::Reflection *reflection = root->GetReflection();
+  const ::google::protobuf::Reflection *reflection = root->GetReflection();
   const auto *field = msg_path_[level];
 
   if (field->is_optional() && !(reflection->HasField(*root, field))) {
@@ -185,15 +185,15 @@ std::string FieldPath::AsString() const {
 }
 
 bool TransformLeafDevpaths(const TransformDevpathFunction &transform,
-                           const ::proto2::FieldDescriptor *devpath_field,
-                           const std::vector<::proto2::Message *> &leaf_msgs) {
+                           const ::google::protobuf::FieldDescriptor *devpath_field,
+                           const std::vector<::google::protobuf::Message *> &leaf_msgs) {
   for (auto *msg : leaf_msgs) {
     // msg contains the devpath field. Read the current value of the field,
     // apply the transformation function to it, and if that was successful then
     // write the new value into it. If the transform function fails then we give
     // up the whole process.
-    const ::proto2::Reflection *reflection = msg->GetReflection();
-    if (devpath_field->label() == ::proto2::FieldDescriptor::LABEL_REPEATED) {
+    const ::google::protobuf::Reflection *reflection = msg->GetReflection();
+    if (devpath_field->label() == ::google::protobuf::FieldDescriptor::LABEL_REPEATED) {
       int repeat_count = reflection->FieldSize(*msg, devpath_field);
 
       for (int field_idx = 0; field_idx < repeat_count; field_idx++) {
@@ -219,13 +219,39 @@ bool TransformLeafDevpaths(const TransformDevpathFunction &transform,
   return true;
 }
 
+// Different versions of the protobuf library unfortunately use different types
+// of string_view type objects (e.g. std vs absl vs custom) and not all of them
+// are convertable between each other; in particular the custom ones cannot be
+// implicitly constructed from our string_view type.
+//
+// In particular this is an issue for our use of FieldMaskUtil::FromString. To
+// work around this we have a helper template here which will infer the type of
+// its first parameter, and then we manually construct an object of that type
+// from the string view and call it.
+//
+// If all versions of protobuf converge on std::string_view or absl::string_view
+// then this workaround can be removed.
+template <typename>
+struct ArgExtractor;
+template <typename T>
+struct ArgExtractor<void(T, ::google::protobuf::FieldMask *)> {
+  using type = T;
+};
+void CallFieldMaskUtilFromString(absl::string_view str,
+                                 ::google::protobuf::FieldMask *out) {
+  using StringViewType = typename ArgExtractor<decltype(
+      ::google::protobuf::util::FieldMaskUtil::FromString)>::type;
+  StringViewType converted_str(str.data(), str.size());
+  ::google::protobuf::util::FieldMaskUtil::FromString(converted_str, out);
+}
+
 }  // namespace
 
 bool TransformProtobufDevpaths(const TransformDevpathFunction &transform,
                                absl::string_view field_mask,
-                               ::proto2::Message *message) {
+                               ::google::protobuf::Message *message) {
   ::google::protobuf::FieldMask mask_proto;
-  ::proto2::util::FieldMaskUtil::FromString(field_mask, &mask_proto);
+  CallFieldMaskUtilFromString(field_mask, &mask_proto);
 
   for (absl::string_view path : mask_proto.paths()) {
     // Extract the field descriptors for traversing the message. These will be
@@ -235,11 +261,11 @@ bool TransformProtobufDevpaths(const TransformDevpathFunction &transform,
         FieldPath::FindPath(message->GetDescriptor(), path);
     if (!field_path) return false;
 
-    if (field_path->field()->type() != ::proto2::FieldDescriptor::TYPE_STRING) {
+    if (field_path->field()->type() != ::google::protobuf::FieldDescriptor::TYPE_STRING) {
       return false;
     }
 
-    std::vector<::proto2::Message *> leaf_msgs;
+    std::vector<::google::protobuf::Message *> leaf_msgs;
     field_path->GetMutableLeafMessages(message, &leaf_msgs);
     if (!TransformLeafDevpaths(transform, field_path->field(), leaf_msgs)) {
       return false;

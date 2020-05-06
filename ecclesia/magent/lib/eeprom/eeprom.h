@@ -20,10 +20,7 @@
 #ifndef ECCLESIA_MAGENT_LIB_EEPROM_EEPROM_H_
 #define ECCLESIA_MAGENT_LIB_EEPROM_EEPROM_H_
 
-#include <stddef.h>
-#include <functional>
-#include <memory>
-#include <string>
+#include <cstddef>
 
 #include "absl/types/optional.h"
 #include "absl/types/span.h"
@@ -59,12 +56,13 @@ class Eeprom {
 
   // Read value.size() bytes from the eeprom.
   // Returns: number of bytes successfully read or <0 on error.
-  virtual int ReadBytes(size_t offset, absl::Span<char> value) const = 0;
+  virtual absl::optional<int> ReadBytes(
+      size_t offset, absl::Span<unsigned char> value) const = 0;
 
   // Write to the eeprom.
   // Returns: number of bytes successfully written or <0 on error.
-  virtual int WriteBytes(size_t offset, absl::Span<const char> data) = 0;
-
+  virtual absl::optional<int> WriteBytes(
+      size_t offset, absl::Span<const unsigned char> data) const = 0;
 };
 
 }  // namespace ecclesia

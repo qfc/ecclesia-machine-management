@@ -1,7 +1,7 @@
 #ifndef ECCLESIA_LIB_IO_CONST_H_
 #define ECCLESIA_LIB_IO_CONST_H_
 
-#include <stdint.h>
+#include <cstdint>
 
 namespace ecclesia {
 

@@ -22,7 +22,6 @@
 
 #include <string>
 
-#include "absl/cleanup/cleanup.h"
 #include "absl/strings/string_view.h"
 
 namespace ecclesia {
@@ -41,13 +40,24 @@ void WithEachFileInDirectory(absl::string_view dirname, F output_func) {
   static constexpr absl::string_view kCurrentDir = ".";
   static constexpr absl::string_view kParentDir = "..";
 
+  class ScandirCloser {
+   public:
+    ScandirCloser(struct dirent **namelist, int n)
+        : namelist_(namelist), n_(n) {}
+    ~ScandirCloser() {
+      int i = n_;
+      while (i--) free(namelist_[i]);
+      free(namelist_);
+    }
+
+   private:
+    struct dirent **namelist_;
+    int n_;
+  };
+
   struct dirent **namelist;
   if (int n = scandir(dirname.data(), &namelist, nullptr, nullptr); n >= 0) {
-    auto scandir_closer = absl::MakeCleanup([namelist, n]() {
-      int i = n;
-      while (i--) free(namelist[i]);
-      free(namelist);
-    });
+    ScandirCloser closer(namelist, n);
     while (n--) {
       absl::string_view directory_entry = namelist[n]->d_name;
       // Skip the entries which don't correspond to real entries.

@@ -7,12 +7,27 @@
 
 #include "magent/lib/fru/fru.h"
 
+#include <assert.h>
+#include <stddef.h>
 #include <stdlib.h>
+#include <time.h>
+
+#include <algorithm>
+#include <cstdint>
+#include <iostream>
+#include <iterator>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include "absl/base/casts.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_format.h"
+#include "absl/types/span.h"
 #include "lib/codec/text.h"
 #include "magent/lib/fru/common_header.emb.h"
+#include "runtime/cpp/emboss_prelude.h"
 
 namespace ecclesia {
 

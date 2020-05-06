@@ -17,8 +17,7 @@
 #ifndef ECCLESIA_MAGENT_LIB_EVENT_LOGGER_SYSTEM_EVENT_VISITORS_H_
 #define ECCLESIA_MAGENT_LIB_EVENT_LOGGER_SYSTEM_EVENT_VISITORS_H_
 
-#include <stdint.h>
-
+#include <cstdint>
 #include <memory>
 #include <optional>
 #include <utility>

@@ -18,8 +18,8 @@ cc_library(
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/types:variant",
-        "//jsoncpp:json",
         "@com_google_tensorflow_serving//tensorflow_serving/util/net_http/server/public:http_server_api",
         "@com_googlesource_code_re2//:re2",
+        "@com_jsoncpp//:json",
     ],
 )

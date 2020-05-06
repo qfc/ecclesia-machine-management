@@ -22,7 +22,7 @@
 #include "absl/container/flat_hash_map.h"
 #include "absl/strings/string_view.h"
 #include "magent/redfish/core/resource.h"
-#include "jsoncpp/value.h"
+#include "json/value.h"
 #include "tensorflow_serving/util/net_http/server/public/httpserver_interface.h"
 #include "tensorflow_serving/util/net_http/server/public/response_code_enum.h"
 #include "tensorflow_serving/util/net_http/server/public/server_request_interface.h"
@@ -37,7 +37,6 @@ namespace ecclesia {
 // component is present or not. However, a redfish compliant client that
 // discovers assemblies by walking through the redfish tree will only discover
 // valid assemblies.
-// TODO(b/144283760): Add dynamic detection of valid assemblies.
 class Assembly : public Resource {
  public:
   explicit Assembly(absl::string_view assemblies_dir);

@@ -55,36 +55,3 @@ emboss_cc_library(
     srcs = ["elog.emb"],
     visibility = ["//:magent_library_users"],
 )
-
-cc_test(
-    name = "mced_reader_test",
-    srcs = ["mced_reader_test.cc"],
-    deps = [
-        ":event_reader",
-        ":mced_reader",
-        "//strings",
-        "//testing/base/public:gunit_main",
-        "@com_google_absl//absl/strings",
-        "@com_google_absl//absl/time",
-        "//util/libcproxy:libcwrapper",
-    ],
-)
-
-cc_test(
-    name = "elog_reader_test",
-    srcs = ["elog_reader_test.cc"],
-    data = [
-        ":test_data/elog.bin",
-    ],
-    deps = [
-        ":elog_emb",
-        ":elog_reader",
-        ":event_reader",
-        "//devtools/build/runtime:get_runfiles_dir",
-        "//testing/base/public:gunit_main",
-        "@com_google_absl//absl/strings",
-        "//lib/smbios:reader",
-        "//lib/smbios:structures_emb",
-        "@com_google_emboss//runtime/cpp:cpp_utils",
-    ],
-)

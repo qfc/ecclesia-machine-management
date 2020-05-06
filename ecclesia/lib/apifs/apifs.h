@@ -21,8 +21,6 @@
 #ifndef ECCLESIA_LIB_APIFS_APIFS_H_
 #define ECCLESIA_LIB_APIFS_APIFS_H_
 
-#include <errno.h>
-#include <fcntl.h>
 #include <sys/stat.h>   // IWYU pragma: keep
 #include <sys/types.h>  // IWYU pragma: keep
 #include <unistd.h>     // IWYU pragma: keep
@@ -32,7 +30,7 @@
 #include <vector>
 
 #include "absl/status/status.h"
-#include "absl/strings/str_format.h"
+#include "absl/types/span.h"
 
 namespace ecclesia {
 

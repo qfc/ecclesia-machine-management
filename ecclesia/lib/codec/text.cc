@@ -1,5 +1,14 @@
 #include "lib/codec/text.h"
 
+#include <stddef.h>
+
+#include <cstdint>
+#include <string>
+
+#include "absl/status/status.h"
+#include "absl/types/span.h"
+#include "lib/codec/bits.h"
+
 namespace ecclesia {
 
 namespace {

@@ -9,21 +9,9 @@ cc_library(
     hdrs = ["apifs.h"],
     visibility = ["//visibility:public"],
     deps = [
+        "//lib/cleanup",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings:str_format",
-        "//lib/cleanup",
-    ],
-)
-
-cc_test(
-    name = "apifs_test",
-    size = "small",
-    srcs = ["apifs_test.cc"],
-    deps = [
-        ":apifs",
-        "//platforms/util/testing:fake_filesystem",
-        "//testing/base/public:gunit_main",
-        "@com_google_absl//absl/status",
-        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/types:span",
     ],
 )

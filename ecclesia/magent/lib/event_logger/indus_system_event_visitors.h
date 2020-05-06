@@ -20,6 +20,7 @@
 #include <memory>
 
 #include "absl/time/time.h"
+#include "lib/mcedecoder/cpu_topology.h"
 #include "magent/lib/event_logger/system_event_visitors.h"
 
 // This file provides concrete system event visitors for counting cpu and memory

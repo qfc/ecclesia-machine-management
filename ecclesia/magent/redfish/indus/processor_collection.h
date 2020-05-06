@@ -25,7 +25,7 @@
 #include "magent/redfish/core/redfish_keywords.h"
 #include "magent/redfish/core/resource.h"
 #include "magent/sysmodel/sysmodel.h"
-#include "jsoncpp/value.h"
+#include "json/value.h"
 #include "tensorflow_serving/util/net_http/server/public/server_request_interface.h"
 
 namespace ecclesia {

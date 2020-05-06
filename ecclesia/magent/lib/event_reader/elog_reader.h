@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+// Define a system event reader to read BIOS Event Log records from. This
+// implementation only supports memory mapped access to the Elog, and supports
+// the Google OEM Elog header format (0x81).
+
 #ifndef ECCLESIA_MAGENT_LIB_EVENT_READER_ELOG_READER_H_
 #define ECCLESIA_MAGENT_LIB_EVENT_READER_ELOG_READER_H_
 
@@ -27,11 +31,6 @@
 
 namespace ecclesia {
 
-// Define a system event reader to read BIOS Event Log records from.
-// This implementation only supports memory mapped access to the Elog, and
-// supports the Google OEM Elog header format (0x81)
-// See:
-// https://sites.google.com/a/google.com/platforms-bringup/bios/google-bios-design-documents/elog
 class ElogReader : public SystemEventReader {
  public:
   // The constructor takes in the smbios system event log structure and path to

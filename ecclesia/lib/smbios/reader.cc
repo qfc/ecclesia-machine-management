@@ -15,9 +15,9 @@
 #include "lib/smbios/reader.h"
 
 #include <stddef.h>
-#include <stdint.h>
 
 #include <algorithm>
+#include <cstdint>
 #include <fstream>  // IWYU pragma: keep
 #include <iostream>
 #include <memory>

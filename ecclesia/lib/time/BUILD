@@ -15,7 +15,6 @@ cc_library(
     visibility = ["//:library_users"],
     deps = [
         ":clock",
-        "//base",
         "@com_google_absl//absl/time",
     ],
 )

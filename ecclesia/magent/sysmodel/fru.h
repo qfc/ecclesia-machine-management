@@ -23,31 +23,27 @@
 #include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
 #include "absl/types/span.h"
+#include "magent/lib/eeprom/smbus_eeprom.h"
+
 namespace ecclesia {
 
 struct FruInfo {
+  std::string product_name;
   std::string manufacturer;
   std::string serial_number;
   std::string part_number;
 };
 
-// TODO(dwangsf): Remove FruInstance once the FRU information is no longer
-// hardcoded but rather read from SMBUS.
-struct FruInstance {
-  std::string fru_name;
-  FruInfo info;
-};
-
-class Fru {
+class SysmodelFru {
  public:
-  Fru(FruInfo fru_info);
+  SysmodelFru(FruInfo fru_info);
 
   // Allow the object to be copyable
   // Make sure that copy construction is relatively light weight.
   // In cases where it is not feasible to copy construct data members,it may
   // make sense to wrap the data member in a shared_ptr.
-  Fru(const Fru &dimm) = default;
-  Fru &operator=(const Fru &dimm) = default;
+  SysmodelFru(const SysmodelFru &dimm) = default;
+  SysmodelFru &operator=(const SysmodelFru &dimm) = default;
 
   absl::string_view GetManufacturer() const;
   absl::string_view GetSerialNumber() const;
@@ -57,9 +53,8 @@ class Fru {
   FruInfo fru_info_;
 };
 
-// TODO(dwangsf): Update this constructor with readers. For now, just accept
-// hardcoded info to construct Frus.
-absl::flat_hash_map<std::string, Fru> CreateFrus(absl::Span<FruInstance> frus);
+absl::flat_hash_map<std::string, SysmodelFru> CreateFrus(
+    absl::Span<SmbusEeprom2ByteAddr::Option> options);
 
 }  // namespace ecclesia
 

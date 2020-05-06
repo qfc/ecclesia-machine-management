@@ -21,7 +21,6 @@
 #ifndef ECCLESIA_LIB_TIME_CLOCK_FAKE_H_
 #define ECCLESIA_LIB_TIME_CLOCK_FAKE_H_
 
-#include "base/logging.h"
 #include "absl/time/clock.h"
 #include "absl/time/time.h"
 #include "lib/time/clock.h"
@@ -38,10 +37,7 @@ class FakeClock : public Clock {
   absl::Time Now() const override { return time_; }
 
   // Move time forward by duration. This cannot be used to move time back.
-  void AdvanceTime(absl::Duration duration) {
-    CHECK(duration >= absl::ZeroDuration());
-    time_ += duration;
-  }
+  void AdvanceTime(absl::Duration duration) { time_ += duration; }
 
  private:
   absl::Time time_;

@@ -21,7 +21,6 @@
 #include "lib/mcedecoder/cpu_topology.h"
 #include "lib/mcedecoder/dimm_translator.h"
 #include "lib/mcedecoder/mce_decode.h"
-#include "magent/lib/event_logger/indus_cpu_topology.h"
 #include "magent/lib/event_logger/system_event_visitors.h"
 
 namespace ecclesia {
@@ -30,7 +29,6 @@ namespace {
 
 std::unique_ptr<mcedecoder::MceDecoder> CreateIndusMceDecoder(
     std::unique_ptr<mcedecoder::CpuTopologyInterface> cpu_topology) {
-  // TODO(b/147515411): Derive cpu_vendor and cpu_identifier from smbios table
   mcedecoder::CpuVendor vendor = mcedecoder::CpuVendor::kIntel;
   mcedecoder::CpuIdentifier identifier = mcedecoder::CpuIdentifier::kSkylake;
   return absl::make_unique<mcedecoder::MceDecoder>(

@@ -18,12 +18,19 @@
 #include <vector>
 
 #include "absl/strings/str_cat.h"
+#include "absl/strings/str_join.h"
 #include "absl/strings/str_split.h"
 #include "absl/strings/string_view.h"
+#include "absl/types/optional.h"
 #include "re2/re2.h"
 
 namespace ecclesia {
 namespace {
+
+std::vector<absl::string_view> SplitPathIntoConnectorParts(
+    absl::string_view str) {
+  return absl::StrSplit(str, '/');
+}
 
 // Given a string, split it into 1-3 pieces using ":" as a divider. If the
 // string is a devpath then this we break it into path and suffix parts.
@@ -45,8 +52,6 @@ bool IsValidDevpath(absl::string_view path) {
   }
 
   // Check that the path component is valid.
-  // TODO(b/148420839): Remove '@' from permitted path regexp once connectors
-  // are no longer permitted to have '@'.
   static const LazyRE2 kPathRegex = {"/phys(?:/[0-9a-zA-Z-_@]+)*"};
   if (!RE2::FullMatch(parts[0], *kPathRegex)) return false;
 
@@ -54,7 +59,6 @@ bool IsValidDevpath(absl::string_view path) {
   if (parts.size() == 1) {
     return true;  // No suffix and the path is valid.
   } else if (parts[1] == "connector" && parts.size() == 3) {
-    // TODO(b/148420839): Remove '@' from permitted connector regex.
     static const LazyRE2 kConnectorRegex = {"[0-9a-zA-Z-_@]+"};
     return RE2::FullMatch(parts[2], *kConnectorRegex);
   } else if (parts[1] == "device" && parts.size() == 3) {
@@ -76,6 +80,33 @@ DevpathComponents GetDevpathComponents(absl::string_view path) {
 
 absl::string_view GetDevpathPlugin(absl::string_view path) {
   return GetDevpathComponents(path).path;
+}
+
+std::optional<std::string> GetUpstreamDevpath(absl::string_view path) {
+  DevpathComponents components = GetDevpathComponents(path);
+  // If this is a plugin, there will be no suffix in the devpath.
+  if (components.suffix_namespace.empty() && components.suffix_text.empty()) {
+    // The root plugin has no parent.
+    if (components.path == "/phys") return absl::nullopt;
+    // Split the devpath into connector parts, remove the final connector to
+    // get the path of the parent plugin, and manually create the parent
+    // connector devpath.
+    std::vector<absl::string_view> connector_parts =
+        SplitPathIntoConnectorParts(components.path);
+
+    // ["", "phys"] would not have a parent, and neither would anything with
+    // fewer connector components than this.
+    if (connector_parts.size() < 2) return absl::nullopt;
+    absl::string_view parent_conn = connector_parts.back();
+    connector_parts.pop_back();
+    return MakeDevpathFromComponents(
+        DevpathComponents{.path = absl::StrJoin(connector_parts, "/"),
+                          .suffix_namespace = "connector",
+                          .suffix_text = parent_conn});
+  } else {
+    // If this is a component residing on a plugin, the parent is the plugin.
+    return std::string(components.path);
+  }
 }
 
 std::string MakeDevpathFromComponents(const DevpathComponents &components) {

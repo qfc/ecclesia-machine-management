@@ -19,14 +19,11 @@
 #define ECCLESIA_LIB_CODEC_BITS_H_
 
 #include <limits.h>
+#include <stddef.h>
 
-#include <bitset>
-#include <iostream>
-#include <iterator>
+#include <cstdint>
 #include <type_traits>
-#include <utility>
 
-#include "absl/base/integral_types.h"
 #include "absl/base/attributes.h"
 
 namespace ecclesia {

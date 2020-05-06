@@ -20,9 +20,12 @@
 
 #include <stddef.h>
 
+#include <cstdint>
 #include <string>
 
-#include "absl/base/integral_types.h"
+#include "absl/status/status.h"
+#include "absl/types/span.h"
+#include "lib/io/ioctl.h"
 #include "magent/lib/io/smbus.h"
 
 namespace ecclesia {
@@ -30,11 +33,11 @@ namespace ecclesia {
 // SMBus access interface using the kernel /dev/i2c-* files.
 class KernelSmbusAccess : public SmbusAccessInterface {
  public:
-  explicit KernelSmbusAccess(std::string dev_dir);
+  KernelSmbusAccess(std::string dev_dir, IoctlInterface *ioctl_intf);
+
   KernelSmbusAccess(const KernelSmbusAccess &) = delete;
   KernelSmbusAccess &operator=(const KernelSmbusAccess &) = delete;
 
-  // Implemented virtual functions from AccessInterface.
   absl::Status ProbeDevice(const SmbusLocation &loc) const override;
   absl::Status WriteQuick(const SmbusLocation &loc,
                           uint8_t data) const override;
@@ -51,11 +54,12 @@ class KernelSmbusAccess : public SmbusAccessInterface {
   absl::Status Read16(const SmbusLocation &loc, int command,
                       uint16_t *data) const override;
 
-  absl::Status WriteBlock(const SmbusLocation &loc, int command,
-                          absl::Span<const unsigned char> data) const override;
-  absl::Status ReadBlock(const SmbusLocation &loc, int command,
-                         absl::Span<unsigned char> data,
-                         size_t *len) const override;
+  absl::Status WriteBlockI2C(
+      const SmbusLocation &loc, int command,
+      absl::Span<const unsigned char> data) const override;
+  absl::Status ReadBlockI2C(const SmbusLocation &loc, int command,
+                            absl::Span<unsigned char> data,
+                            size_t *len) const override;
 
  private:
   int OpenI2CSlaveFile(const SmbusLocation &loc) const;
@@ -63,6 +67,7 @@ class KernelSmbusAccess : public SmbusAccessInterface {
   int CheckFunctionality(int fd, uint32_t flags) const;
 
   std::string dev_dir_;
+  IoctlInterface *ioctl_;
 };
 
 }  // namespace ecclesia

@@ -23,11 +23,11 @@
 #define ECCLESIA_MMASTER_LIB_DEVPATH_TRANSFORM_H_
 
 #include <functional>
-#include <optional>
 #include <string>
 
-#include "net/proto2/public/message.h"
+#include "google/protobuf/message.h"
 #include "absl/strings/string_view.h"
+#include "absl/types/optional.h"
 
 namespace ecclesia {
 // Generic function for transforming a devpath field. It should expect a devpath
@@ -47,7 +47,7 @@ using TransformDevpathFunction =
 // state: it may have been partially transformed, or maybe not.
 bool TransformProtobufDevpaths(const TransformDevpathFunction &transform,
                                absl::string_view field_mask,
-                               ::proto2::Message *message);
+                               ::google::protobuf::Message *message);
 }  // namespace ecclesia
 
 #endif  // ECCLESIA_MMASTER_LIB_DEVPATH_TRANSFORM_H_

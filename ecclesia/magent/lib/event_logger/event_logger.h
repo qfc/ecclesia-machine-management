@@ -72,8 +72,6 @@ class SystemEventLogger {
   // of event records, generating error counts etc.
   void Visit(SystemEventVisitor *visitor);
 
-  // TODO(b/146561470): Implement a strategy for pruning when the system event
-  // logs grow beyond an acceptable limit
  private:
   void Loop();
 

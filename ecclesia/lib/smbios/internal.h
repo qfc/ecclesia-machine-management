@@ -19,8 +19,8 @@
 
 #include <assert.h>
 #include <stddef.h>
-#include <stdint.h>
 
+#include <cstdint>
 #include <iostream>
 #include <string>
 #include <vector>

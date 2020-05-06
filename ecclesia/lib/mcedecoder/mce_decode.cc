@@ -150,7 +150,6 @@ bool MceDecoder::DecodeMceMessage(const MceLogMessage &raw_msg,
         cpu_topology_->GetSocketIdForLpu(raw_msg.lpu_id));
   }
 
-  // TODO(junyao): only support Intel CPU for now.
   switch (cpu_vendor_) {
     case CpuVendor::kIntel:
       return DecodeIntelMce(cpu_identifier_, raw_msg, dimm_translator_.get(),

@@ -33,6 +33,7 @@
 #include <string>
 
 #include "absl/strings/string_view.h"
+#include "absl/types/optional.h"
 
 namespace ecclesia {
 
@@ -55,6 +56,15 @@ DevpathComponents GetDevpathComponents(absl::string_view path);
 // Get the devpath of the plugin that the given path belongs to. Note that if
 // the given path is a plugin, the result is just itself.
 absl::string_view GetDevpathPlugin(absl::string_view path);
+
+// Given a devpath, get its upstream devpath. More specifically:
+// * For a plugin/cable, produces the devpath of the upstream connector
+// * For a connector or device, produces the devpath of the plugin it resides on
+// If the devpath does not have an upstream, nullopt is returned (i.e. root
+// board). Note the limitation of this method is that it can only provide a
+// single upstream devpath; if the system model in reality has multiple upstream
+// devpaths for a given devpath, this method is unable to provide that info.
+absl::optional<std::string> GetUpstreamDevpath(absl::string_view devpath);
 
 // Given a set of devpath components, construct a full devpath.
 std::string MakeDevpathFromComponents(const DevpathComponents &components);

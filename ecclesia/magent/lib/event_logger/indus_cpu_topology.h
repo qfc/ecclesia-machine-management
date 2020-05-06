@@ -4,9 +4,14 @@
 #ifndef ECCLESIA_MAGENT_LIB_EVENT_LOGGER_INDUS_CPU_TOPOLOGY_H_
 #define ECCLESIA_MAGENT_LIB_EVENT_LOGGER_INDUS_CPU_TOPOLOGY_H_
 
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "absl/status/status.h"
 #include "absl/strings/numbers.h"
 #include "absl/strings/str_cat.h"
+#include "absl/strings/string_view.h"
 #include "lib/apifs/apifs.h"
 #include "lib/mcedecoder/cpu_topology.h"
 

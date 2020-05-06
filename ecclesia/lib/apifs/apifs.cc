@@ -19,6 +19,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <stddef.h>
+#include <stdio.h>
 #include <sys/stat.h>   // IWYU pragma: keep
 #include <sys/types.h>  // IWYU pragma: keep
 #include <unistd.h>     // IWYU pragma: keep
@@ -31,6 +32,7 @@
 
 #include "absl/status/status.h"
 #include "absl/strings/str_format.h"
+#include "absl/types/span.h"
 #include "lib/cleanup/cleanup.h"
 
 namespace ecclesia {

@@ -63,7 +63,6 @@ struct MceLogMessage {
 };
 
 // Decoded CPU Error bucket if the MCE event is related to CPU error.
-// TODO(junyao): we may need to revise these fields.
 struct CpuErrorBucket {
   int socket = -1;
   int lpu_id = -1;
@@ -95,7 +94,6 @@ struct CpuError {
 };
 
 // Decoded Memory Error bucket if the MCE event is related to memory error.
-// TODO(junyao): we may need to revise these fields.
 struct MemoryErrorBucket {
   // DIMM number by GLDN.
   int gldn = -1;
@@ -124,7 +122,6 @@ struct MemoryError {
 
 // First level decoded message of a MCE event. The MCE can be further decoded to
 // get detailed CPU errors or memory errors.
-// TODO(junyao): we may need to revise these fields.
 struct MceBucket {
   int bank = -1;
   int socket = -1;
@@ -181,7 +178,6 @@ struct MceDecodedMessage {
 // Machine Check Exception Attributes.
 class MceAttributes {
  public:
-  // TODO(junyao): expand this enum keys as necessary.
   enum MceAttributeKey {
     kMciStatusValid,
     kMciStatusUncorrected,

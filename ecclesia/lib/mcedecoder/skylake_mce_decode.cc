@@ -80,9 +80,9 @@ bool DecodeSkylakeM2MBank(int imc_id, MceAttributes *attributes) {
   attributes->SetAttribute(MceAttributes::kImcChannelId, imc_channel_id);
   attributes->SetAttribute(MceAttributes::kMemoryChannel,
                            imc_id * kSkylakeNumChannelPerImc + imc_channel_id);
-  // TODO(junyao): assume the DIMM is always populated at slot 0 only. This
-  // assumption is generally valid for Indus machine. For other configuration,
-  // we will need to implement the physical memory address decoding.
+  // Assume the DIMM is always populated at slot 0 only. This assumption is
+  // generally valid for Indus machine. For other configuration, we will need to
+  // implement the physical memory address decoding.
   attributes->SetAttribute(MceAttributes::kImcChannelSlot, 0);
 
   MceAttributes::MceUniqueId unique_id = MceAttributes::kIdUnknown;
@@ -192,8 +192,8 @@ bool DecodeSkylakeBankAttributes(MceAttributes *attributes) {
   }
   SkylakeMceBank bank = static_cast<SkylakeMceBank>(bank_id);
 
-  // TODO(junyao): only decode memory related banks for now. May need to add
-  // decoding to other banks.
+  // Only decode memory related banks for now. May need to add decoding to other
+  // banks.
   switch (bank) {
     case kM2m0Bank:
       return DecodeSkylakeM2MBank(0, attributes);
@@ -271,8 +271,6 @@ bool DecodeSkylakeMemoryError(const MceAttributes &attributes,
   if (total_error_count > accounted_mem_error_count) {
     MemoryError remaining_mem_error;
     remaining_mem_error.mem_error_bucket.correctable = !uncorrected;
-    // TODO(junyao): to confirm this is the correct handling of remaining error
-    // gldn.
     remaining_mem_error.mem_error_bucket.gldn = gldn;
     remaining_mem_error.error_count =
         total_error_count - accounted_mem_error_count;

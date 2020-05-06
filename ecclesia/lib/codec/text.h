@@ -24,10 +24,10 @@
 #ifndef ECCLESIA_LIB_CODEC_DECODE_H_
 #define ECCLESIA_LIB_CODEC_DECODE_H_
 
-#include "absl/base/integral_types.h"
+#include <string>
+
 #include "absl/status/status.h"
 #include "absl/types/span.h"
-#include "lib/codec/bits.h"
 
 namespace ecclesia {
 

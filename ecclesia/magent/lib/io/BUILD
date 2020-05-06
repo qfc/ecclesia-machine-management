@@ -6,11 +6,10 @@ licenses(["notice"])
 
 cc_library(
     name = "smbus",
-    srcs = ["smbus.cc"],
     hdrs = ["smbus.h"],
     visibility = ["//:magent_library_users"],
     deps = [
-        "@com_google_absl//absl/base:core_headers",
+        "//lib/types:fixed_range_int",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings:str_format",
         "@com_google_absl//absl/types:span",
@@ -24,33 +23,24 @@ cc_library(
     visibility = ["//:magent_library_users"],
     deps = [
         ":smbus",
-        "@com_google_absl//absl/base:core_headers",
+        "//lib/cleanup",
+        "//lib/io:ioctl",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings:str_format",
         "@com_google_absl//absl/types:span",
     ],
 )
 
-cc_test(
-    name = "smbus_test",
-    size = "small",
-    srcs = ["smbus_test.cc"],
+cc_library(
+    name = "pci_location",
+    srcs = ["pci_location.cc"],
+    hdrs = ["pci_location.h"],
+    visibility = ["//:magent_library_users"],
     deps = [
-        ":smbus",
-        "//testing/base/public:gunit_main",
-        "@com_google_absl//absl/container:flat_hash_map",
-    ],
-)
-
-cc_test(
-    name = "smbus_kernel_dev_test",
-    size = "small",
-    srcs = ["smbus_kernel_dev_test.cc"],
-    deps = [
-        ":smbus_kernel_dev",
-        "//platforms/util/testing:fake_filesystem",
-        "//testing/base/public:gunit_main",
-        "@com_google_absl//absl/base:core_headers",
-        "//util/gtl:singleton",
+        "//lib/types:fixed_range_int",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:str_format",
+        "@com_google_absl//absl/types:optional",
+        "@com_googlesource_code_re2//:re2",
     ],
 )

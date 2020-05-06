@@ -24,6 +24,7 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "absl/time/time.h"
+#include "lib/mcedecoder/cpu_topology.h"
 #include "magent/lib/event_logger/indus_cpu_topology.h"
 #include "magent/lib/event_logger/indus_system_event_visitors.h"
 #include "magent/lib/event_logger/system_event_visitors.h"
@@ -31,7 +32,7 @@
 #include "magent/redfish/core/redfish_keywords.h"
 #include "magent/redfish/core/resource.h"
 #include "magent/sysmodel/sysmodel.h"
-#include "jsoncpp/value.h"
+#include "json/value.h"
 #include "tensorflow_serving/util/net_http/server/public/response_code_enum.h"
 #include "tensorflow_serving/util/net_http/server/public/server_request_interface.h"
 

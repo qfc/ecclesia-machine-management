@@ -21,6 +21,7 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "absl/base/thread_annotations.h"
@@ -28,8 +29,10 @@
 #include "absl/strings/string_view.h"
 #include "absl/synchronization/mutex.h"
 #include "absl/types/optional.h"
+#include "absl/types/span.h"
 #include "lib/smbios/platform_translator.h"
 #include "lib/smbios/reader.h"
+#include "magent/lib/eeprom/smbus_eeprom.h"
 #include "magent/lib/event_logger/event_logger.h"
 #include "magent/sysmodel/cpu.h"
 #include "magent/sysmodel/dimm.h"
@@ -44,10 +47,7 @@ struct SysmodelParams {
   std::string smbios_tables_path;
   std::string mced_socket_path;
   std::string sysfs_mem_file_path;
-
-  // TODO(dwangsf): Update this parameter to point to a FRU using SMBUS addrs
-  // Otherwise for now, just hardcode a bunch of FRU ids and data.
-  std::vector<FruInstance> frus;
+  absl::Span<SmbusEeprom2ByteAddr::Option> eeprom_options;
 };
 
 // The SystemModel must be thread safe
@@ -70,7 +70,7 @@ class SystemModel {
       iterator(f.first, f.second);
     }
   }
-  absl::optional<Fru> GetFru(absl::string_view fru_name) const;
+  absl::optional<SysmodelFru> GetFru(absl::string_view fru_name) const;
 
   // The event logger logs all of the system events with respect to cpu and dimm
   // errors. This method provides a mechanism to process the events for error
@@ -94,9 +94,12 @@ class SystemModel {
   std::vector<Cpu> cpus_ ABSL_GUARDED_BY(cpus_lock_);
 
   mutable absl::Mutex frus_lock_;
-  absl::flat_hash_map<std::string, Fru> frus_ ABSL_GUARDED_BY(frus_lock_);
+  absl::flat_hash_map<std::string, SysmodelFru> frus_
+      ABSL_GUARDED_BY(frus_lock_);
 
   std::unique_ptr<SystemEventLogger> event_logger_;
+
+  absl::Span<SmbusEeprom2ByteAddr::Option> eeprom_options_;
 };
 
 }  // namespace ecclesia

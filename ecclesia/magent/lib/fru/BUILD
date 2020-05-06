@@ -17,21 +17,11 @@ cc_library(
     visibility = ["//:magent_library_users"],
     deps = [
         ":common_header_emb",
+        "//lib/codec:text",
         "@com_google_absl//absl/base",
         "@com_google_absl//absl/status",
-        "@com_google_absl//absl/strings",
-        "@com_google_absl//absl/strings:cord",
         "@com_google_absl//absl/strings:str_format",
-        "//lib/codec:text",
-    ],
-)
-
-cc_test(
-    name = "fru_test",
-    size = "small",
-    srcs = ["fru_test.cc"],
-    deps = [
-        ":ipmi_fru",
-        "//testing/base/public:gunit_main",
+        "@com_google_absl//absl/types:span",
+        "@com_google_emboss//runtime/cpp:cpp_utils",
     ],
 )

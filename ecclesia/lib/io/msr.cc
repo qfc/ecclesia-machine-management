@@ -16,10 +16,8 @@
 
 #include "lib/io/msr.h"
 
-#include <stdint.h>
-
 #include <array>
-#include <filesystem>
+#include <cstdint>
 #include <filesystem>
 #include <string>
 #include <system_error>
