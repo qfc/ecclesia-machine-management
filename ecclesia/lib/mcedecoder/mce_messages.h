@@ -17,8 +17,7 @@
 #ifndef ECCLESIA_LIB_MCEDECODER_MCE_MESSAGES_H_
 #define ECCLESIA_LIB_MCEDECODER_MCE_MESSAGES_H_
 
-#include <stddef.h>
-
+#include <cstddef>
 #include <cstdint>
 #include <ctime>
 #include <string>

@@ -18,12 +18,11 @@
 
 #include <errno.h>
 #include <fcntl.h>
-#include <stddef.h>
-#include <stdio.h>
 #include <sys/stat.h>   // IWYU pragma: keep
 #include <sys/types.h>  // IWYU pragma: keep
 #include <unistd.h>     // IWYU pragma: keep
 
+#include <cstddef>
 #include <filesystem>
 #include <string>
 #include <system_error>

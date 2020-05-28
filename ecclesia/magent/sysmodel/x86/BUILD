@@ -1,7 +1,7 @@
 licenses(["notice"])
 
 cc_library(
-    name = "sysmodel",
+    name = "x86_sysmodel",
     srcs = ["sysmodel.cc"],
     hdrs = ["sysmodel.h"],
     visibility = ["//:magent_library_users"],

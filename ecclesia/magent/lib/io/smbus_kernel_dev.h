@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 // SMBus access routines using the kernel /dev interface.
 
 #ifndef ECCLESIA_MAGENT_LIB_IO_SMBUS_KERNEL_DEV_H_
 #define ECCLESIA_MAGENT_LIB_IO_SMBUS_KERNEL_DEV_H_
 
-#include <stddef.h>
-
+#include <cstddef>
 #include <cstdint>
 #include <string>
 

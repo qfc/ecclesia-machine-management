@@ -20,10 +20,10 @@
 #include <fcntl.h>
 #include <linux/i2c-dev.h>
 #include <linux/i2c.h>
-#include <stddef.h>
 #include <string.h>
 
 #include <algorithm>
+#include <cstddef>
 #include <cstdint>
 #include <iostream>
 #include <string>

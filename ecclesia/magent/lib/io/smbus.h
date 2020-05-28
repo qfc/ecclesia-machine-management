@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 // Basic read/write routines for SMBus devices.
 
 #ifndef ECCLESIA_MAGENT_LIB_IO_SMBUS_H_
 #define ECCLESIA_MAGENT_LIB_IO_SMBUS_H_
 
-#include <stddef.h>
-
+#include <cstddef>
 #include <cstdint>
 #include <iosfwd>
 #include <tuple>
@@ -67,15 +67,13 @@ class SmbusLocation {
 
   // Relational operators. Order is equivalent to <bus, address> tuple.
   friend bool operator==(const SmbusLocation &lhs, const SmbusLocation &rhs) {
-    return std::tuple(lhs.bus_.value(), lhs.address_.value()) ==
-           std::tuple(rhs.bus_.value(), rhs.address_.value());
+    return std::tie(lhs.bus_, lhs.address_) == std::tie(rhs.bus_, rhs.address_);
   }
   friend bool operator!=(const SmbusLocation &lhs, const SmbusLocation &rhs) {
     return !(lhs == rhs);
   }
   friend bool operator<(const SmbusLocation &lhs, const SmbusLocation &rhs) {
-    return std::tuple(lhs.bus_.value(), lhs.address_.value()) <
-           std::tuple(rhs.bus_.value(), rhs.address_.value());
+    return std::tie(lhs.bus_, lhs.address_) < std::tie(rhs.bus_, rhs.address_);
   }
   friend bool operator>(const SmbusLocation &lhs, const SmbusLocation &rhs) {
     return rhs < lhs;
@@ -90,7 +88,7 @@ class SmbusLocation {
   // Support hashing of locations.
   template <typename H>
   friend H AbslHashValue(H h, const SmbusLocation &loc) {
-    return H::combine(std::move(h), loc.bus_.value(), loc.address_.value());
+    return H::combine(std::move(h), loc.bus_, loc.address_);
   }
 
   // String conversion. This deliberately follows the bus+address format that

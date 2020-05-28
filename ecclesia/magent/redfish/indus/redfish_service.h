@@ -34,7 +34,7 @@
 #include "magent/redfish/indus/service_root.h"
 #include "magent/redfish/indus/system.h"
 #include "magent/redfish/indus/systems.h"
-#include "magent/sysmodel/sysmodel.h"
+#include "magent/sysmodel/x86/sysmodel.h"
 #include "tensorflow_serving/util/net_http/server/public/httpserver_interface.h"
 
 namespace ecclesia {

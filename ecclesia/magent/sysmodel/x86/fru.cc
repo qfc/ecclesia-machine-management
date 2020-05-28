@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-#include "magent/sysmodel/fru.h"
+#include "magent/sysmodel/x86/fru.h"
 
-#include <stddef.h>
-
+#include <cstddef>
 #include <cstdint>
 #include <iostream>
 #include <string>

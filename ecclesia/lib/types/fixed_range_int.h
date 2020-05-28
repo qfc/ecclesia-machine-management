@@ -47,6 +47,7 @@
 //   * value(), an accessor that returns the stored value
 //   * Copy, Copy-Assign, Move, and Move-Assign operators
 //   * Relational operators, that match relations on the underlying value.
+//   * Hash support, that just hashes using the underlying integer.
 //
 // The produced class does not implement integer bitwise or arithmetic
 // operators. There is no clear reasonable semantics to apply when the result
@@ -57,6 +58,8 @@
 
 #ifndef ECCLESIA_LIB_TYPES_FIXED_RANGE_INT_H_
 #define ECCLESIA_LIB_TYPES_FIXED_RANGE_INT_H_
+
+#include <utility>
 
 #include "absl/types/optional.h"
 
@@ -93,6 +96,32 @@ class FixedRangeInteger {
 
   // Value accessor.
   IntType value() const { return value_; }
+
+  // Relational operators. Ordering uses the underlying integer order.
+  friend bool operator==(const T &lhs, const T &rhs) {
+    return lhs.value_ == rhs.value_;
+  }
+  friend bool operator!=(const T &lhs, const T &rhs) {
+    return lhs.value_ != rhs.value_;
+  }
+  friend bool operator<(const T &lhs, const T &rhs) {
+    return lhs.value_ < rhs.value_;
+  }
+  friend bool operator>(const T &lhs, const T &rhs) {
+    return lhs.value_ > rhs.value_;
+  }
+  friend bool operator<=(const T &lhs, const T &rhs) {
+    return lhs.value_ <= rhs.value_;
+  }
+  friend bool operator>=(const T &lhs, const T &rhs) {
+    return lhs.value_ >= rhs.value_;
+  }
+
+  // Support hashing of values. Just hashes the underlying integer.
+  template <typename H>
+  friend H AbslHashValue(H h, const T &t) {
+    return H::combine(std::move(h), t.value_);
+  }
 
  private:
   // Unchecked constructor. Only invoked by Make and TryMake, both of which

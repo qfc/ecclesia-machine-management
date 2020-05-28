@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 // This library provides support for interacting with Model Specific Regisger.
 
 #ifndef ECCLESIA_LIB_IO_MSR_H_

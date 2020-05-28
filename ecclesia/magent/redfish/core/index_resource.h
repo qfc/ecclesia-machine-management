@@ -18,9 +18,9 @@
 #define ECCLESIA_MAGENT_REDFISH_CORE_INDEX_RESOURCE_H_
 
 #include <string>
-#include <variant>
 
 #include "absl/strings/string_view.h"
+#include "absl/types/variant.h"
 #include "magent/redfish/core/resource.h"
 #include "tensorflow_serving/util/net_http/server/public/httpserver_interface.h"
 #include "tensorflow_serving/util/net_http/server/public/response_code_enum.h"

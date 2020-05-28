@@ -18,8 +18,8 @@
 #define ECCLESIA_LIB_SMBIOS_INTERNAL_H_
 
 #include <assert.h>
-#include <stddef.h>
 
+#include <cstddef>
 #include <cstdint>
 #include <iostream>
 #include <string>

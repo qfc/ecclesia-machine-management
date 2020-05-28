@@ -21,11 +21,10 @@
 #ifndef ECCLESIA_MAGENT_LIB_FRU_FRU_H_
 #define ECCLESIA_MAGENT_LIB_FRU_FRU_H_
 
-#include <stddef.h>
-#include <time.h>
-
 #include <algorithm>
+#include <cstddef>
 #include <cstdint>
+#include <ctime>
 #include <memory>
 #include <string>
 #include <vector>

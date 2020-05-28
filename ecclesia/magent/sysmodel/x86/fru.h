@@ -14,53 +14,48 @@
  * limitations under the License.
  */
 
-#ifndef ECCLESIA_MAGENT_SYSMODEL_CPU_H_
-#define ECCLESIA_MAGENT_SYSMODEL_CPU_H_
+#ifndef ECCLESIA_MAGENT_SYSMODEL_X86_FRU_H_
+#define ECCLESIA_MAGENT_SYSMODEL_X86_FRU_H_
 
 #include <string>
-#include <vector>
 
+#include "absl/container/flat_hash_map.h"
+#include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
-#include "lib/smbios/processor_information.h"
-#include "lib/smbios/reader.h"
+#include "absl/types/span.h"
+#include "magent/lib/eeprom/smbus_eeprom.h"
 
 namespace ecclesia {
 
-struct CpuInfo {
-  std::string name;
-  bool enabled;
-  absl::optional<CpuSignature> cpu_signature;
-  int max_speed_mhz;
+struct FruInfo {
+  std::string product_name;
+  std::string manufacturer;
   std::string serial_number;
   std::string part_number;
-  int total_cores;
-  int enabled_cores;
-  int total_threads;
-  int socket_id = -1;  // -1 indicates invalid value.
 };
 
-class Cpu {
+class SysmodelFru {
  public:
-  explicit Cpu(const ProcessorInformation &processor);
+  SysmodelFru(FruInfo fru_info);
 
   // Allow the object to be copyable
   // Make sure that copy construction is relatively light weight.
   // In cases where it is not feasible to copy construct data members,it may
   // make sense to wrap the data member in a shared_ptr.
-  Cpu(const Cpu &cpu) = default;
-  Cpu &operator=(const Cpu &cpu) = default;
+  SysmodelFru(const SysmodelFru &dimm) = default;
+  SysmodelFru &operator=(const SysmodelFru &dimm) = default;
 
-  const CpuInfo &GetCpuInfo() const { return cpu_info_; }
-
-  // Possible additions wil likely be methods to temperature sensors associated
-  // with the cpu
+  absl::string_view GetManufacturer() const;
+  absl::string_view GetSerialNumber() const;
+  absl::string_view GetPartNumber() const;
 
  private:
-  CpuInfo cpu_info_;
+  FruInfo fru_info_;
 };
 
-std::vector<Cpu> CreateCpus(const SmbiosReader &reader);
+absl::flat_hash_map<std::string, SysmodelFru> CreateFrus(
+    absl::Span<SmbusEeprom2ByteAddr::Option> options);
 
 }  // namespace ecclesia
 
-#endif  // ECCLESIA_MAGENT_SYSMODEL_CPU_H_
+#endif  // ECCLESIA_MAGENT_SYSMODEL_X86_FRU_H_

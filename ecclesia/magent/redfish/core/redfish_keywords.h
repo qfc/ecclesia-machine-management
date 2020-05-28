@@ -114,6 +114,10 @@ inline constexpr char kRdmaSupported[] = "RdmaSupported";
 inline constexpr char kMACAddress[] = "MACAddress";
 inline constexpr char kLinkStatus[] = "LinkStatus";
 inline constexpr char kSpeedMbps[] = "SpeedMbps";
+inline constexpr char kReading[] = "Reading";
+inline constexpr char kReadingUnits[] = "ReadingUnits";
+inline constexpr char kMinReadingRange[] = "MinReadingRange";
+inline constexpr char kMaxReadingRange[] = "MaxReadingRange";
 
 // Redfish resource URIs
 inline constexpr char kServiceRootUri[] = "/redfish/v1";

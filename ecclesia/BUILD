@@ -15,6 +15,7 @@ package_group(
     packages = [
         "//...",
         "//platforms/ecclesia/...",
+        "//platforms/gsys/...",
         "//third_party/blt/...",
     ],
 )
@@ -26,6 +27,7 @@ package_group(
         "//lib/redfish/...",
         "//mmaster/backends/redfish/...",
         "//mmaster/frontends/...",
+        "//ops/hardware/hydra/common/megapede_power/...",
         "//platforms/ecclesia/mmaster/backends/redfish/...",
         "//platforms/ecclesia/mmaster/frontends/...",
     ],
@@ -50,6 +52,9 @@ package_group(
 package_group(
     name = "mmaster_users",
     packages = [
+        "//borg/integration/...",
+        "//borg/slave/...",
+        "//borg/test/...",
         "//cloud/platforms/hammurabi/netboot/...",
         "//mmaster/...",
         "//platforms/ecclesia/lib/rpc/...",
@@ -61,6 +66,8 @@ package_group(
 package_group(
     name = "mmaster_backend_users",
     packages = [
+        "//mmaster/backends/...",
+        "//mmaster/frontends/...",
         "//mmaster/middles/...",
     ],
 )

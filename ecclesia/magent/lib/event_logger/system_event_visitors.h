@@ -19,11 +19,11 @@
 
 #include <cstdint>
 #include <memory>
-#include <optional>
 #include <utility>
 
 #include "absl/container/flat_hash_map.h"
 #include "absl/time/time.h"
+#include "absl/types/optional.h"
 #include "lib/mcedecoder/mce_decode.h"
 #include "lib/mcedecoder/mce_messages.h"
 #include "magent/lib/event_logger/event_logger.h"

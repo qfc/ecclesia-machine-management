@@ -1,21 +1,22 @@
-// Copyright 2020 Google LLC
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+/*
+ * Copyright 2020 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #include "lib/devpath/transform.h"
 
-#include <stddef.h>
-
+#include <cstddef>
 #include <string>
 #include <utility>
 #include <vector>
@@ -24,7 +25,6 @@
 #include "google/protobuf/descriptor.h"
 #include "google/protobuf/message.h"
 #include "google/protobuf/util/field_mask_util.h"
-#include "absl/strings/str_cat.h"
 #include "absl/strings/str_split.h"
 #include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
@@ -99,8 +99,6 @@ class FieldPath {
   // the message of type C that are nested in it.
   void GetMutableLeafMessages(::google::protobuf::Message *root,
                               std::vector<::google::protobuf::Message *> *result) const;
-  // Return the string representation of the field path. Example: .bb.cc.c
-  std::string AsString() const;
 
  private:
   // path: Msg Path prefix.
@@ -172,18 +170,6 @@ void FieldPath::GetMutableLeafMessagesRecurse(
   }
 }
 
-std::string FieldPath::AsString() const {
-  std::string result;
-  absl::StrAppend(&result, ".");
-  for (const auto *seg : msg_path_) {
-    absl::StrAppend(&result, seg->name(), ".");
-  }
-  if (HasField()) {
-    absl::StrAppend(&result, field()->name());
-  }
-  return result;
-}
-
 bool TransformLeafDevpaths(const TransformDevpathFunction &transform,
                            const ::google::protobuf::FieldDescriptor *devpath_field,
                            const std::vector<::google::protobuf::Message *> &leaf_msgs) {
@@ -231,7 +217,7 @@ bool TransformLeafDevpaths(const TransformDevpathFunction &transform,
 //
 // If all versions of protobuf converge on std::string_view or absl::string_view
 // then this workaround can be removed.
-template <typename>
+template <typename T>
 struct ArgExtractor;
 template <typename T>
 struct ArgExtractor<void(T, ::google::protobuf::FieldMask *)> {

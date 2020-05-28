@@ -22,10 +22,10 @@
 #define ECCLESIA_MAGENT_LIB_EVENT_READER_ELOG_READER_H_
 
 #include <memory>
-#include <optional>
 #include <queue>
 #include <string>
 
+#include "absl/types/optional.h"
 #include "lib/smbios/system_event_log.h"
 #include "magent/lib/event_reader/event_reader.h"
 

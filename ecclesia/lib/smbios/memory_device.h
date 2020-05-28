@@ -17,7 +17,7 @@
 #ifndef ECCLESIA_LIB_SMBIOS_MEMORY_DEVICE_H_
 #define ECCLESIA_LIB_SMBIOS_MEMORY_DEVICE_H_
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "absl/strings/string_view.h"
 #include "lib/smbios/internal.h"

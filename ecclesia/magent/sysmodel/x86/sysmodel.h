@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-#ifndef ECCLESIA_MAGENT_SYSMODEL_INTERFACE_H_
-#define ECCLESIA_MAGENT_SYSMODEL_INTERFACE_H_
+#ifndef ECCLESIA_MAGENT_SYSMODEL_X86_SYSMODEL_H_
+#define ECCLESIA_MAGENT_SYSMODEL_X86_SYSMODEL_H_
 
-#include <stddef.h>
-
+#include <cstddef>
 #include <memory>
 #include <string>
 #include <utility>
@@ -34,9 +33,9 @@
 #include "lib/smbios/reader.h"
 #include "magent/lib/eeprom/smbus_eeprom.h"
 #include "magent/lib/event_logger/event_logger.h"
-#include "magent/sysmodel/cpu.h"
-#include "magent/sysmodel/dimm.h"
-#include "magent/sysmodel/fru.h"
+#include "magent/sysmodel/x86/cpu.h"
+#include "magent/sysmodel/x86/dimm.h"
+#include "magent/sysmodel/x86/fru.h"
 
 namespace ecclesia {
 
@@ -104,4 +103,4 @@ class SystemModel {
 
 }  // namespace ecclesia
 
-#endif  // ECCLESIA_MAGENT_SYSMODEL_INTERFACE_H_
+#endif  // ECCLESIA_MAGENT_SYSMODEL_X86_SYSMODEL_H_

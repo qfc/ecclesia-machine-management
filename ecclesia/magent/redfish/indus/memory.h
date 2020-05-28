@@ -17,19 +17,19 @@
 #ifndef ECCLESIA_MAGENT_REDFISH_INDUS_MEMORY_H_
 #define ECCLESIA_MAGENT_REDFISH_INDUS_MEMORY_H_
 
-#include <optional>
 #include <string>
 #include <type_traits>
 
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
+#include "absl/types/optional.h"
 #include "absl/types/variant.h"
 #include "magent/redfish/core/index_resource.h"
 #include "magent/redfish/core/json_helper.h"
 #include "magent/redfish/core/redfish_keywords.h"
 #include "magent/redfish/core/resource.h"
-#include "magent/sysmodel/dimm.h"
-#include "magent/sysmodel/sysmodel.h"
+#include "magent/sysmodel/x86/dimm.h"
+#include "magent/sysmodel/x86/sysmodel.h"
 #include "json/value.h"
 #include "tensorflow_serving/util/net_http/server/public/response_code_enum.h"
 #include "tensorflow_serving/util/net_http/server/public/server_request_interface.h"

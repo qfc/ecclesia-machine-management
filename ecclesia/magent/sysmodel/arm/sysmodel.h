@@ -14,20 +14,31 @@
  * limitations under the License.
  */
 
-#include "lib/io/ioctl.h"
+#ifndef ECCLESIA_MAGENT_SYSMODEL_INTERFACE_H_
+#define ECCLESIA_MAGENT_SYSMODEL_INTERFACE_H_
 
-#include <sys/ioctl.h>
+#include <cstddef>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
-#include <cstdint>
+#include "absl/base/thread_annotations.h"
+#include "absl/container/flat_hash_map.h"
+#include "absl/strings/string_view.h"
+#include "absl/synchronization/mutex.h"
+#include "absl/types/optional.h"
+#include "absl/types/span.h"
 
 namespace ecclesia {
 
-int SysIoctl::Call(int fd, unsigned long request, intptr_t argi) {
-  return ioctl(fd, request, argi);
-}
-
-int SysIoctl::Call(int fd, unsigned long request, void *argp) {
-  return ioctl(fd, request, argp);
-}
+// The SystemModel must be thread safe
+class SystemModel {
+ public:
+  ~SystemModel() {}
+  // TODO(jaghu) : Add functions
+};
 
 }  // namespace ecclesia
+
+#endif  // ECCLESIA_MAGENT_SYSMODEL_INTERFACE_H_

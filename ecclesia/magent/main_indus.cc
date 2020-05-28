@@ -1,23 +1,24 @@
-// Copyright 2020 Google LLC
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+/*
+ * Copyright 2020 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 // Redfish server for the Ecclesia Management Agent on Indus
 #include <stdlib.h>
 
 #include <iostream>
 #include <memory>
-#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
@@ -30,6 +31,7 @@
 #include "absl/strings/numbers.h"
 #include "absl/strings/str_format.h"
 #include "absl/strings/string_view.h"
+#include "absl/types/optional.h"
 #include "absl/types/span.h"
 #include "lib/apifs/apifs.h"
 #include "lib/io/ioctl.h"
@@ -41,7 +43,7 @@
 #include "magent/lib/io/smbus_kernel_dev.h"
 #include "magent/main_common.h"
 #include "magent/redfish/indus/redfish_service.h"
-#include "magent/sysmodel/sysmodel.h"
+#include "magent/sysmodel/x86/sysmodel.h"
 #include "tensorflow_serving/util/net_http/server/public/httpserver_interface.h"
 
 ABSL_FLAG(int, port, 3995, "Port number for the magent to listen on");

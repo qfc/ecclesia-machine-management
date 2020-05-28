@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 // A class for reading SMBus compatible I2C EEPROMs.
 
 #ifndef ECCLESIA_MAGENT_LIB_EEPROM_SMBUS_EEPROM_H_
 #define ECCLESIA_MAGENT_LIB_EEPROM_SMBUS_EEPROM_H_
 
-#include <stddef.h>
-
+#include <cstddef>
 #include <string>
 
 #include "absl/base/thread_annotations.h"

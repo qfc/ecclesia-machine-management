@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 // Some templated helper routines to support ExtractBits from bitRange.
 
 #ifndef ECCLESIA_LIB_CODEC_BITS_H_
 #define ECCLESIA_LIB_CODEC_BITS_H_
 
-#include <limits.h>
-#include <stddef.h>
-
+#include <climits>
+#include <cstddef>
 #include <cstdint>
 #include <type_traits>
 

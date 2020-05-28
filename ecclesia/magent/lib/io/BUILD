@@ -44,3 +44,27 @@ cc_library(
         "@com_googlesource_code_re2//:re2",
     ],
 )
+
+cc_library(
+    name = "pci",
+    hdrs = [
+        "pci.h",
+        "pci_consts.h",
+        "pci_regs.h",
+    ],
+    visibility = ["//:magent_library_users"],
+    deps = [
+        ":pci_location",
+        "@com_google_absl//absl/status",
+    ],
+)
+
+cc_library(
+    name = "pci_cc",
+    hdrs = ["pci.h"],
+    deps = [
+        ":pci",
+        ":pci_location",
+        "@com_google_absl//absl/status",
+    ],
+)

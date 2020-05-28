@@ -152,6 +152,7 @@ def constant_lib(
         name = py_name,
         srcs = [py_source],
         visibility = visibility,
+        srcs_version = "PY3",
     )
 
     # Define a filegroup with all of the *_library rules. This is primarily

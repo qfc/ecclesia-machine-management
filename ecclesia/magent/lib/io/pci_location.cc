@@ -13,8 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "magent/lib/io/pci_location.h"
 
+#include <cstdint>
+
+#include "absl/strings/string_view.h"
+#include "absl/types/optional.h"
 #include "re2/re2.h"
 
 namespace ecclesia {

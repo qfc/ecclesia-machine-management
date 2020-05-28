@@ -17,7 +17,7 @@
 #ifndef ECCLESIA_LIB_SMBIOS_SYSTEM_EVENT_LOG_H_
 #define ECCLESIA_LIB_SMBIOS_SYSTEM_EVENT_LOG_H_
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "absl/strings/string_view.h"
 #include "lib/smbios/internal.h"

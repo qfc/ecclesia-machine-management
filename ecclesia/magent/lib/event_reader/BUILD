@@ -46,6 +46,7 @@ cc_library(
         ":event_reader",
         "//lib/smbios:reader",
         "//lib/smbios:structures_emb",
+        "@com_google_absl//absl/types:optional",
         "@com_google_emboss//runtime/cpp:cpp_utils",
     ],
 )
