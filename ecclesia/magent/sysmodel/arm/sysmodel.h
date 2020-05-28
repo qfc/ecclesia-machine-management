@@ -36,7 +36,6 @@ namespace ecclesia {
 class SystemModel {
  public:
   ~SystemModel() {}
-  // TODO(jaghu) : Add functions
 };
 
 }  // namespace ecclesia
