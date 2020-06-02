@@ -11,6 +11,7 @@ cc_binary(
         "//lib/smbios:reader",
         "//lib/types:fixed_range_int",
         "//magent/lib/eeprom",
+        "//magent/lib/io:pci_sys",
         "//magent/lib/io:smbus",
         "//magent/lib/io:smbus_kernel_dev",
         "//magent/redfish/indus",

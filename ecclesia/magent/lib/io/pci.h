@@ -107,6 +107,8 @@ class PciConfigSpace {
     return region_->Write16(kPciCommandReg, value);
   }
 
+  PciRegion *region() { return region_; }
+
  private:
   PciRegion *region_;
 };

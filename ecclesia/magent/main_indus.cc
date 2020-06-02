@@ -39,6 +39,7 @@
 #include "lib/types/fixed_range_int.h"
 #include "magent/lib/eeprom/eeprom.h"
 #include "magent/lib/eeprom/smbus_eeprom.h"
+#include "magent/lib/io/pci_sys.h"
 #include "magent/lib/io/smbus.h"
 #include "magent/lib/io/smbus_kernel_dev.h"
 #include "magent/main_common.h"
@@ -105,12 +106,114 @@ absl::optional<ecclesia::SmbusBus> GetEepromSmbusBus() {
   }
 
   return absl::nullopt;
-}  // namespace
+}
 
 // We will read i2c bus offset 0x55 to get board information.
 // Fru common header has 8 bytes.
 // https://www.intel.com/content/dam/www/public/us/en/documents/product-briefs/platform-management-fru-document-rev-1-2-feb-2013.pdf
 constexpr auto kEepromSmbusAddress = ecclesia::SmbusAddress::Make<0x55>();
+
+struct SkylakeImcDimmChannel {
+  const absl::string_view name;
+  ecclesia::PciLocation loc;
+  // thermal info offset for channel0 is 0x150, for channel1 is 0x154
+  std::array<size_t, 2> offset;
+};
+
+constexpr SkylakeImcDimmChannel dimm_channel_info[]{
+    {"cpu0_1lms_0",
+     ecclesia::PciLocation::Make<0, 0x3a, 0x0a, 2>(),
+     {0x150, 0x154}},
+    {"cpu0_1lms_1",
+     ecclesia::PciLocation::Make<0, 0x3a, 0x0a, 6>(),
+     {0x150, 0x154}},
+    {"cpu0_1lms_2",
+     ecclesia::PciLocation::Make<0, 0x3a, 0x0b, 2>(),
+     {0x150, 0x154}},
+    {"cpu0_1lms_5",
+     ecclesia::PciLocation::Make<0, 0x3a, 0x0d, 2>(),
+     {0x154, 0x150}},
+    {"cpu0_1lms_4",
+     ecclesia::PciLocation::Make<0, 0x3a, 0x0c, 6>(),
+     {0x154, 0x150}},
+    {"cpu0_1lms_3",
+     ecclesia::PciLocation::Make<0, 0x3a, 0x0c, 2>(),
+     {0x154, 0x150}},
+
+    {"cpu1_1lms_0",
+     ecclesia::PciLocation::Make<0, 0xae, 0x0a, 2>(),
+     {0x150, 0x154}},
+    {"cpu1_1lms_1",
+     ecclesia::PciLocation::Make<0, 0xae, 0x0a, 6>(),
+     {0x150, 0x154}},
+    {"cpu1_1lms_2",
+     ecclesia::PciLocation::Make<0, 0xae, 0x0b, 2>(),
+     {0x150, 0x154}},
+    {"cpu1_1lms_5",
+     ecclesia::PciLocation::Make<0, 0xae, 0x0d, 2>(),
+     {0x154, 0x150}},
+    {"cpu1_1lms_4",
+     ecclesia::PciLocation::Make<0, 0xae, 0x0c, 6>(),
+     {0x154, 0x150}},
+    {"cpu1_1lms_3",
+     ecclesia::PciLocation::Make<0, 0xae, 0x0c, 2>(),
+     {0x154, 0x150}}};
+
+// Build dimm_thermal_devices using hardcoded infomation for SkylakeImc.
+// return 12 pci devices, each devices can have up to 2 dimms.
+// The order of the devices:
+// cpu0: 1lms0, 1lms1, 1lms2, 1lms5, 1lms4, 1lms3
+// cpu1: 1lms0, 1lms1, 1lms2, 1lms5, 1lms4, 1lms3
+std::vector<std::unique_ptr<ecclesia::PciDevice>> CreateDimmThermalDevices() {
+  std::vector<std::unique_ptr<ecclesia::PciDevice>> dimm_thermal_devices;
+  dimm_thermal_devices.reserve(sizeof(dimm_channel_info) /
+                               sizeof(dimm_channel_info[0]));
+  for (const auto &info : dimm_channel_info) {
+    auto pci_loc = info.loc;
+    dimm_thermal_devices.push_back(std::make_unique<ecclesia::PciDevice>(
+        pci_loc, std::make_unique<ecclesia::SysPciRegion>(pci_loc)));
+  }
+
+  return dimm_thermal_devices;
+}
+
+// Read dimm temperature in degree.
+// We return a vector of int representing temperature,
+// vector index corresponds with dimm index, nunllopt means "not present".
+std::vector<absl::optional<int>> ReadAllDimmThermalDegrees(
+    const std::vector<std::unique_ptr<ecclesia::PciDevice>> &devices,
+    ecclesia::SystemModel *system_model) {
+  std::vector<absl::optional<int>> dimm_thermal(devices.size() * 2);
+  for (int i = 0; i < devices.size(); i++) {
+    uint16_t t;
+    auto config = devices[i]->config_space();
+
+    // there are 2 dimms per channel
+    auto dimm0 = system_model->GetDimm(i * 2);
+    if (dimm0->GetDimmInfo().present) {
+      absl::Status status =
+          config.region()->Read16(dimm_channel_info[i].offset[0], &t);
+      if (status.ok()) {
+        dimm_thermal[i * 2] = t;
+      } else {
+        dimm_thermal[i * 2] = absl::nullopt;
+      }
+    }
+
+    auto dimm1 = system_model->GetDimm(i * 2 + 1);
+    if (dimm1->GetDimmInfo().present) {
+      absl::Status status =
+          config.region()->Read16(dimm_channel_info[i].offset[1], &t);
+      if (status.ok()) {
+        dimm_thermal[i * 2 + 1] = t;
+      } else {
+        dimm_thermal[i * 2 + 1] = absl::nullopt;
+      }
+    }
+  }
+
+  return dimm_thermal;
+}
 
 }  // namespace
 
@@ -154,6 +257,14 @@ int main(int argc, char **argv) {
 
   std::unique_ptr<ecclesia::SystemModel> system_model =
       absl::make_unique<ecclesia::SystemModel>(std::move(params));
+
+  auto dimm_thermal_devices = CreateDimmThermalDevices();
+
+  // We haven't decided on the API for getting dimm thermal, so here we simply
+  // return a vector of int to represent temperature in degree, the vector index
+  // corresponds to dimm index.
+  auto dimm_thermal =
+      ReadAllDimmThermalDegrees(dimm_thermal_devices, system_model.get());
 
   auto server = ecclesia::CreateServer(absl::GetFlag(FLAGS_port));
   ecclesia::IndusRedfishService redfish_service(
