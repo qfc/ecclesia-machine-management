@@ -33,6 +33,7 @@
 #ifndef ECCLESIA_LIB_CACHE_RCU_VIEW_H_
 #define ECCLESIA_LIB_CACHE_RCU_VIEW_H_
 
+#include "absl/synchronization/mutex.h"
 #include "lib/cache/rcu_snapshot.h"
 #include "lib/cache/rcu_store.h"
 
@@ -66,6 +67,60 @@ class RcuDirectView final : public RcuView<T> {
 
  private:
   const RcuStore<T> &store_;
+};
+
+// Adapter implementation of the RcuView<T> to allow translating from a backing
+// RcuStore of type FromType to a view of type ToType. This implementation
+// allows subclasses to provide a Translate function for creating the ToType
+// view based on FromType. An internal cache is used to hold the translation
+// view so long as the underlying RcuStore has not emitted a change
+// notification.
+//
+// NOTE: This stores a _reference_ to the RcuStore<T> that it wraps. So it is
+// very important that the lifetime of the store exceeds the lifetime of the
+// view. Usually you want the RcuDirectView object to be owned by the same thing
+// that owns the RcuStore.
+template <typename FromType, typename ToType>
+class TranslatedRcuView : public RcuView<ToType> {
+ public:
+  explicit TranslatedRcuView(const RcuStore<FromType> &store) : store_(store) {}
+
+  // Copying these can be dangerous because it stores a reference.
+  TranslatedRcuView(const TranslatedRcuView &other) = delete;
+  TranslatedRcuView &operator=(const TranslatedRcuView &other) = delete;
+
+  // Read will check if the underlying store has reported a change. If so, it
+  // will rebuild the cache using the subclass Translate function and notify all
+  // snapshot that a change has occurred. If the store is unchanged, the cached
+  // snapshot will be returned.
+  RcuSnapshot<ToType> Read() const override {
+    absl::MutexLock ml(&cache_.mutex);
+    if (cache_.change_notification.HasTriggered()) {
+      cache_.change_notification.Reset();
+      auto from_snapshot = store_.Read();
+      from_snapshot.RegisterNotification(cache_.change_notification);
+      ToType new_translation = Translate(*from_snapshot);
+      cache_.info.invalidator.InvalidateSnapshot();
+      cache_.info = RcuSnapshot<ToType>::Create(std::move(new_translation));
+    }
+    return cache_.info.snapshot;
+  }
+
+  // Subclasses will override this with an implementation which translate the
+  // store's data of type FromType to a view of type ToType.
+  virtual ToType Translate(const FromType &to) const = 0;
+
+ private:
+  const RcuStore<FromType> &store_;
+  // Internal cache storing the translation of the ToType view based on store_.
+  mutable struct Cache {
+    Cache() : info(RcuSnapshot<ToType>::Create()), change_notification(true) {}
+
+    absl::Mutex mutex;
+    typename RcuSnapshot<ToType>::WithInvalidator info ABSL_GUARDED_BY(mutex);
+    // change_notification listens for a notification from store_.
+    RcuNotification change_notification ABSL_GUARDED_BY(mutex);
+  } cache_;
 };
 
 }  // namespace ecclesia
