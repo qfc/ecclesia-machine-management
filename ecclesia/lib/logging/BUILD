@@ -1,0 +1,16 @@
+# Description:
+#   Libraries to provide informational logging.
+
+licenses(["notice"])
+
+cc_library(
+    name = "logging",
+    srcs = ["logging.cc"],
+    hdrs = ["logging.h"],
+    deps = [
+        "//lib/time:clock",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/time",
+    ],
+)
