@@ -24,7 +24,6 @@
 
 #include <iostream>
 #include <memory>
-#include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -33,6 +32,7 @@
 #include "absl/strings/string_view.h"
 #include "absl/synchronization/mutex.h"
 #include "absl/time/time.h"
+#include "lib/logging/location.h"
 #include "lib/time/clock.h"
 
 namespace ecclesia {
@@ -56,8 +56,17 @@ class LogSequencer {
   // Creates a string containing log metadata that can be prefixed to log lines.
   // In order to ensure that logs have consistent stamps this should normally
   // only be called from inside InSequence.
-  std::string MakeMetadataPrefix(int log_level) const {
-    return absl::StrFormat("L%d %s] ", log_level, MakeTimestamp());
+  std::string MakeMetadataPrefix(int log_level, SourceLocation loc) const {
+    // Find the base name of the source file logging. Logging the full path is
+    // a bit too noisy and depends on too many details of the source tree.
+    absl::string_view loc_file_name = loc.file_name();
+    auto slash_pos = loc_file_name.find_last_of('/');
+    if (slash_pos != loc_file_name.npos) {
+      loc_file_name.remove_prefix(slash_pos + 1);
+    }
+    // Combine the log level, timestamp and location into a prefix.
+    return absl::StrFormat("L%d %s %s:%d] ", log_level, MakeTimestamp(),
+                           loc_file_name, loc.line());
   }
 
  private:
@@ -80,12 +89,13 @@ class LoggerInterface {
   // Parameters that will be passed to the Write call.
   struct WriteParameters {
     int log_level;
+    SourceLocation source_location;
     absl::string_view text;
     const LogSequencer *sequencer;
 
     // Helper function to generate a metadata prefix using the sequencer.
     std::string MakeMetadataPrefix() const {
-      return sequencer->MakeMetadataPrefix(log_level);
+      return sequencer->MakeMetadataPrefix(log_level, source_location);
     }
   };
 
@@ -146,6 +156,7 @@ class LogMessageStream {
   ~LogMessageStream() {
     if (logger_) {
       logger_->Write({.log_level = log_level_,
+                      .source_location = source_location_,
                       .text = stream_.str(),
                       .sequencer = sequencer_});
     }
@@ -160,6 +171,7 @@ class LogMessageStream {
   LogMessageStream &operator=(const LogMessageStream &other) = delete;
   LogMessageStream(LogMessageStream &&other)
       : log_level_(other.log_level_),
+        source_location_(other.source_location_),
         logger_(other.logger_),
         sequencer_(other.sequencer_),
         stream_(std::move(other.stream_)) {
@@ -181,12 +193,16 @@ class LogMessageStream {
   // Used to give LeveledLogger permission to construct these objects.
   friend class LeveledLogger;
 
-  LogMessageStream(int log_level, LoggerInterface *logger,
-                   const LogSequencer *sequencer)
-      : log_level_(log_level), logger_(logger), sequencer_(sequencer) {}
+  LogMessageStream(int log_level, SourceLocation source_location,
+                   LoggerInterface *logger, const LogSequencer *sequencer)
+      : log_level_(log_level),
+        source_location_(source_location),
+        logger_(logger),
+        sequencer_(sequencer) {}
 
   // The information and objects need to actually write out the log.
   int log_level_;
+  SourceLocation source_location_;
   LoggerInterface *logger_;
   const LogSequencer *sequencer_;
   // A string stream used to accumulate the log text.
@@ -227,8 +243,8 @@ class LeveledLogger {
 
   // Create a new message stream for logging at a particular level. The stream
   // will be prepended with log level and timestamp text.
-  LogMessageStream MakeStream(int log_level) const {
-    return LogMessageStream(log_level, GetLogger(log_level), &sequencer_);
+  LogMessageStream MakeStream(int log_level, SourceLocation loc) const {
+    return LogMessageStream(log_level, loc, GetLogger(log_level), &sequencer_);
   }
 
  private:
@@ -257,18 +273,33 @@ void SetGlobalLogger(std::unique_ptr<LeveledLogger> logger);
 // Generic function for logging to a numeric log level. Normally only needed in
 // contexts where you need the log level to be parameterized.
 template <int LogLevel>
-LogMessageStream WriteLog() {
+LogMessageStream WriteLog(SourceLocation loc = SourceLocation::current()) {
   static_assert(LogLevel >= 0, "log levels must be positive");
-  return GetGlobalLogger().MakeStream(LogLevel);
+  return GetGlobalLogger().MakeStream(LogLevel, loc);
 }
 
 // Alias functions with more meaningful names for log levels 0-4. Generally
 // preferred in most code.
-inline LogMessageStream FatalLog() { return WriteLog<0>(); }
-inline LogMessageStream ErrorLog() { return WriteLog<1>(); }
-inline LogMessageStream WarningLog() { return WriteLog<2>(); }
-inline LogMessageStream InfoLog() { return WriteLog<3>(); }
-inline LogMessageStream DebugLog() { return WriteLog<4>(); }
+inline LogMessageStream FatalLog(
+    SourceLocation loc = SourceLocation::current()) {
+  return WriteLog<0>(loc);
+}
+inline LogMessageStream ErrorLog(
+    SourceLocation loc = SourceLocation::current()) {
+  return WriteLog<1>(loc);
+}
+inline LogMessageStream WarningLog(
+    SourceLocation loc = SourceLocation::current()) {
+  return WriteLog<2>(loc);
+}
+inline LogMessageStream InfoLog(
+    SourceLocation loc = SourceLocation::current()) {
+  return WriteLog<3>(loc);
+}
+inline LogMessageStream DebugLog(
+    SourceLocation loc = SourceLocation::current()) {
+  return WriteLog<4>(loc);
+}
 
 }  // namespace ecclesia
 

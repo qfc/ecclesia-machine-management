@@ -5,7 +5,10 @@ licenses(["notice"])
 
 cc_library(
     name = "logging",
-    srcs = ["logging.cc"],
+    srcs = [
+        "location.h",
+        "logging.cc",
+    ],
     hdrs = ["logging.h"],
     deps = [
         "//lib/time:clock",
