@@ -43,8 +43,11 @@ std::unique_ptr<LeveledLogger> MakeDefaultLogger() {
 // setting the value is threadsafe, just that initialization is.
 const LeveledLogger &GetOrSetGlobalLogger(
     std::unique_ptr<LeveledLogger> logger) {
-  static auto global_logger = MakeDefaultLogger();
-  if (logger) global_logger = std::move(logger);
+  static LeveledLogger *global_logger = MakeDefaultLogger().release();
+  if (logger) {
+    auto old_logger = absl::WrapUnique(global_logger);
+    global_logger = logger.release();
+  }
   return *global_logger;
 }
 

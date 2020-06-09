@@ -29,26 +29,84 @@
 #include <utility>
 #include <vector>
 
+#include "absl/strings/str_format.h"
 #include "absl/strings/string_view.h"
+#include "absl/synchronization/mutex.h"
 #include "absl/time/time.h"
 #include "lib/time/clock.h"
 
 namespace ecclesia {
 
-// Generic logger interface for writing out different kinds of log files. It is
-// called with logs which have already been decorated with metadata about the
-// source of the call (e.g. timestamps, log lines).
+// Class used to serialize logging operations.
+class LogSequencer {
+ public:
+  explicit LogSequencer(Clock *clock) : clock_(clock) {}
+
+  // These objects are used for synchronization and so should not be copied.
+  LogSequencer(const LogSequencer &other) = delete;
+  LogSequencer &operator=(const LogSequencer &other) = delete;
+
+  // Execute the given function under the sequencers mutex.
+  template <typename F>
+  void InSequence(F func) const {
+    absl::MutexLock ml(&mutex_);
+    func();
+  }
+
+  // Creates a string containing log metadata that can be prefixed to log lines.
+  // In order to ensure that logs have consistent stamps this should normally
+  // only be called from inside InSequence.
+  std::string MakeMetadataPrefix(int log_level) const {
+    return absl::StrFormat("L%d %s] ", log_level, MakeTimestamp());
+  }
+
+ private:
+  // Creates a timestamp string using a standard format. Timestamps are always
+  // rendered in UTC.
+  std::string MakeTimestamp() const {
+    return absl::FormatTime("%Y-%m-%d %H:%M:%E6S", clock_->Now(),
+                            absl::UTCTimeZone());
+  }
+
+  // The underlying mutex object.
+  mutable absl::Mutex mutex_;
+
+  Clock *clock_;
+};
+
+// Generic logger interface for writing out different kinds of log files.
 class LoggerInterface {
  public:
+  // Parameters that will be passed to the Write call.
+  struct WriteParameters {
+    int log_level;
+    absl::string_view text;
+    const LogSequencer *sequencer;
+
+    // Helper function to generate a metadata prefix using the sequencer.
+    std::string MakeMetadataPrefix() const {
+      return sequencer->MakeMetadataPrefix(log_level);
+    }
+  };
+
   LoggerInterface() = default;
   virtual ~LoggerInterface() = default;
 
   // Take a log line and write it out to the underlying sink. The text does not
-  // contain a trailing newline and so the writer should add one as necessary.
+  // contain a trailing newline and so the writer should add one if necessary.
   //
   // NOTE: The text not having a trailing newline does not mean that it does not
   // contain any newlines.
-  virtual void Write(absl::string_view text) = 0;
+  //
+  // This function is expected to be thread-safe. In particular:
+  //   * log text from concurrent writes should _never_ be interleaved
+  //   * log metadata (timestamps) should be sequenced in the same way that
+  //     writes are sequenced, i.e. timestamps in logs should be ordered in the
+  //     same way as the log lines themselves
+  // The LogSequencer can be used as a simple way to provide a global order on
+  // logs. However, if the underlying sink has its own metadata and timestamping
+  // then implementations can use it instead.
+  virtual void Write(WriteParameters params) = 0;
 };
 
 // Null logger implementation that discards all logs it is given.
@@ -57,7 +115,7 @@ class NullLogger : public LoggerInterface {
   NullLogger() : LoggerInterface() {}
 
  private:
-  void Write(absl::string_view text) override {}
+  void Write(WriteParameters params) override {}
 };
 
 // Logger implementation that writes all logs out to standard error.
@@ -66,8 +124,10 @@ class StderrLogger : public LoggerInterface {
   StderrLogger() : LoggerInterface() {}
 
  private:
-  void Write(absl::string_view text) override {
-    std::cerr << text << std::endl;
+  void Write(WriteParameters params) override {
+    params.sequencer->InSequence([&]() {
+      std::cerr << params.MakeMetadataPrefix() << params.text << std::endl;
+    });
   }
 };
 
@@ -84,7 +144,11 @@ class LogMessageStream {
   // When the LogMessage is destroyed it will flush its contents out to the
   // underlying logger. If logger is null then it does nothing.
   ~LogMessageStream() {
-    if (logger_) logger_->Write(stream_.str());
+    if (logger_) {
+      logger_->Write({.log_level = log_level_,
+                      .text = stream_.str(),
+                      .sequencer = sequencer_});
+    }
   }
 
   // You can't copy or assign to a message stream, but you can move it. This is
@@ -95,7 +159,10 @@ class LogMessageStream {
   LogMessageStream(const LogMessageStream &other) = delete;
   LogMessageStream &operator=(const LogMessageStream &other) = delete;
   LogMessageStream(LogMessageStream &&other)
-      : logger_(other.logger_), stream_(std::move(other.stream_)) {
+      : log_level_(other.log_level_),
+        logger_(other.logger_),
+        sequencer_(other.sequencer_),
+        stream_(std::move(other.stream_)) {
     // Explicitly clear out the logger from the moved-from object. This keeps it
     // from flushing anything to the logger in its destructor.
     other.logger_ = nullptr;
@@ -114,9 +181,15 @@ class LogMessageStream {
   // Used to give LeveledLogger permission to construct these objects.
   friend class LeveledLogger;
 
-  explicit LogMessageStream(LoggerInterface *logger) : logger_(logger) {}
+  LogMessageStream(int log_level, LoggerInterface *logger,
+                   const LogSequencer *sequencer)
+      : log_level_(log_level), logger_(logger), sequencer_(sequencer) {}
 
+  // The information and objects need to actually write out the log.
+  int log_level_;
   LoggerInterface *logger_;
+  const LogSequencer *sequencer_;
+  // A string stream used to accumulate the log text.
   std::ostringstream stream_;
 };
 
@@ -131,7 +204,7 @@ class LeveledLogger {
   // Create a new levelled logger using the given logger as the default and the
   // given clock for capturing log timestamps.
   LeveledLogger(std::unique_ptr<LoggerInterface> default_logger, Clock *clock)
-      : default_logger_(std::move(default_logger)), clock_(clock) {}
+      : default_logger_(std::move(default_logger)), sequencer_(clock) {}
 
   // Add a new logger for handling the given log level.
   void AddLogger(int log_level, std::unique_ptr<LoggerInterface> logger) {
@@ -143,16 +216,6 @@ class LeveledLogger {
     loggers_[log_level] = std::move(logger);
   }
 
-  // Create a new message stream for logging at a particular level. The stream
-  // will be prepended with log level and timestamp text.
-  LogMessageStream MakeStream(int log_level) const {
-    return LogMessageStream(GetLogger(log_level))
-           << "L" << log_level
-           << absl::FormatTime(" %Y-%m-%d %H:%M:%E6S] ", clock_->Now(),
-                               absl::UTCTimeZone());
-  }
-
- private:
   // Find the logger to use for a particular log level. Returns the default
   // logger if no logger was defined for that level.
   LoggerInterface *GetLogger(int log_level) const {
@@ -162,6 +225,13 @@ class LeveledLogger {
     return loggers_[log_level].get();
   }
 
+  // Create a new message stream for logging at a particular level. The stream
+  // will be prepended with log level and timestamp text.
+  LogMessageStream MakeStream(int log_level) const {
+    return LogMessageStream(log_level, GetLogger(log_level), &sequencer_);
+  }
+
+ private:
   // The default logger, used for log levels with no explicit level.
   std::unique_ptr<LoggerInterface> default_logger_;
 
@@ -171,8 +241,8 @@ class LeveledLogger {
   // "blank" entries is generally small.
   std::vector<std::unique_ptr<LoggerInterface>> loggers_;
 
-  // The clock to use for capturing log timestamps.
-  Clock *clock_;
+  // Sequencer used to sequence all log writes.
+  LogSequencer sequencer_;
 };
 
 // Get the global logger.
