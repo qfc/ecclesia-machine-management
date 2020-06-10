@@ -26,7 +26,6 @@
 #include <memory>
 #include <string>
 #include <utility>
-#include <vector>
 
 #include "absl/strings/str_format.h"
 #include "absl/strings/string_view.h"
@@ -37,73 +36,50 @@
 
 namespace ecclesia {
 
-// Class used to serialize logging operations.
-class LogSequencer {
+// Generic logger interface for writing logging out to different kinds of sinks.
+class LoggerInterface {
  public:
-  explicit LogSequencer(Clock *clock) : clock_(clock) {}
+  // Parameters that will be passed to the Write call.
+  struct WriteParameters {
+    // The log level of the call. This should be used to control what sinks the
+    // logs will be sent to. Different LoggerInterface implementations will have
+    // different behaviors for this.
+    int log_level;
+    // The source location where the logging call originated from.
+    SourceLocation source_location;
+    // The raw text to written out. This does not contain any metadata derived
+    // from the above fields, so if the sink needs metadata attached the logger
+    // must add it itself. This normally would be done with MakeMetadataPrefix.
+    absl::string_view text;
+  };
 
-  // These objects are used for synchronization and so should not be copied.
-  LogSequencer(const LogSequencer &other) = delete;
-  LogSequencer &operator=(const LogSequencer &other) = delete;
+  LoggerInterface() = default;
+  virtual ~LoggerInterface() = default;
 
-  // Execute the given function under the sequencers mutex.
-  template <typename F>
-  void InSequence(F func) const {
-    absl::MutexLock ml(&mutex_);
-    func();
-  }
-
-  // Creates a string containing log metadata that can be prefixed to log lines.
-  // In order to ensure that logs have consistent stamps this should normally
-  // only be called from inside InSequence.
-  std::string MakeMetadataPrefix(int log_level, SourceLocation loc) const {
-    // Find the base name of the source file logging. Logging the full path is
+  // Standard helper function for generating a standard string with metadata
+  // information that can be prefixed to log lines. Captures log level,
+  // timestamp and source location.
+  static std::string MakeMetadataPrefix(
+      int log_level, absl::Time timestamp,
+      SourceLocation loc) {  // Find the base name of the source file logging.
+                             // Logging the full path is
     // a bit too noisy and depends on too many details of the source tree.
     absl::string_view loc_file_name = loc.file_name();
     auto slash_pos = loc_file_name.find_last_of('/');
     if (slash_pos != loc_file_name.npos) {
       loc_file_name.remove_prefix(slash_pos + 1);
     }
+    // Use a UTC timestamp with microsecond precision.
+    std::string timestamp_str =
+        absl::FormatTime("%Y-%m-%d %H:%M:%E6S", timestamp, absl::UTCTimeZone());
     // Combine the log level, timestamp and location into a prefix.
-    return absl::StrFormat("L%d %s %s:%d] ", log_level, MakeTimestamp(),
-                           loc_file_name, loc.line());
+    return absl::StrFormat("L%d %s %s:%d] ", log_level,
+                           std::move(timestamp_str), loc_file_name, loc.line());
   }
 
- private:
-  // Creates a timestamp string using a standard format. Timestamps are always
-  // rendered in UTC.
-  std::string MakeTimestamp() const {
-    return absl::FormatTime("%Y-%m-%d %H:%M:%E6S", clock_->Now(),
-                            absl::UTCTimeZone());
-  }
-
-  // The underlying mutex object.
-  mutable absl::Mutex mutex_;
-
-  Clock *clock_;
-};
-
-// Generic logger interface for writing out different kinds of log files.
-class LoggerInterface {
- public:
-  // Parameters that will be passed to the Write call.
-  struct WriteParameters {
-    int log_level;
-    SourceLocation source_location;
-    absl::string_view text;
-    const LogSequencer *sequencer;
-
-    // Helper function to generate a metadata prefix using the sequencer.
-    std::string MakeMetadataPrefix() const {
-      return sequencer->MakeMetadataPrefix(log_level, source_location);
-    }
-  };
-
-  LoggerInterface() = default;
-  virtual ~LoggerInterface() = default;
-
-  // Take a log line and write it out to the underlying sink. The text does not
-  // contain a trailing newline and so the writer should add one if necessary.
+  // Take a log line and write it out to the appropriate sinks for the given log
+  // level. The text does not contain a trailing newline and so the writer
+  // should add one if necessary.
   //
   // NOTE: The text not having a trailing newline does not mean that it does not
   // contain any newlines.
@@ -113,32 +89,30 @@ class LoggerInterface {
   //   * log metadata (timestamps) should be sequenced in the same way that
   //     writes are sequenced, i.e. timestamps in logs should be ordered in the
   //     same way as the log lines themselves
-  // The LogSequencer can be used as a simple way to provide a global order on
-  // logs. However, if the underlying sink has its own metadata and timestamping
-  // then implementations can use it instead.
+  // The MakeMetadataPrefix function provides a standard format for prefixing
+  // log metadata to text-based logs. However, it is not required if the
+  // underlying sink has its own ways to represent such metadata.
   virtual void Write(WriteParameters params) = 0;
 };
 
-// Null logger implementation that discards all logs it is given.
-class NullLogger : public LoggerInterface {
+// The default logger implementation. Its behavior is:
+//   * L0 logs go to stderr and then terminate the program
+//   * L1 logs go to stderr
+//   * L2+ logs are discarded
+// This is the logger that will be added to the global LogMessageStream on
+// startup. Programs desiring different behavior should install their own logger
+// implementation to replace it.
+class DefaultLogger : public LoggerInterface {
  public:
-  NullLogger() : LoggerInterface() {}
+  explicit DefaultLogger(Clock *clock);
+
+  void Write(WriteParameters params) override;
 
  private:
-  void Write(WriteParameters params) override {}
-};
-
-// Logger implementation that writes all logs out to standard error.
-class StderrLogger : public LoggerInterface {
- public:
-  StderrLogger() : LoggerInterface() {}
-
- private:
-  void Write(WriteParameters params) override {
-    params.sequencer->InSequence([&]() {
-      std::cerr << params.MakeMetadataPrefix() << params.text << std::endl;
-    });
-  }
+  // Used to synchronize logging.
+  absl::Mutex mutex_;
+  // Used to capture timestamps for log lines.
+  Clock *clock_;
 };
 
 // Object that absorbs streamed text from users. When the various *Log()
@@ -146,9 +120,9 @@ class StderrLogger : public LoggerInterface {
 // caller can write to it via the << operator.
 //
 // The logging will all be written out when the LogMessageStream object is
-// destroyed. It is expected that callers will not hold onto the object outside
-// of the logging statement, and so the lifetime should generally end along with
-// the statement.
+// destroyed. Callers should not hold onto the object outside of the logging
+// statement, and so the lifetime should generally end when the logging
+// statement does.
 class LogMessageStream {
  public:
   // When the LogMessage is destroyed it will flush its contents out to the
@@ -157,8 +131,7 @@ class LogMessageStream {
     if (logger_) {
       logger_->Write({.log_level = log_level_,
                       .source_location = source_location_,
-                      .text = stream_.str(),
-                      .sequencer = sequencer_});
+                      .text = stream_.str()});
     }
   }
 
@@ -173,7 +146,6 @@ class LogMessageStream {
       : log_level_(other.log_level_),
         source_location_(other.source_location_),
         logger_(other.logger_),
-        sequencer_(other.sequencer_),
         stream_(std::move(other.stream_)) {
     // Explicitly clear out the logger from the moved-from object. This keeps it
     // from flushing anything to the logger in its destructor.
@@ -190,85 +162,56 @@ class LogMessageStream {
   }
 
  private:
-  // Used to give LeveledLogger permission to construct these objects.
-  friend class LeveledLogger;
+  // Used to give LoggerStreamFactory permission to construct these objects.
+  friend class LoggerStreamFactory;
 
   LogMessageStream(int log_level, SourceLocation source_location,
-                   LoggerInterface *logger, const LogSequencer *sequencer)
+                   LoggerInterface *logger)
       : log_level_(log_level),
         source_location_(source_location),
-        logger_(logger),
-        sequencer_(sequencer) {}
+        logger_(logger) {}
 
   // The information and objects need to actually write out the log.
   int log_level_;
   SourceLocation source_location_;
   LoggerInterface *logger_;
-  const LogSequencer *sequencer_;
+
   // A string stream used to accumulate the log text.
   std::ostringstream stream_;
 };
 
-// Class representing a set of logging implementations, one for each supported
-// log level plus a default one for levels with no explicit logger.
-//
-// Normally this class is used by constructing a new instance, using AddLogger
-// to configure loggers for all the various levels you support, and then using
-// SetGlobalLogger to install this globally.
-class LeveledLogger {
+// Class that wraps a LoggerInterface implementation that can be used to
+// construct logging streams. Used as a global singleton.
+class LoggerStreamFactory {
  public:
-  // Create a new levelled logger using the given logger as the default and the
-  // given clock for capturing log timestamps.
-  LeveledLogger(std::unique_ptr<LoggerInterface> default_logger, Clock *clock)
-      : default_logger_(std::move(default_logger)), sequencer_(clock) {}
+  // Construct a new factory using the given logger.
+  LoggerStreamFactory(std::unique_ptr<LoggerInterface> logger);
 
-  // Add a new logger for handling the given log level.
-  void AddLogger(int log_level, std::unique_ptr<LoggerInterface> logger) {
-    // Make sure the loggers vector is large enough to hold this log level.
-    if (log_level >= loggers_.size()) {
-      loggers_.resize(log_level + 1);
-    }
-    // Add the logger into the logger vector.
-    loggers_[log_level] = std::move(logger);
-  }
-
-  // Find the logger to use for a particular log level. Returns the default
-  // logger if no logger was defined for that level.
-  LoggerInterface *GetLogger(int log_level) const {
-    if (log_level >= loggers_.size() || !loggers_[log_level]) {
-      return default_logger_.get();
-    }
-    return loggers_[log_level].get();
-  }
+  // Replace the current logger implementation with an new one. This code is not
+  // thread-safe, and is not safe to call if there are any outstanding
+  // LogMessageStream objects.
+  void SetLogger(std::unique_ptr<LoggerInterface> logger);
 
   // Create a new message stream for logging at a particular level. The stream
   // will be prepended with log level and timestamp text.
   LogMessageStream MakeStream(int log_level, SourceLocation loc) const {
-    return LogMessageStream(log_level, loc, GetLogger(log_level), &sequencer_);
+    return LogMessageStream(log_level, loc, logger_.get());
   }
 
  private:
-  // The default logger, used for log levels with no explicit level.
-  std::unique_ptr<LoggerInterface> default_logger_;
-
-  // A map of log levels to loggers. A vector is used because it is very low
-  // overhead for both storage and lookups; since the in-use log levels are
-  // usually just 0-4, or a subset of that, the amount of space wasted on
-  // "blank" entries is generally small.
-  std::vector<std::unique_ptr<LoggerInterface>> loggers_;
-
-  // Sequencer used to sequence all log writes.
-  LogSequencer sequencer_;
+  // The underlying log implementation stored in this object.
+  std::unique_ptr<LoggerInterface> logger_;
 };
 
-// Get the global logger.
-const LeveledLogger &GetGlobalLogger();
+// Get the global logger. Note that this returns a reference to the stream
+// factory, and not the underlying LoggerInterface.
+const LoggerStreamFactory &GetGlobalLogger();
 
-// Install a new global set of loggers. Calling this while GetGlobalLogger is
-// being used (or while other calls are being made to SetGlobalLogger) is a data
-// race and so to call it safely you should call this as early as possible in
-// your program startup.
-void SetGlobalLogger(std::unique_ptr<LeveledLogger> logger);
+// Install a new global logger implementation. Calling this while
+// GetGlobalLogger is being used (or while other calls are being made to
+// SetGlobalLogger) is a data race and so to call it safely you should call this
+// as early as possible in your program startup.
+void SetGlobalLogger(std::unique_ptr<LoggerInterface> logger);
 
 // Generic function for logging to a numeric log level. Normally only needed in
 // contexts where you need the log level to be parameterized.

@@ -16,47 +16,53 @@
 
 #include "lib/logging/logging.h"
 
+#include <cstdlib>
+#include <iostream>
 #include <memory>
 #include <utility>
 
 #include "absl/memory/memory.h"
+#include "absl/synchronization/mutex.h"
 #include "lib/time/clock.h"
 
 namespace ecclesia {
 namespace {
 
-// Create an instance of the default logger.
-std::unique_ptr<LeveledLogger> MakeDefaultLogger() {
-  auto logger = absl::make_unique<LeveledLogger>(
-      absl::make_unique<NullLogger>(), Clock::RealClock());
-  logger->AddLogger(1, absl::make_unique<StderrLogger>());
-  return logger;
-}
-
-// Function that can both get and set the global logger, depending on whether
-// or not the parameter is null (it just does a get) or not (it will set the
-// parameter and then return it).
-//
-// This is used to implement both the Get and Setfunctions in a way that
-// provides thread-safe lazy initialization, unlike if we used a shared global
-// variable between the two functions. Note that this safety doesn't mean that
-// setting the value is threadsafe, just that initialization is.
-const LeveledLogger &GetOrSetGlobalLogger(
-    std::unique_ptr<LeveledLogger> logger) {
-  static LeveledLogger *global_logger = MakeDefaultLogger().release();
-  if (logger) {
-    auto old_logger = absl::WrapUnique(global_logger);
-    global_logger = logger.release();
-  }
-  return *global_logger;
+// Function that holds the underlying global logger stream factory.
+LoggerStreamFactory &GetGlobalLoggerStreamFactory() {
+  static auto &lsf = *(new LoggerStreamFactory(
+      absl::make_unique<DefaultLogger>(Clock::RealClock())));
+  return lsf;
 }
 
 }  // namespace
 
-const LeveledLogger &GetGlobalLogger() { return GetOrSetGlobalLogger(nullptr); }
+DefaultLogger::DefaultLogger(Clock *clock) : clock_(clock) {}
 
-void SetGlobalLogger(std::unique_ptr<LeveledLogger> logger) {
-  GetOrSetGlobalLogger(std::move(logger));
+void DefaultLogger::Write(WriteParameters params) {
+  if (params.log_level < 2) {
+    absl::MutexLock ml(&mutex_);
+    std::cerr << MakeMetadataPrefix(params.log_level, clock_->Now(),
+                                    params.source_location)
+              << params.text << std::endl;
+    if (params.log_level == 0) std::abort();
+  }
+}
+
+LoggerStreamFactory::LoggerStreamFactory(
+    std::unique_ptr<LoggerInterface> logger)
+    : logger_(std::move(logger)) {}
+
+void LoggerStreamFactory::SetLogger(std::unique_ptr<LoggerInterface> logger) {
+  logger_ = std::move(logger);
+}
+
+const LoggerStreamFactory &GetGlobalLogger() {
+  return GetGlobalLoggerStreamFactory();
+}
+
+void SetGlobalLogger(std::unique_ptr<LoggerInterface> logger) {
+  GetGlobalLoggerStreamFactory().SetLogger(std::move(logger));
 }
 
 }  // namespace ecclesia
