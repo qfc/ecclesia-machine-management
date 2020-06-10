@@ -198,7 +198,7 @@ absl::Status KernelSmbusAccess::ReceiveByte(const SmbusLocation &loc,
   auto fd_closer = FdCloser(fd);
 
   absl::Status status;
-  union i2c_smbus_data i2c_data;
+  union i2c_smbus_data i2c_data{0};
   if (SmbusIoctl(ioctl_, fd, I2C_SMBUS_READ, 0, I2C_SMBUS_BYTE, &i2c_data) <
       0) {
     status = absl::InternalError(absl::StrFormat(
@@ -222,7 +222,7 @@ absl::Status KernelSmbusAccess::Write8(const SmbusLocation &loc, int command,
   auto fd_closer = FdCloser(fd);
 
   absl::Status status;
-  union i2c_smbus_data i2c_data;
+  union i2c_smbus_data i2c_data{};
   i2c_data.byte = data;
   if (SmbusIoctl(ioctl_, fd, I2C_SMBUS_WRITE, command, I2C_SMBUS_BYTE_DATA,
                  &i2c_data) < 0) {
@@ -245,7 +245,7 @@ absl::Status KernelSmbusAccess::Read8(const SmbusLocation &loc, int command,
   auto fd_closer = FdCloser(fd);
 
   absl::Status status;
-  union i2c_smbus_data i2c_data;
+  union i2c_smbus_data i2c_data{};
   if (SmbusIoctl(ioctl_, fd, I2C_SMBUS_READ, command, I2C_SMBUS_BYTE_DATA,
                  &i2c_data) < 0) {
     status = absl::InternalError(absl::StrFormat("Read8 from device %s failed.",
@@ -269,7 +269,7 @@ absl::Status KernelSmbusAccess::Write16(const SmbusLocation &loc, int command,
   auto fd_closer = FdCloser(fd);
 
   absl::Status status;
-  union i2c_smbus_data i2c_data;
+  union i2c_smbus_data i2c_data{};
   i2c_data.word = data;
   if (SmbusIoctl(ioctl_, fd, I2C_SMBUS_WRITE, command, I2C_SMBUS_WORD_DATA,
                  &i2c_data) < 0) {
@@ -292,7 +292,7 @@ absl::Status KernelSmbusAccess::Read16(const SmbusLocation &loc, int command,
   auto fd_closer = FdCloser(fd);
 
   absl::Status status;
-  union i2c_smbus_data i2c_data;
+  union i2c_smbus_data i2c_data{};
   if (SmbusIoctl(ioctl_, fd, I2C_SMBUS_READ, command, I2C_SMBUS_WORD_DATA,
                  &i2c_data) < 0) {
     status = absl::InternalError(absl::StrFormat(
@@ -326,7 +326,7 @@ absl::Status KernelSmbusAccess::WriteBlockI2C(
 
   absl::Status status;
 
-  union i2c_smbus_data i2c_data;
+  union i2c_smbus_data i2c_data{};
   memcpy(&i2c_data.block[1], data.data(), data.size());
   i2c_data.block[0] = data.size();
 
@@ -370,7 +370,7 @@ absl::Status KernelSmbusAccess::ReadBlockI2C(const SmbusLocation &loc,
   }
 
   absl::Status status;
-  union i2c_smbus_data i2c_data;
+  union i2c_smbus_data i2c_data{};
   if (SmbusIoctl(ioctl_, fd, I2C_SMBUS_READ, command, I2C_SMBUS_I2C_BLOCK_DATA,
                  &i2c_data) < 0) {
     status = absl::InternalError(
