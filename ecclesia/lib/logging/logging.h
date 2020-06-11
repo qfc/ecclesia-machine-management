@@ -60,7 +60,7 @@
 #define ECCLESIA_LIB_LOGGING_LOGGING_H_
 
 #include "lib/logging/globals.h"
-#include "lib/logging/location.h"
+#include "lib/logging/interfaces.h"
 
 namespace ecclesia {
 

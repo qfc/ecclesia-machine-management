@@ -53,7 +53,6 @@
 
 #include "absl/synchronization/mutex.h"
 #include "lib/logging/interfaces.h"
-#include "lib/logging/location.h"
 #include "lib/time/clock.h"
 
 namespace ecclesia {
@@ -69,9 +68,9 @@ class DefaultLogger : public LoggerInterface {
  public:
   explicit DefaultLogger(Clock *clock);
 
+ private:
   void Write(WriteParameters params) override;
 
- private:
   // Used to synchronize logging.
   absl::Mutex mutex_;
   // Used to capture timestamps for log lines.

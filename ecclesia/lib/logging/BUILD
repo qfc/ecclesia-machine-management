@@ -5,10 +5,7 @@ licenses(["notice"])
 
 cc_library(
     name = "logging",
-    srcs = [
-        "globals.cc",
-        "location.h",
-    ],
+    srcs = ["globals.cc"],
     hdrs = [
         "globals.h",
         "interfaces.h",
