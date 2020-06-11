@@ -1,15 +1,20 @@
 # Description:
-#   Libraries to provide informational logging.
+#   Libraries to for supporting the logging of errors and information.
 
 licenses(["notice"])
 
 cc_library(
     name = "logging",
     srcs = [
+        "globals.cc",
         "location.h",
-        "logging.cc",
     ],
-    hdrs = ["logging.h"],
+    hdrs = [
+        "globals.h",
+        "interfaces.h",
+        "logging.h",
+    ],
+    visibility = ["//:library_users"],
     deps = [
         "//lib/time:clock",
         "@com_google_absl//absl/memory",

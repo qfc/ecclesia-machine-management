@@ -1,0 +1,180 @@
+/*
+ * Copyright 2020 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Definitions of the global objects used by the logging system, along with
+// functions for getting and setting them. This header is normally only needed
+// if you want to install your own logging implementation.
+//
+// There are three major things provided by this library:
+//
+// 1. A default logging implementation, set up when the logging system is first
+//    constructed. This does minimal logging to stderr and is normally intended
+//    to be replaced with something more fully featured.
+//
+// 2. Some objects that can be used to implement the actual user logging
+//    functions. The LogMessageStream class is used as a temporary object in
+//    log invocations to capture the logging text, and the LoggingStreamFactory
+//    is used to wrap the LoggingInterface and construct LogMessageStream
+//    instances. These object should never really be used directly by either
+//    users _or_ backend implementers.
+//
+// 3. (Get|Set)GlobalLogger functions for installing a global logger, or getting
+//    access to it to do logging.
+//
+// It is important to note that installing a new logger is not threadsafe. This
+// generally means that you should not use SetGlobalLogger while a program is
+// running multiple threads. Calling SetGlobalLogger will destroy the logging
+// object pointed to by every outstanding LogMessageStream and so it is only
+// safe to call if nothing is using the logging yet.
+//
+// It is okay to use the logging system before SetGlobalLogger is called (e.g.
+// to log errors that occur while trying to set up the logger) so log as all
+// logging is finished before the call is made.
+
+#ifndef ECCLESIA_LIB_LOGGING_GLOBALS_H_
+#define ECCLESIA_LIB_LOGGING_GLOBALS_H_
+
+#include <iostream>
+#include <memory>
+#include <utility>
+
+#include "absl/synchronization/mutex.h"
+#include "lib/logging/interfaces.h"
+#include "lib/logging/location.h"
+#include "lib/time/clock.h"
+
+namespace ecclesia {
+
+// The default logger implementation. Its behavior is:
+//   * L0 logs go to stderr and then terminate the program
+//   * L1 logs go to stderr
+//   * L2+ logs are discarded
+// This is the logger that will be added to the global LogMessageStream on
+// startup. Programs desiring different behavior should install their own logger
+// implementation to replace it.
+class DefaultLogger : public LoggerInterface {
+ public:
+  explicit DefaultLogger(Clock *clock);
+
+  void Write(WriteParameters params) override;
+
+ private:
+  // Used to synchronize logging.
+  absl::Mutex mutex_;
+  // Used to capture timestamps for log lines.
+  Clock *clock_;
+};
+
+// Object that absorbs streamed text from users. When the various *Log()
+// functions are called an instance of this object will be returned and the
+// caller can write to it via the << operator.
+//
+// The logging will all be written out when the LogMessageStream object is
+// destroyed. Callers should not hold onto the object outside of the logging
+// statement, and so the lifetime should generally end when the logging
+// statement does.
+class LogMessageStream {
+ public:
+  // When the LogMessage is destroyed it will flush its contents out to the
+  // underlying logger. If logger is null then it does nothing.
+  ~LogMessageStream() {
+    if (logger_) {
+      logger_->Write({.log_level = log_level_,
+                      .source_location = source_location_,
+                      .text = stream_.str()});
+    }
+  }
+
+  // You can't copy or assign to a message stream, but you can move it. This is
+  // because message stream is basically intended to be used as a temporary
+  // object that accumulates data as it is written to and then flushes it out to
+  // the logger when it is destroyed. Thus, we delete all of these operators
+  // except for the move, which allows values to be efficiently returned.
+  LogMessageStream(const LogMessageStream &other) = delete;
+  LogMessageStream &operator=(const LogMessageStream &other) = delete;
+  LogMessageStream(LogMessageStream &&other)
+      : log_level_(other.log_level_),
+        source_location_(other.source_location_),
+        logger_(other.logger_),
+        stream_(std::move(other.stream_)) {
+    // Explicitly clear out the logger from the moved-from object. This keeps it
+    // from flushing anything to the logger in its destructor.
+    other.logger_ = nullptr;
+  }
+  LogMessageStream &operator=(LogMessageStream &&other) = delete;
+
+  // Implement the stream operator (<<) for the log message stream. Under the
+  // covers this writes to the underlying ostringstream.
+  template <typename T>
+  friend LogMessageStream operator<<(LogMessageStream lms, T &&value) {
+    lms.stream_ << std::forward<T>(value);
+    return lms;
+  }
+
+ private:
+  // Used to give LoggerStreamFactory permission to construct these objects.
+  friend class LoggerStreamFactory;
+
+  LogMessageStream(int log_level, SourceLocation source_location,
+                   LoggerInterface *logger)
+      : log_level_(log_level),
+        source_location_(source_location),
+        logger_(logger) {}
+
+  // The information and objects need to actually write out the log.
+  int log_level_;
+  SourceLocation source_location_;
+  LoggerInterface *logger_;
+
+  // A string stream used to accumulate the log text.
+  std::ostringstream stream_;
+};
+
+// Class that wraps a LoggerInterface implementation that can be used to
+// construct logging streams. Used as a global singleton.
+class LoggerStreamFactory {
+ public:
+  // Construct a new factory using the given logger.
+  LoggerStreamFactory(std::unique_ptr<LoggerInterface> logger);
+
+  // Replace the current logger implementation with an new one. This code is not
+  // thread-safe, and is not safe to call if there are any outstanding
+  // LogMessageStream objects.
+  void SetLogger(std::unique_ptr<LoggerInterface> logger);
+
+  // Create a new message stream for logging at a particular level. The stream
+  // will be prepended with log level and timestamp text.
+  LogMessageStream MakeStream(int log_level, SourceLocation loc) const {
+    return LogMessageStream(log_level, loc, logger_.get());
+  }
+
+ private:
+  // The underlying log implementation stored in this object.
+  std::unique_ptr<LoggerInterface> logger_;
+};
+
+// Get the global logger. Note that this returns a reference to the stream
+// factory, and not the underlying LoggerInterface.
+const LoggerStreamFactory &GetGlobalLogger();
+
+// Install a new global logger implementation. This cannot be done safely while
+// logging being done and so should normally only be done very early in process
+// startup, before you have any multi-threading.
+void SetGlobalLogger(std::unique_ptr<LoggerInterface> logger);
+
+}  // namespace ecclesia
+
+#endif  // ECCLESIA_LIB_LOGGING_GLOBALS_H_

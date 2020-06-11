@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "lib/logging/logging.h"
+#include "lib/logging/globals.h"
 
 #include <cstdlib>
 #include <iostream>
@@ -23,6 +23,7 @@
 
 #include "absl/memory/memory.h"
 #include "absl/synchronization/mutex.h"
+#include "lib/logging/interfaces.h"
 #include "lib/time/clock.h"
 
 namespace ecclesia {
