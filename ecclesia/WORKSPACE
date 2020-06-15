@@ -111,3 +111,12 @@ http_archive(
     strip_prefix = "zlib-1.2.11",
     urls = ["https://zlib.net/zlib-1.2.11.tar.gz"],
 )
+
+http_archive(
+    name = "boringssl",
+    sha256 = "c474665d0d2f1880ac1b10ec4e9d861783e2b78273777bea5a9f0d9c2f0f7f05",
+    strip_prefix = "boringssl-410a461df59ec34bcf2d7c4c183c7d293d331421",
+    urls = [
+        "https://github.com/google/boringssl/archive/410a461df59ec34bcf2d7c4c183c7d293d331421.tar.gz",
+    ],
+)
