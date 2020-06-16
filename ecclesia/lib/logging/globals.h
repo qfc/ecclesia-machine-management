@@ -160,6 +160,14 @@ class LoggerStreamFactory {
     return LogMessageStream(log_level, loc, logger_.get());
   }
 
+  // Create a new message stream that will absorb streams but not actually send
+  // them anywhere. This is useful for conditional logging functions that need
+  // to return an object for streaming to but which only actuall use the logging
+  // on some branches.
+  LogMessageStream MakeNullStream() const {
+    return LogMessageStream(-1, SourceLocation::current(), nullptr);
+  }
+
  private:
   // The underlying log implementation stored in this object.
   std::unique_ptr<LoggerInterface> logger_;

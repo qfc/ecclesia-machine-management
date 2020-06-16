@@ -1,17 +1,42 @@
 licenses(["notice"])
 
 cc_library(
+    name = "dir",
+    hdrs = ["dir.h"],
+    visibility = ["//:library_users"],
+    deps = ["@com_google_absl//absl/strings"],
+)
+
+cc_library(
+    name = "path",
+    srcs = ["path.cc"],
+    hdrs = ["path.h"],
+    visibility = ["//:library_users"],
+    deps = [
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/types:span",
+    ],
+)
+
+cc_library(
+    name = "test_filesystem",
+    testonly = True,
+    srcs = ["test_filesystem.cc"],
+    hdrs = ["test_filesystem.h"],
+    visibility = ["//:library_users"],
+    deps = [
+        ":dir",
+        ":path",
+        "//lib/cleanup",
+        "//lib/logging",
+        "//lib/logging:posix",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
     name = "uds",
     srcs = ["uds.cc"],
     hdrs = ["uds.h"],
     visibility = ["//:library_users"],
-)
-
-cc_library(
-    name = "dir",
-    hdrs = ["dir.h"],
-    visibility = ["//:library_users"],
-    deps = [
-        "@com_google_absl//absl/strings",
-    ],
 )

@@ -21,3 +21,14 @@ cc_library(
         "@com_google_absl//absl/time",
     ],
 )
+
+cc_library(
+    name = "posix",
+    srcs = ["posix.cc"],
+    hdrs = ["posix.h"],
+    visibility = ["//:library_users"],
+    deps = [
+        ":logging",
+        "@com_google_absl//absl/strings:str_format",
+    ],
+)

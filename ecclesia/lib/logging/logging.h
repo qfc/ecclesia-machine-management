@@ -59,6 +59,7 @@
 #ifndef ECCLESIA_LIB_LOGGING_LOGGING_H_
 #define ECCLESIA_LIB_LOGGING_LOGGING_H_
 
+#include "absl/strings/string_view.h"
 #include "lib/logging/globals.h"
 #include "lib/logging/interfaces.h"
 
@@ -94,6 +95,40 @@ inline LogMessageStream DebugLog(
     SourceLocation loc = SourceLocation::current()) {
   return WriteLog<4>(loc);
 }
+
+// An function that will check a condition and log a fatal error if it fails.
+// Similar to assert, but integrated into the logging system.
+//
+// The function takes two parameters: the condition you want to check and a
+// description of the condition to be printed in the output. Additional output
+// can be streamed into the result and will be appended to the failure message.
+//
+// Note that the description should be the condition you're checking to be true
+// not an error message to be reported if it is false. For example if you were
+// checking if a number is even a reasonable description use would be:
+//
+//   Check(x % 2 == 0, "x is an even number");
+//
+// The description is NOT an error message. If you want to add an error message
+// then use << to add additional text to the result.
+inline LogMessageStream Check(bool condition, absl::string_view description,
+                              SourceLocation loc = SourceLocation::current()) {
+  if (condition) {
+    return GetGlobalLogger().MakeNullStream();
+  } else {
+    return FatalLog(loc) << "Check (" << description << ") failed ";
+  }
+}
+
+// A macro version of Check that will just use the condition expression as the
+// description. For cases where the description would just be a trivial
+// description of the expression (e.g. if checking x > 0 would just be "x is
+// greater than 0") this can be a little simpler.
+//
+// This is implemented as a macro because that's the only way to capture the
+// text of the expression. However, it is named as a function for uniformity
+// with the rest of the logging API.
+#define CheckCondition(expr) Check(expr, #expr)
 
 }  // namespace ecclesia
 
