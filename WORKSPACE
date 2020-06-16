@@ -120,3 +120,13 @@ http_archive(
         "https://github.com/google/boringssl/archive/410a461df59ec34bcf2d7c4c183c7d293d331421.tar.gz",
     ],
 )
+
+http_archive(
+    name = "ncurses",
+    build_file = "@//oss:ncurses.BUILD",
+    sha256 = "aa057eeeb4a14d470101eff4597d5833dcef5965331be3528c08d99cebaa0d17",
+    strip_prefix = "ncurses-6.1",
+    urls = [
+        "http://ftp.gnu.org/pub/gnu/ncurses/ncurses-6.1.tar.gz"
+    ],
+)
