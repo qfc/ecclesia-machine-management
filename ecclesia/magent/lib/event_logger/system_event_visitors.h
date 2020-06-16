@@ -24,10 +24,10 @@
 #include "absl/container/flat_hash_map.h"
 #include "absl/time/time.h"
 #include "absl/types/optional.h"
-#include "lib/mcedecoder/mce_decode.h"
-#include "lib/mcedecoder/mce_messages.h"
-#include "magent/lib/event_logger/event_logger.h"
-#include "magent/lib/event_reader/event_reader.h"
+#include "ecclesia/lib/mcedecoder/mce_decode.h"
+#include "ecclesia/lib/mcedecoder/mce_messages.h"
+#include "ecclesia/magent/lib/event_logger/event_logger.h"
+#include "ecclesia/magent/lib/event_reader/event_reader.h"
 
 namespace ecclesia {
 // struct to keep track of the count of correctable and uncorrectable errors per

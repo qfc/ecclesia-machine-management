@@ -25,8 +25,8 @@
 
 #include "absl/status/status.h"
 #include "absl/types/span.h"
-#include "lib/io/ioctl.h"
-#include "magent/lib/io/smbus.h"
+#include "ecclesia/lib/io/ioctl.h"
+#include "ecclesia/magent/lib/io/smbus.h"
 
 namespace ecclesia {
 

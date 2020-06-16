@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "lib/smbios/reader.h"
+#include "ecclesia/lib/smbios/reader.h"
 
 #include <algorithm>
 #include <cstddef>
@@ -27,13 +27,13 @@
 #include <vector>
 
 #include "absl/memory/memory.h"
-#include "lib/smbios/bios.h"
-#include "lib/smbios/entry_point.emb.h"
-#include "lib/smbios/internal.h"
-#include "lib/smbios/memory_device.h"
-#include "lib/smbios/processor_information.h"
-#include "lib/smbios/structures.emb.h"
-#include "lib/smbios/system_event_log.h"
+#include "ecclesia/lib/smbios/bios.h"
+#include "ecclesia/lib/smbios/entry_point.emb.h"
+#include "ecclesia/lib/smbios/internal.h"
+#include "ecclesia/lib/smbios/memory_device.h"
+#include "ecclesia/lib/smbios/processor_information.h"
+#include "ecclesia/lib/smbios/structures.emb.h"
+#include "ecclesia/lib/smbios/system_event_log.h"
 #include "runtime/cpp/emboss_enum_view.h"
 #include "runtime/cpp/emboss_prelude.h"
 

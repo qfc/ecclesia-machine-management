@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "magent/lib/io/pci_location.h"
+#include "ecclesia/magent/lib/io/pci_location.h"
 
 #include <cstdint>
 

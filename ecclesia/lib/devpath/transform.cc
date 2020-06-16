@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "lib/devpath/transform.h"
+#include "ecclesia/lib/devpath/transform.h"
 
 #include <cstddef>
 #include <string>

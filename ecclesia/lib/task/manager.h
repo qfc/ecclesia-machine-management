@@ -29,7 +29,7 @@
 #include <memory>
 #include <utility>
 
-#include "lib/task/task.h"
+#include "ecclesia/lib/task/task.h"
 
 namespace ecclesia {
 

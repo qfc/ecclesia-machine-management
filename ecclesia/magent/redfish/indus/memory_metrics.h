@@ -17,10 +17,10 @@
 #ifndef ECCLESIA_MAGENT_REDFISH_INDUS_MEMORY_METRICS_H_
 #define ECCLESIA_MAGENT_REDFISH_INDUS_MEMORY_METRICS_H_
 
-#include "magent/redfish/core/index_resource.h"
-#include "magent/redfish/core/redfish_keywords.h"
-#include "magent/redfish/core/resource.h"
-#include "magent/sysmodel/x86/sysmodel.h"
+#include "ecclesia/magent/redfish/core/index_resource.h"
+#include "ecclesia/magent/redfish/core/redfish_keywords.h"
+#include "ecclesia/magent/redfish/core/resource.h"
+#include "ecclesia/magent/sysmodel/x86/sysmodel.h"
 #include "json/value.h"
 #include "tensorflow_serving/util/net_http/server/public/server_request_interface.h"
 

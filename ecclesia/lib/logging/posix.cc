@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-#include "lib/logging/posix.h"
+#include "ecclesia/lib/logging/posix.h"
 
 #include <cerrno>
 #include <string>
 #include <system_error>
 
 #include "absl/strings/str_format.h"
-#include "lib/logging/globals.h"
-#include "lib/logging/interfaces.h"
+#include "ecclesia/lib/logging/globals.h"
+#include "ecclesia/lib/logging/interfaces.h"
 
 namespace ecclesia {
 

@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-#include "lib/mcedecoder/skylake_mce_decode.h"
+#include "ecclesia/lib/mcedecoder/skylake_mce_decode.h"
 
 #include <cstdint>
 #include <iostream>
 #include <set>
 #include <vector>
 
-#include "lib/mcedecoder/bit_operator.h"
-#include "lib/mcedecoder/dimm_translator.h"
-#include "lib/mcedecoder/mce_messages.h"
+#include "ecclesia/lib/mcedecoder/bit_operator.h"
+#include "ecclesia/lib/mcedecoder/dimm_translator.h"
+#include "ecclesia/lib/mcedecoder/mce_messages.h"
 
 namespace mcedecoder {
 namespace {

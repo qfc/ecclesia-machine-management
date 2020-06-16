@@ -29,13 +29,13 @@
 #include "absl/synchronization/mutex.h"
 #include "absl/types/optional.h"
 #include "absl/types/span.h"
-#include "lib/smbios/platform_translator.h"
-#include "lib/smbios/reader.h"
-#include "magent/lib/eeprom/smbus_eeprom.h"
-#include "magent/lib/event_logger/event_logger.h"
-#include "magent/sysmodel/x86/cpu.h"
-#include "magent/sysmodel/x86/dimm.h"
-#include "magent/sysmodel/x86/fru.h"
+#include "ecclesia/lib/smbios/platform_translator.h"
+#include "ecclesia/lib/smbios/reader.h"
+#include "ecclesia/magent/lib/eeprom/smbus_eeprom.h"
+#include "ecclesia/magent/lib/event_logger/event_logger.h"
+#include "ecclesia/magent/sysmodel/x86/cpu.h"
+#include "ecclesia/magent/sysmodel/x86/dimm.h"
+#include "ecclesia/magent/sysmodel/x86/fru.h"
 
 namespace ecclesia {
 

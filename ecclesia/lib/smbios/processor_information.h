@@ -23,8 +23,8 @@
 
 #include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
-#include "lib/smbios/internal.h"
-#include "lib/smbios/structures.emb.h"
+#include "ecclesia/lib/smbios/internal.h"
+#include "ecclesia/lib/smbios/structures.emb.h"
 #include "runtime/cpp/emboss_cpp_util.h"
 #include "runtime/cpp/emboss_prelude.h"
 

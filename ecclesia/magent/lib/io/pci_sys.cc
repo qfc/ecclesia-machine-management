@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-#include "magent/lib/io/pci_sys.h"
+#include "ecclesia/magent/lib/io/pci_sys.h"
 
 #include "absl/status/status.h"
 #include "absl/types/span.h"
-#include "lib/codec/endian.h"
+#include "ecclesia/lib/codec/endian.h"
 
 namespace ecclesia {
 

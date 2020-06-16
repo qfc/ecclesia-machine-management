@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "magent/lib/event_logger/system_event_visitors.h"
+#include "ecclesia/magent/lib/event_logger/system_event_visitors.h"
 
 #include <memory>
 #include <type_traits>
@@ -23,10 +23,10 @@
 #include "absl/time/time.h"
 #include "absl/types/optional.h"
 #include "absl/types/variant.h"
-#include "lib/mcedecoder/mce_decode.h"
-#include "lib/mcedecoder/mce_messages.h"
-#include "magent/lib/event_reader/elog.emb.h"
-#include "magent/lib/event_reader/event_reader.h"
+#include "ecclesia/lib/mcedecoder/mce_decode.h"
+#include "ecclesia/lib/mcedecoder/mce_messages.h"
+#include "ecclesia/magent/lib/event_reader/elog.emb.h"
+#include "ecclesia/magent/lib/event_reader/event_reader.h"
 #include "runtime/cpp/emboss_cpp_util.h"
 #include "runtime/cpp/emboss_prelude.h"
 

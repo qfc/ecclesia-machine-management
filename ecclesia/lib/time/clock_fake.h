@@ -23,7 +23,7 @@
 
 #include "absl/time/clock.h"
 #include "absl/time/time.h"
-#include "lib/time/clock.h"
+#include "ecclesia/lib/time/clock.h"
 
 namespace ecclesia {
 

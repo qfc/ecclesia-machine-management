@@ -21,7 +21,7 @@
 #include <memory>
 #include <utility>
 
-#include "magent/lib/thread_pool/thread_pool.h"
+#include "ecclesia/magent/lib/thread_pool/thread_pool.h"
 #include "tensorflow_serving/util/net_http/server/public/httpserver.h"
 #include "tensorflow_serving/util/net_http/server/public/httpserver_interface.h"
 

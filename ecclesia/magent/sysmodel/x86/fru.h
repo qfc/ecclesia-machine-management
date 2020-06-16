@@ -23,7 +23,7 @@
 #include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
 #include "absl/types/span.h"
-#include "magent/lib/eeprom/smbus_eeprom.h"
+#include "ecclesia/magent/lib/eeprom/smbus_eeprom.h"
 
 namespace ecclesia {
 

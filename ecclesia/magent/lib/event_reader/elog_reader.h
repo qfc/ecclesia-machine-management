@@ -26,8 +26,8 @@
 #include <string>
 
 #include "absl/types/optional.h"
-#include "lib/smbios/system_event_log.h"
-#include "magent/lib/event_reader/event_reader.h"
+#include "ecclesia/lib/smbios/system_event_log.h"
+#include "ecclesia/magent/lib/event_reader/event_reader.h"
 
 namespace ecclesia {
 

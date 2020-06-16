@@ -41,7 +41,7 @@
 
 #include "absl/base/thread_annotations.h"
 #include "absl/synchronization/mutex.h"
-#include "lib/cache/rcu_snapshot.h"
+#include "ecclesia/lib/cache/rcu_snapshot.h"
 
 namespace ecclesia {
 

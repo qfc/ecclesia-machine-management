@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-#include "magent/lib/event_logger/indus_system_event_visitors.h"
+#include "ecclesia/magent/lib/event_logger/indus_system_event_visitors.h"
 
 #include <memory>
 #include <utility>
 
 #include "absl/time/time.h"
-#include "lib/mcedecoder/cpu_topology.h"
-#include "lib/mcedecoder/dimm_translator.h"
-#include "lib/mcedecoder/mce_decode.h"
-#include "magent/lib/event_logger/system_event_visitors.h"
+#include "ecclesia/lib/mcedecoder/cpu_topology.h"
+#include "ecclesia/lib/mcedecoder/dimm_translator.h"
+#include "ecclesia/lib/mcedecoder/mce_decode.h"
+#include "ecclesia/magent/lib/event_logger/system_event_visitors.h"
 
 namespace ecclesia {
 

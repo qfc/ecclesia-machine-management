@@ -19,8 +19,8 @@
 
 #include <cassert>
 
-#include "lib/task/manager.h"
-#include "lib/task/task.h"
+#include "ecclesia/lib/task/manager.h"
+#include "ecclesia/lib/task/task.h"
 
 namespace ecclesia {
 

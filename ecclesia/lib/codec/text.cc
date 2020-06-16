@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "lib/codec/text.h"
+#include "ecclesia/lib/codec/text.h"
 
 #include <cstddef>
 #include <cstdint>
@@ -22,7 +22,7 @@
 
 #include "absl/status/status.h"
 #include "absl/types/span.h"
-#include "lib/codec/bits.h"
+#include "ecclesia/lib/codec/bits.h"
 
 namespace ecclesia {
 

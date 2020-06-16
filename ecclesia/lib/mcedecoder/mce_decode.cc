@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "lib/mcedecoder/mce_decode.h"
+#include "ecclesia/lib/mcedecoder/mce_decode.h"
 
 #include <cstdint>
 #include <iostream>
@@ -22,11 +22,11 @@
 #include <utility>
 #include <vector>
 
-#include "lib/mcedecoder/bit_operator.h"
-#include "lib/mcedecoder/cpu_topology.h"
-#include "lib/mcedecoder/dimm_translator.h"
-#include "lib/mcedecoder/mce_messages.h"
-#include "lib/mcedecoder/skylake_mce_decode.h"
+#include "ecclesia/lib/mcedecoder/bit_operator.h"
+#include "ecclesia/lib/mcedecoder/cpu_topology.h"
+#include "ecclesia/lib/mcedecoder/dimm_translator.h"
+#include "ecclesia/lib/mcedecoder/mce_messages.h"
+#include "ecclesia/lib/mcedecoder/skylake_mce_decode.h"
 
 namespace mcedecoder {
 namespace {

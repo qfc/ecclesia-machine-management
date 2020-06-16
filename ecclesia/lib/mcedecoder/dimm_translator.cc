@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "lib/mcedecoder/dimm_translator.h"
+#include "ecclesia/lib/mcedecoder/dimm_translator.h"
 
 namespace mcedecoder {
 namespace {

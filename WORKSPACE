@@ -54,7 +54,7 @@ http_archive(
 
 http_archive(
     name = "com_github_libevent_libevent",
-    build_file = "@//oss:libevent.BUILD",
+    build_file = "@//ecclesia/oss:libevent.BUILD",
     sha256 = "70158101eab7ed44fd9cc34e7f247b3cae91a8e4490745d9d6eb7edc184e4d96",
     strip_prefix = "libevent-release-2.1.8-stable",
     urls = [
@@ -98,7 +98,7 @@ tf_serving_workspace()
 #jsoncpp. Official release 1.9.2.
 http_archive(
     name = "com_jsoncpp",
-    build_file = "@//oss:jsoncpp.BUILD",
+    build_file = "@//ecclesia/oss:jsoncpp.BUILD",
     sha256 = "77a402fb577b2e0e5d0bdc1cf9c65278915cdb25171e3452c68b6da8a561f8f0",
     strip_prefix = "jsoncpp-1.9.2",
     urls = ["https://github.com/open-source-parsers/jsoncpp/archive/1.9.2.tar.gz"],

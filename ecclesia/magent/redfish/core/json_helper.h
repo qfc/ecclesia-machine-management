@@ -20,7 +20,7 @@
 #include <cassert>
 #include <string>
 
-#include "magent/redfish/core/redfish_keywords.h"
+#include "ecclesia/magent/redfish/core/redfish_keywords.h"
 #include "json/value.h"
 
 namespace ecclesia {

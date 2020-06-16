@@ -12,7 +12,7 @@ cc_library(
         "redfish_keywords.h",
         "resource.h",
     ],
-    visibility = ["//:magent_library_users"],
+    visibility = ["//ecclesia:magent_library_users"],
     deps = [
         "@com_google_absl//absl/container:flat_hash_map",
         "@com_google_absl//absl/memory",

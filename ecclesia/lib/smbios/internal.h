@@ -27,7 +27,7 @@
 
 #include "absl/memory/memory.h"
 #include "absl/strings/string_view.h"
-#include "lib/smbios/structures.emb.h"
+#include "ecclesia/lib/smbios/structures.emb.h"
 
 namespace ecclesia {
 

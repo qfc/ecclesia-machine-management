@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "magent/sysmodel/x86/fru.h"
+#include "ecclesia/magent/sysmodel/x86/fru.h"
 
 #include <cstddef>
 #include <cstdint>
@@ -29,8 +29,8 @@
 #include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
 #include "absl/types/span.h"
-#include "magent/lib/eeprom/smbus_eeprom.h"
-#include "magent/lib/fru/fru.h"
+#include "ecclesia/magent/lib/eeprom/smbus_eeprom.h"
+#include "ecclesia/magent/lib/fru/fru.h"
 
 namespace ecclesia {
 

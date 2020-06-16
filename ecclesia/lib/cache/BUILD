@@ -3,7 +3,7 @@
 
 licenses(["notice"])
 
-package(default_visibility = ["//:library_users"])
+package(default_visibility = ["//ecclesia:library_users"])
 
 cc_library(
     name = "rcu",

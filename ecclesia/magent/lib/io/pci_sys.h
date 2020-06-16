@@ -21,8 +21,8 @@
 
 #include "absl/status/status.h"
 #include "absl/strings/str_format.h"
-#include "lib/apifs/apifs.h"
-#include "magent/lib/io/pci.h"
+#include "ecclesia/lib/apifs/apifs.h"
+#include "ecclesia/magent/lib/io/pci.h"
 
 namespace ecclesia {
 

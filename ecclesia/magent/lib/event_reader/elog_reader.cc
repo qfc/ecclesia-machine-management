@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "magent/lib/event_reader/elog_reader.h"
+#include "ecclesia/magent/lib/event_reader/elog_reader.h"
 
 #include <fcntl.h>
 #include <sys/mman.h>
@@ -27,10 +27,10 @@
 #include <queue>
 #include <string>
 
-#include "lib/smbios/structures.emb.h"
-#include "lib/smbios/system_event_log.h"
-#include "magent/lib/event_reader/elog.emb.h"
-#include "magent/lib/event_reader/event_reader.h"
+#include "ecclesia/lib/smbios/structures.emb.h"
+#include "ecclesia/lib/smbios/system_event_log.h"
+#include "ecclesia/magent/lib/event_reader/elog.emb.h"
+#include "ecclesia/magent/lib/event_reader/event_reader.h"
 #include "runtime/cpp/emboss_enum_view.h"
 #include "runtime/cpp/emboss_prelude.h"
 

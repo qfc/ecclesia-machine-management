@@ -5,5 +5,5 @@ licenses(["notice"])
 cc_library(
     name = "cleanup",
     hdrs = ["cleanup.h"],
-    visibility = ["//:library_users"],
+    visibility = ["//ecclesia:library_users"],
 )

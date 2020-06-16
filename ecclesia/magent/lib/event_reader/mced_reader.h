@@ -27,7 +27,7 @@
 #include "absl/synchronization/notification.h"
 #include "absl/types/optional.h"
 #include "absl/types/variant.h"
-#include "magent/lib/event_reader/event_reader.h"
+#include "ecclesia/magent/lib/event_reader/event_reader.h"
 
 namespace ecclesia {
 

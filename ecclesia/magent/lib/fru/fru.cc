@@ -21,7 +21,7 @@
 // Does not support internal use areas, but support for these
 // can be added if needed.
 
-#include "magent/lib/fru/fru.h"
+#include "ecclesia/magent/lib/fru/fru.h"
 
 #include <assert.h>
 #include <stdlib.h>
@@ -41,8 +41,8 @@
 #include "absl/status/status.h"
 #include "absl/strings/str_format.h"
 #include "absl/types/span.h"
-#include "lib/codec/text.h"
-#include "magent/lib/fru/common_header.emb.h"
+#include "ecclesia/lib/codec/text.h"
+#include "ecclesia/magent/lib/fru/common_header.emb.h"
 #include "runtime/cpp/emboss_prelude.h"
 
 namespace ecclesia {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "lib/devpath/devpath.h"
+#include "ecclesia/lib/devpath/devpath.h"
 
 #include <string>
 #include <vector>

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "magent/sysmodel/x86/cpu.h"
+#include "ecclesia/magent/sysmodel/x86/cpu.h"
 
 #include <cstdint>
 #include <string>
@@ -26,12 +26,12 @@
 #include "absl/strings/str_format.h"
 #include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
-#include "lib/io/constants.h"
-#include "lib/io/msr.h"
-#include "lib/smbios/processor_information.h"
-#include "lib/smbios/reader.h"
-#include "lib/smbios/structures.emb.h"
-#include "magent/lib/event_logger/indus_cpu_topology.h"
+#include "ecclesia/lib/io/constants.h"
+#include "ecclesia/lib/io/msr.h"
+#include "ecclesia/lib/smbios/processor_information.h"
+#include "ecclesia/lib/smbios/reader.h"
+#include "ecclesia/lib/smbios/structures.emb.h"
+#include "ecclesia/magent/lib/event_logger/indus_cpu_topology.h"
 #include "runtime/cpp/emboss_prelude.h"
 #include "re2/re2.h"
 

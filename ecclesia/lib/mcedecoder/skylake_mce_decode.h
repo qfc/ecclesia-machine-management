@@ -17,8 +17,8 @@
 #ifndef ECCLESIA_LIB_MCEDECODER_SKYLAKE_MCE_DECODE_H_
 #define ECCLESIA_LIB_MCEDECODER_SKYLAKE_MCE_DECODE_H_
 
-#include "lib/mcedecoder/dimm_translator.h"
-#include "lib/mcedecoder/mce_messages.h"
+#include "ecclesia/lib/mcedecoder/dimm_translator.h"
+#include "ecclesia/lib/mcedecoder/mce_messages.h"
 
 namespace mcedecoder {
 // Decode Intel Skylake machine check exception. Add the decoded attributes and

@@ -6,7 +6,7 @@
 
 licenses(["notice"])
 
-package(default_visibility = ["//:library_users"])
+package(default_visibility = ["//ecclesia:library_users"])
 
 cc_library(
     name = "bits",
@@ -17,7 +17,7 @@ cc_library(
 cc_library(
     name = "endian",
     hdrs = ["endian.h"],
-    visibility = ["//:library_users"],
+    visibility = ["//ecclesia:library_users"],
     deps = ["@com_google_absl//absl/numeric:int128"],
 )
 

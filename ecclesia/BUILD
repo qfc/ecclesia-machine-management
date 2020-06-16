@@ -13,7 +13,7 @@ exports_files(["LICENSE"])
 package_group(
     name = "library_users",
     packages = [
-        "//...",
+        "//ecclesia/...",
         "//platforms/ecclesia/...",
         "//platforms/gsys/...",
         "//third_party/blt/...",
@@ -24,9 +24,9 @@ package_group(
 package_group(
     name = "redfish_users",
     packages = [
-        "//lib/redfish/...",
-        "//mmaster/backends/redfish/...",
-        "//mmaster/frontends/...",
+        "//ecclesia/lib/redfish/...",
+        "//ecclesia/mmaster/backends/redfish/...",
+        "//ecclesia/mmaster/frontends/...",
         "//ops/hardware/hydra/common/megapede_power/...",
         "//platforms/ecclesia/mmaster/backends/redfish/...",
         "//platforms/ecclesia/mmaster/frontends/...",
@@ -37,7 +37,7 @@ package_group(
 package_group(
     name = "magent_library_users",
     packages = [
-        "//magent/...",
+        "//ecclesia/magent/...",
         "//platforms/ecclesia/magent/...",
     ],
 )
@@ -45,7 +45,7 @@ package_group(
 # Machine agent frontend code.
 package_group(
     name = "magent_frontend_users",
-    packages = ["//magent"],
+    packages = ["//ecclesia/magent"],
 )
 
 # Allowed users of the machine master API.
@@ -56,7 +56,7 @@ package_group(
         "//borg/slave/...",
         "//borg/test/...",
         "//cloud/platforms/hammurabi/netboot/...",
-        "//mmaster/...",
+        "//ecclesia/mmaster/...",
         "//platforms/ecclesia/lib/rpc/...",
         "//platforms/ecclesia/mmaster/...",
     ],
@@ -66,9 +66,9 @@ package_group(
 package_group(
     name = "mmaster_backend_users",
     packages = [
-        "//mmaster/backends/...",
-        "//mmaster/frontends/...",
-        "//mmaster/middles/...",
+        "//ecclesia/mmaster/backends/...",
+        "//ecclesia/mmaster/frontends/...",
+        "//ecclesia/mmaster/middles/...",
     ],
 )
 
@@ -76,27 +76,27 @@ package_group(
 package_group(
     name = "mmaster_middle_users",
     packages = [
-        "//mmaster/frontends/...",
-        "//mmaster/middles/...",
+        "//ecclesia/mmaster/frontends/...",
+        "//ecclesia/mmaster/middles/...",
     ],
 )
 
 # Machine master frontend code.
 package_group(
     name = "mmaster_frontend_users",
-    packages = ["//mmaster/mock/..."],
+    packages = ["//ecclesia/mmaster/mock/..."],
 )
 
 # Machine master config code.
 package_group(
     name = "mmaster_config_users",
-    packages = ["//mmaster/..."],
+    packages = ["//ecclesia/mmaster/..."],
 )
 
 # Users of the machine master mock daemon.
 package_group(
     name = "mmaster_mock_users",
-    packages = ["//mmaster/mock/..."],
+    packages = ["//ecclesia/mmaster/mock/..."],
 )
 
 # Tests which use the mmaster binary directly.

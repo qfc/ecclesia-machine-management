@@ -5,7 +5,7 @@ licenses(["notice"])
 cc_library(
     name = "event_reader",
     hdrs = ["event_reader.h"],
-    visibility = ["//:magent_library_users"],
+    visibility = ["//ecclesia:magent_library_users"],
     deps = [
         ":elog_emb",
         "@com_google_absl//absl/time",
@@ -23,7 +23,7 @@ cc_library(
     hdrs = [
         "mced_reader.h",
     ],
-    visibility = ["//:magent_library_users"],
+    visibility = ["//ecclesia:magent_library_users"],
     deps = [
         ":event_reader",
         "@com_google_absl//absl/base:core_headers",
@@ -40,12 +40,12 @@ cc_library(
     name = "elog_reader",
     srcs = ["elog_reader.cc"],
     hdrs = ["elog_reader.h"],
-    visibility = ["//:magent_library_users"],
+    visibility = ["//ecclesia:magent_library_users"],
     deps = [
         ":elog_emb",
         ":event_reader",
-        "//lib/smbios:reader",
-        "//lib/smbios:structures_emb",
+        "//ecclesia/lib/smbios:reader",
+        "//ecclesia/lib/smbios:structures_emb",
         "@com_google_absl//absl/types:optional",
         "@com_google_emboss//runtime/cpp:cpp_utils",
     ],
@@ -54,5 +54,5 @@ cc_library(
 emboss_cc_library(
     name = "elog_emb",
     srcs = ["elog.emb"],
-    visibility = ["//:magent_library_users"],
+    visibility = ["//ecclesia:magent_library_users"],
 )

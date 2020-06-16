@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "magent/lib/event_logger/indus_cpu_topology.h"
+#include "ecclesia/magent/lib/event_logger/indus_cpu_topology.h"
 
 #include <iostream>
 #include <string>

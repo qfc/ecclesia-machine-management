@@ -27,7 +27,7 @@
 #include "absl/strings/str_format.h"
 #include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
-#include "lib/types/fixed_range_int.h"
+#include "ecclesia/lib/types/fixed_range_int.h"
 
 namespace ecclesia {
 

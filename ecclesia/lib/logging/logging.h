@@ -60,8 +60,8 @@
 #define ECCLESIA_LIB_LOGGING_LOGGING_H_
 
 #include "absl/strings/string_view.h"
-#include "lib/logging/globals.h"
-#include "lib/logging/interfaces.h"
+#include "ecclesia/lib/logging/globals.h"
+#include "ecclesia/lib/logging/interfaces.h"
 
 namespace ecclesia {
 

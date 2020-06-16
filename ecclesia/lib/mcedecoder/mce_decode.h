@@ -20,9 +20,9 @@
 #include <memory>
 #include <utility>
 
-#include "lib/mcedecoder/cpu_topology.h"
-#include "lib/mcedecoder/dimm_translator.h"
-#include "lib/mcedecoder/mce_messages.h"
+#include "ecclesia/lib/mcedecoder/cpu_topology.h"
+#include "ecclesia/lib/mcedecoder/dimm_translator.h"
+#include "ecclesia/lib/mcedecoder/mce_messages.h"
 
 namespace mcedecoder {
 

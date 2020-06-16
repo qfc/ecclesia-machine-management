@@ -26,8 +26,8 @@
 #include "absl/synchronization/mutex.h"
 #include "absl/types/optional.h"
 #include "absl/types/span.h"
-#include "magent/lib/eeprom/eeprom.h"
-#include "magent/lib/io/smbus.h"
+#include "ecclesia/magent/lib/eeprom/eeprom.h"
+#include "ecclesia/magent/lib/io/smbus.h"
 
 namespace ecclesia {
 

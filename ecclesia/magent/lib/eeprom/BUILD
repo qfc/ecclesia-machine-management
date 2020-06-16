@@ -3,7 +3,7 @@
 
 licenses(["notice"])
 
-package(default_visibility = ["//:magent_library_users"])
+package(default_visibility = ["//ecclesia:magent_library_users"])
 
 cc_library(
     name = "eeprom",
@@ -13,7 +13,7 @@ cc_library(
         "smbus_eeprom.h",
     ],
     deps = [
-        "//magent/lib/io:smbus",
+        "//ecclesia/magent/lib/io:smbus",
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/synchronization",

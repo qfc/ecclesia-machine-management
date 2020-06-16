@@ -17,7 +17,7 @@
 #ifndef ECCLESIA_MAGENT_LIB_IO_PCI_CONSTS_H_
 #define ECCLESIA_MAGENT_LIB_IO_PCI_CONSTS_H_
 
-#include "magent/lib/io/pci_regs.h"
+#include "ecclesia/magent/lib/io/pci_regs.h"
 
 namespace ecclesia {
 

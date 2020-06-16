@@ -30,8 +30,8 @@
 #include <utility>
 
 #include "absl/status/status.h"
-#include "magent/lib/io/pci_location.h"
-#include "magent/lib/io/pci_regs.h"
+#include "ecclesia/magent/lib/io/pci_location.h"
+#include "ecclesia/magent/lib/io/pci_regs.h"
 
 namespace ecclesia {
 

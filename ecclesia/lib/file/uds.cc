@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "lib/file/uds.h"
+#include "ecclesia/lib/file/uds.h"
 
 #include <errno.h>
 #include <sys/stat.h>

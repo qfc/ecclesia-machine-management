@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "magent/lib/io/smbus_kernel_dev.h"
+#include "ecclesia/magent/lib/io/smbus_kernel_dev.h"
 
 #include <errno.h>
 #include <fcntl.h>
@@ -32,9 +32,9 @@
 #include "absl/status/status.h"
 #include "absl/strings/str_format.h"
 #include "absl/types/span.h"
-#include "lib/cleanup/cleanup.h"
-#include "lib/io/ioctl.h"
-#include "magent/lib/io/smbus.h"
+#include "ecclesia/lib/cleanup/cleanup.h"
+#include "ecclesia/lib/io/ioctl.h"
+#include "ecclesia/magent/lib/io/smbus.h"
 
 namespace ecclesia {
 

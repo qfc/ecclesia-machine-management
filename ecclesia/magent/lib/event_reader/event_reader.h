@@ -25,7 +25,7 @@
 #include "absl/time/time.h"
 #include "absl/types/optional.h"
 #include "absl/types/variant.h"
-#include "magent/lib/event_reader/elog.emb.h"
+#include "ecclesia/magent/lib/event_reader/elog.emb.h"
 #include "runtime/cpp/emboss_cpp_util.h"
 
 namespace ecclesia {

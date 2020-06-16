@@ -10,7 +10,7 @@ emboss_cc_library(
 emboss_cc_library(
     name = "structures_emb",
     srcs = ["structures.emb"],
-    visibility = ["//:library_users"],
+    visibility = ["//ecclesia:library_users"],
 )
 
 cc_library(
@@ -29,7 +29,7 @@ cc_library(
         "system_event_log.h",
     ],
     visibility = [
-        "//:library_users",
+        "//ecclesia:library_users",
     ],
     deps = [
         ":entry_point_emb",

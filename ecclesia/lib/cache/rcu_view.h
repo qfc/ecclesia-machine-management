@@ -34,8 +34,8 @@
 #define ECCLESIA_LIB_CACHE_RCU_VIEW_H_
 
 #include "absl/synchronization/mutex.h"
-#include "lib/cache/rcu_snapshot.h"
-#include "lib/cache/rcu_store.h"
+#include "ecclesia/lib/cache/rcu_snapshot.h"
+#include "ecclesia/lib/cache/rcu_store.h"
 
 namespace ecclesia {
 

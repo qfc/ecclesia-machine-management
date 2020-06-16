@@ -28,7 +28,7 @@
 #include "absl/status/status.h"
 #include "absl/strings/str_format.h"
 #include "absl/types/span.h"
-#include "lib/types/fixed_range_int.h"
+#include "ecclesia/lib/types/fixed_range_int.h"
 
 namespace ecclesia {
 

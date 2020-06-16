@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "lib/io/msr.h"
+#include "ecclesia/lib/io/msr.h"
 
 #include <array>
 #include <cstdint>
@@ -25,8 +25,8 @@
 
 #include "absl/status/status.h"
 #include "absl/types/span.h"
-#include "lib/apifs/apifs.h"
-#include "lib/codec/endian.h"
+#include "ecclesia/lib/apifs/apifs.h"
+#include "ecclesia/lib/codec/endian.h"
 
 namespace ecclesia {
 

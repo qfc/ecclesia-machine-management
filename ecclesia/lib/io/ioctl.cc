@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "lib/io/ioctl.h"
+#include "ecclesia/lib/io/ioctl.h"
 
 #include <sys/ioctl.h>
 

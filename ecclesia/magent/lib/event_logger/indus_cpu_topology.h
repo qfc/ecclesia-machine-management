@@ -28,8 +28,8 @@
 #include "absl/strings/numbers.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
-#include "lib/apifs/apifs.h"
-#include "lib/mcedecoder/cpu_topology.h"
+#include "ecclesia/lib/apifs/apifs.h"
+#include "ecclesia/lib/mcedecoder/cpu_topology.h"
 
 namespace ecclesia {
 

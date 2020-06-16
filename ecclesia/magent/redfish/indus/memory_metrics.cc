@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "magent/redfish/indus/memory_metrics.h"
+#include "ecclesia/magent/redfish/indus/memory_metrics.h"
 
 #include <memory>
 #include <string>
@@ -26,14 +26,14 @@
 #include "absl/time/time.h"
 #include "absl/types/optional.h"
 #include "absl/types/variant.h"
-#include "lib/mcedecoder/cpu_topology.h"
-#include "magent/lib/event_logger/indus_cpu_topology.h"
-#include "magent/lib/event_logger/indus_system_event_visitors.h"
-#include "magent/lib/event_logger/system_event_visitors.h"
-#include "magent/redfish/core/json_helper.h"
-#include "magent/redfish/core/redfish_keywords.h"
-#include "magent/redfish/core/resource.h"
-#include "magent/sysmodel/x86/sysmodel.h"
+#include "ecclesia/lib/mcedecoder/cpu_topology.h"
+#include "ecclesia/magent/lib/event_logger/indus_cpu_topology.h"
+#include "ecclesia/magent/lib/event_logger/indus_system_event_visitors.h"
+#include "ecclesia/magent/lib/event_logger/system_event_visitors.h"
+#include "ecclesia/magent/redfish/core/json_helper.h"
+#include "ecclesia/magent/redfish/core/redfish_keywords.h"
+#include "ecclesia/magent/redfish/core/resource.h"
+#include "ecclesia/magent/sysmodel/x86/sysmodel.h"
 #include "json/value.h"
 #include "tensorflow_serving/util/net_http/server/public/response_code_enum.h"
 #include "tensorflow_serving/util/net_http/server/public/server_request_interface.h"

@@ -20,10 +20,10 @@
 #include <string>
 
 #include "absl/strings/string_view.h"
-#include "magent/redfish/core/json_helper.h"
-#include "magent/redfish/core/redfish_keywords.h"
-#include "magent/redfish/core/resource.h"
-#include "magent/sysmodel/x86/sysmodel.h"
+#include "ecclesia/magent/redfish/core/json_helper.h"
+#include "ecclesia/magent/redfish/core/redfish_keywords.h"
+#include "ecclesia/magent/redfish/core/resource.h"
+#include "ecclesia/magent/sysmodel/x86/sysmodel.h"
 #include "json/value.h"
 #include "tensorflow_serving/util/net_http/server/public/server_request_interface.h"
 

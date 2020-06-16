@@ -17,8 +17,8 @@
 #ifndef ECCLESIA_MAGENT_REDFISH_INDUS_ROOT_H_
 #define ECCLESIA_MAGENT_REDFISH_INDUS_ROOT_H_
 
-#include "magent/redfish/core/redfish_keywords.h"
-#include "magent/redfish/core/resource.h"
+#include "ecclesia/magent/redfish/core/redfish_keywords.h"
+#include "ecclesia/magent/redfish/core/resource.h"
 #include "json/value.h"
 #include "tensorflow_serving/util/net_http/server/public/server_request_interface.h"
 

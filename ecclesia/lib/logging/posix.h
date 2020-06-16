@@ -23,8 +23,8 @@
 
 #include <string>
 
-#include "lib/logging/globals.h"
-#include "lib/logging/interfaces.h"
+#include "ecclesia/lib/logging/globals.h"
+#include "ecclesia/lib/logging/interfaces.h"
 
 namespace ecclesia {
 

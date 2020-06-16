@@ -52,8 +52,8 @@
 #include <utility>
 
 #include "absl/synchronization/mutex.h"
-#include "lib/logging/interfaces.h"
-#include "lib/time/clock.h"
+#include "ecclesia/lib/logging/interfaces.h"
+#include "ecclesia/lib/time/clock.h"
 
 namespace ecclesia {
 

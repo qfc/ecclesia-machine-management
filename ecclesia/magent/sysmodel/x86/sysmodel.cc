@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "magent/sysmodel/x86/sysmodel.h"
+#include "ecclesia/magent/sysmodel/x86/sysmodel.h"
 
 #include <cstddef>
 #include <memory>
@@ -26,15 +26,15 @@
 #include "absl/strings/string_view.h"
 #include "absl/synchronization/mutex.h"
 #include "absl/types/optional.h"
-#include "lib/smbios/reader.h"
-#include "lib/time/clock.h"
-#include "magent/lib/event_logger/event_logger.h"
-#include "magent/lib/event_reader/elog_reader.h"
-#include "magent/lib/event_reader/event_reader.h"
-#include "magent/lib/event_reader/mced_reader.h"
-#include "magent/sysmodel/x86/cpu.h"
-#include "magent/sysmodel/x86/dimm.h"
-#include "magent/sysmodel/x86/fru.h"
+#include "ecclesia/lib/smbios/reader.h"
+#include "ecclesia/lib/time/clock.h"
+#include "ecclesia/magent/lib/event_logger/event_logger.h"
+#include "ecclesia/magent/lib/event_reader/elog_reader.h"
+#include "ecclesia/magent/lib/event_reader/event_reader.h"
+#include "ecclesia/magent/lib/event_reader/mced_reader.h"
+#include "ecclesia/magent/sysmodel/x86/cpu.h"
+#include "ecclesia/magent/sysmodel/x86/dimm.h"
+#include "ecclesia/magent/sysmodel/x86/fru.h"
 
 namespace ecclesia {
 

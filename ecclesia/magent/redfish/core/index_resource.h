@@ -21,7 +21,7 @@
 
 #include "absl/strings/string_view.h"
 #include "absl/types/variant.h"
-#include "magent/redfish/core/resource.h"
+#include "ecclesia/magent/redfish/core/resource.h"
 #include "tensorflow_serving/util/net_http/server/public/httpserver_interface.h"
 #include "tensorflow_serving/util/net_http/server/public/response_code_enum.h"
 #include "tensorflow_serving/util/net_http/server/public/server_request_interface.h"

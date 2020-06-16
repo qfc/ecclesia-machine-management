@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "magent/sysmodel/x86/dimm.h"
+#include "ecclesia/magent/sysmodel/x86/dimm.h"
 
 #include <cstdint>
 #include <string>
@@ -22,10 +22,10 @@
 
 #include "absl/memory/memory.h"
 #include "absl/strings/string_view.h"
-#include "lib/smbios/memory_device.h"
-#include "lib/smbios/platform_translator.h"
-#include "lib/smbios/reader.h"
-#include "lib/smbios/structures.emb.h"
+#include "ecclesia/lib/smbios/memory_device.h"
+#include "ecclesia/lib/smbios/platform_translator.h"
+#include "ecclesia/lib/smbios/reader.h"
+#include "ecclesia/lib/smbios/structures.emb.h"
 #include "runtime/cpp/emboss_cpp_util.h"
 #include "runtime/cpp/emboss_prelude.h"
 

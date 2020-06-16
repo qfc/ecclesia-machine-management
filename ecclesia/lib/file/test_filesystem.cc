@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "lib/file/test_filesystem.h"
+#include "ecclesia/lib/file/test_filesystem.h"
 
 #include <errno.h>
 #include <fcntl.h>
@@ -29,12 +29,12 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_split.h"
 #include "absl/strings/string_view.h"
-#include "lib/cleanup/cleanup.h"
-#include "lib/file/dir.h"
-#include "lib/file/path.h"
-#include "lib/logging/globals.h"
-#include "lib/logging/logging.h"
-#include "lib/logging/posix.h"
+#include "ecclesia/lib/cleanup/cleanup.h"
+#include "ecclesia/lib/file/dir.h"
+#include "ecclesia/lib/file/path.h"
+#include "ecclesia/lib/logging/globals.h"
+#include "ecclesia/lib/logging/logging.h"
+#include "ecclesia/lib/logging/posix.h"
 
 namespace ecclesia {
 namespace {

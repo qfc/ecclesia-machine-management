@@ -9,7 +9,7 @@ cc_library(
     hdrs = ["apifs.h"],
     visibility = ["//visibility:public"],
     deps = [
-        "//lib/cleanup",
+        "//ecclesia/lib/cleanup",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings:str_format",
         "@com_google_absl//absl/types:span",

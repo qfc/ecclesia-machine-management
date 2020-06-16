@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "lib/file/path.h"
+#include "ecclesia/lib/file/path.h"
 
 #include <cstddef>
 #include <string>

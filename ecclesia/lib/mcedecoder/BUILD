@@ -6,7 +6,7 @@ licenses(["notice"])
 package_group(
     name = "mcedecoder_users",
     packages = [
-        "//magent/...",
+        "//ecclesia/magent/...",
         "//platforms/baremetal/healthagent/...",
     ],
 )

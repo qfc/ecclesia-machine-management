@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "magent/lib/event_reader/mced_reader.h"
+#include "ecclesia/magent/lib/event_reader/mced_reader.h"
 
 #include <errno.h>
 #include <string.h>
@@ -34,7 +34,7 @@
 #include "absl/synchronization/notification.h"
 #include "absl/time/time.h"
 #include "absl/types/optional.h"
-#include "magent/lib/event_reader/event_reader.h"
+#include "ecclesia/magent/lib/event_reader/event_reader.h"
 #include "re2/re2.h"
 
 namespace ecclesia {

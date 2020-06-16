@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-#include "lib/smbios/processor_information.h"
+#include "ecclesia/lib/smbios/processor_information.h"
 
 #include <string>
 
 #include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
-#include "lib/smbios/structures.emb.h"
+#include "ecclesia/lib/smbios/structures.emb.h"
 #include "runtime/cpp/emboss_prelude.h"
 
 namespace ecclesia {

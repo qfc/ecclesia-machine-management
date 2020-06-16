@@ -11,9 +11,9 @@ cc_library(
         "interfaces.h",
         "logging.h",
     ],
-    visibility = ["//:library_users"],
+    visibility = ["//ecclesia:library_users"],
     deps = [
-        "//lib/time:clock",
+        "//ecclesia/lib/time:clock",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/strings:str_format",
@@ -26,7 +26,7 @@ cc_library(
     name = "posix",
     srcs = ["posix.cc"],
     hdrs = ["posix.h"],
-    visibility = ["//:library_users"],
+    visibility = ["//ecclesia:library_users"],
     deps = [
         ":logging",
         "@com_google_absl//absl/strings:str_format",

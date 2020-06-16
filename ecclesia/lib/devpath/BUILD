@@ -4,7 +4,7 @@ cc_library(
     name = "devpath",
     srcs = ["devpath.cc"],
     hdrs = ["devpath.h"],
-    visibility = ["//:library_users"],
+    visibility = ["//ecclesia:library_users"],
     deps = [
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/types:optional",
@@ -16,7 +16,7 @@ cc_library(
     name = "transform",
     srcs = ["transform.cc"],
     hdrs = ["transform.h"],
-    visibility = ["//:mmaster_middle_users"],
+    visibility = ["//ecclesia:mmaster_middle_users"],
     deps = [
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/types:optional",

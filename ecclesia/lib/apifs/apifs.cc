@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "lib/apifs/apifs.h"
+#include "ecclesia/lib/apifs/apifs.h"
 
 #include <errno.h>
 #include <fcntl.h>
@@ -32,7 +32,7 @@
 #include "absl/status/status.h"
 #include "absl/strings/str_format.h"
 #include "absl/types/span.h"
-#include "lib/cleanup/cleanup.h"
+#include "ecclesia/lib/cleanup/cleanup.h"
 
 namespace ecclesia {
 

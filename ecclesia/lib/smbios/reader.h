@@ -21,11 +21,11 @@
 #include <string>
 #include <vector>
 
-#include "lib/smbios/bios.h"
-#include "lib/smbios/internal.h"
-#include "lib/smbios/memory_device.h"
-#include "lib/smbios/processor_information.h"
-#include "lib/smbios/system_event_log.h"
+#include "ecclesia/lib/smbios/bios.h"
+#include "ecclesia/lib/smbios/internal.h"
+#include "ecclesia/lib/smbios/memory_device.h"
+#include "ecclesia/lib/smbios/processor_information.h"
+#include "ecclesia/lib/smbios/system_event_log.h"
 
 namespace ecclesia {
 

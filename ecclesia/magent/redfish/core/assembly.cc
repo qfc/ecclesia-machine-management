@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "magent/redfish/core/assembly.h"
+#include "ecclesia/magent/redfish/core/assembly.h"
 
 #include <filesystem>
 #include <fstream>
@@ -23,8 +23,8 @@
 #include "absl/container/flat_hash_map.h"
 #include "absl/strings/match.h"
 #include "absl/strings/string_view.h"
-#include "magent/redfish/core/redfish_keywords.h"
-#include "magent/redfish/core/resource.h"
+#include "ecclesia/magent/redfish/core/redfish_keywords.h"
+#include "ecclesia/magent/redfish/core/resource.h"
 #include "json/json.h"
 #include "json/value.h"
 #include "tensorflow_serving/util/net_http/server/public/httpserver_interface.h"
