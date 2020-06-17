@@ -123,10 +123,20 @@ http_archive(
 
 http_archive(
     name = "ncurses",
-    build_file = "@//oss:ncurses.BUILD",
+    build_file = "@//ecclesia/oss:ncurses.BUILD",
     sha256 = "aa057eeeb4a14d470101eff4597d5833dcef5965331be3528c08d99cebaa0d17",
     strip_prefix = "ncurses-6.1",
     urls = [
         "http://ftp.gnu.org/pub/gnu/ncurses/ncurses-6.1.tar.gz"
+    ],
+)
+
+http_archive(
+    name = "libedit",
+    build_file = "@//ecclesia/oss:libedit.BUILD",
+    sha256 = "dbb82cb7e116a5f8025d35ef5b4f7d4a3cdd0a3909a146a39112095a2d229071",
+    strip_prefix = "libedit-20191231-3.1",
+    urls = [
+        "https://www.thrysoee.dk/editline/libedit-20191231-3.1.tar.gz",
     ],
 )

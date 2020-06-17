@@ -64,5 +64,5 @@ cc_library(
     includes = ["ncurses-6.1/ncurse/include"],
     linkopts = ["-lpthread"],
     linkstatic = 1,
-    default_visibility = ["//visibility:public"],
+    visibility = ["//visibility:public"],
 )
