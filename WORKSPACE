@@ -114,10 +114,10 @@ http_archive(
 
 http_archive(
     name = "boringssl",
-    sha256 = "c474665d0d2f1880ac1b10ec4e9d861783e2b78273777bea5a9f0d9c2f0f7f05",
-    strip_prefix = "boringssl-410a461df59ec34bcf2d7c4c183c7d293d331421",
+    sha256 = "66e1b0675d58b35f9fe3224b26381a6d707c3293eeee359c813b4859a6446714",
+    strip_prefix = "boringssl-9b7498d5aba71e545747d65dc65a4d4424477ff0",
     urls = [
-        "https://github.com/google/boringssl/archive/410a461df59ec34bcf2d7c4c183c7d293d331421.tar.gz",
+        "https://github.com/google/boringssl/archive/9b7498d5aba71e545747d65dc65a4d4424477ff0.tar.gz",
     ],
 )
 
@@ -138,5 +138,24 @@ http_archive(
     strip_prefix = "libedit-20191231-3.1",
     urls = [
         "https://www.thrysoee.dk/editline/libedit-20191231-3.1.tar.gz",
+    ],
+)
+
+http_archive(
+    name = "ipmitool",
+    build_file = "@//ecclesia/oss:ipmitool.BUILD",
+    sha256 = "e93fe5966d59e16bb4317c9c588cdf35d6100753a0ba957c493b064bcad52493",
+    strip_prefix = "ipmitool-1.8.18",
+    urls = [
+        "https://github.com/ipmitool/ipmitool/releases/download/IPMITOOL_1_8_18/ipmitool-1.8.18.tar.gz"
+    ],
+    patches = [
+        # Openssl 1.1 made struct EVP_MD_CTX opaque, so we have to heap
+        # allocate it.
+        "//ecclesia/oss:ipmitool.lanplus_crypt_impl.patch"
+    ],
+    patch_cmds = [
+        "./configure",
+        "cp ./config.h include",
     ],
 )
