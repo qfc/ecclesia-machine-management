@@ -29,7 +29,7 @@ cc_library(
     name = "dimm",
     srcs = ["dimm.cc"],
     hdrs = ["dimm.h"],
-    visibility = ["//ecclesia/magent/redfish/indus:__pkg__"],
+    visibility = ["//ecclesia:magent_library_users"],
     deps = [
         "//ecclesia/lib/smbios:reader",
         "//ecclesia/lib/smbios:structures_emb",
@@ -43,7 +43,7 @@ cc_library(
     name = "cpu",
     srcs = ["cpu.cc"],
     hdrs = ["cpu.h"],
-    visibility = ["//ecclesia/magent/redfish/indus:__pkg__"],
+    visibility = ["//ecclesia:magent_library_users"],
     deps = [
         "//ecclesia/lib/io:msr",
         "//ecclesia/lib/smbios:reader",
@@ -62,10 +62,7 @@ cc_library(
     name = "sysmodel_fru",
     srcs = ["fru.cc"],
     hdrs = ["fru.h"],
-    visibility = [
-        "//ecclesia/magent:__pkg__",
-        "//ecclesia/magent/redfish/indus:__pkg__",
-    ],
+    visibility = ["//ecclesia:magent_library_users"],
     deps = [
         "//ecclesia/magent/lib/eeprom",
         "//ecclesia/magent/lib/fru:ipmi_fru",

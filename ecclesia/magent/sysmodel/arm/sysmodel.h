@@ -17,18 +17,7 @@
 #ifndef ECCLESIA_MAGENT_SYSMODEL_INTERFACE_H_
 #define ECCLESIA_MAGENT_SYSMODEL_INTERFACE_H_
 
-#include <cstddef>
-#include <memory>
-#include <string>
-#include <utility>
-#include <vector>
-
-#include "absl/base/thread_annotations.h"
-#include "absl/container/flat_hash_map.h"
-#include "absl/strings/string_view.h"
-#include "absl/synchronization/mutex.h"
 #include "absl/types/optional.h"
-#include "absl/types/span.h"
 
 namespace ecclesia {
 

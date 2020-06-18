@@ -22,6 +22,7 @@
 #include <unistd.h>
 
 #include <cstdio>
+#include <cstdlib>
 #include <string>
 #include <utility>
 #include <vector>
@@ -38,6 +39,9 @@
 
 namespace ecclesia {
 namespace {
+
+// Path of the ecclesia root, relative to the build environment WORKSPACE root.
+constexpr absl::string_view kEcclesiaRoot = "ecclesia";
 
 // Make a directory exist. This will create the directory if it does not exist
 // and do nothing if it already does.
@@ -88,6 +92,22 @@ void RemoveDirectoryTree(const std::string &path) {
 }
 
 }  // namespace
+
+std::string GetTestDataDependencyPath(absl::string_view path) {
+  char *srcdir = std::getenv("TEST_SRCDIR");
+  Check(srcdir, "TEST_SRCDIR environment variable is defined");
+  return JoinFilePaths(srcdir, kEcclesiaRoot, path);
+}
+
+std::string GetTestTempdirPath() {
+  char *tmpdir = std::getenv("TEST_TMPDIR");
+  Check(tmpdir, "TEST_TMPDIR environment variable is defined");
+  return tmpdir;
+}
+
+std::string GetTestTempdirPath(absl::string_view path) {
+  return JoinFilePaths(GetTestTempdirPath(), path);
+}
 
 TestFilesystem::TestFilesystem(std::string root) : root_(std::move(root)) {
   MakeDirectoryExist(root_);

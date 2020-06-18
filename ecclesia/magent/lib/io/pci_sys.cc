@@ -16,9 +16,17 @@
 
 #include "ecclesia/magent/lib/io/pci_sys.h"
 
+#include <array>
+#include <cstddef>
+#include <cstdint>
+
 #include "absl/status/status.h"
+#include "absl/strings/str_format.h"
 #include "absl/types/span.h"
+#include "ecclesia/lib/apifs/apifs.h"
 #include "ecclesia/lib/codec/endian.h"
+#include "ecclesia/magent/lib/io/pci.h"
+#include "ecclesia/magent/lib/io/pci_location.h"
 
 namespace ecclesia {
 

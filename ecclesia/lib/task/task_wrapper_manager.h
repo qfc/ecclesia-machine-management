@@ -18,6 +18,8 @@
 #define ECCLESIA_LIB_TASK_TASK_WRAPPER_MANAGER_H_
 
 #include <cassert>
+#include <memory>
+#include <utility>
 
 #include "ecclesia/lib/task/manager.h"
 #include "ecclesia/lib/task/task.h"

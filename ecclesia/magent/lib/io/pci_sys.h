@@ -19,10 +19,13 @@
 #ifndef ECCLESIA_MAGENT_LIB_IO_PCI_SYS_H_
 #define ECCLESIA_MAGENT_LIB_IO_PCI_SYS_H_
 
+#include <cstddef>
+#include <cstdint>
+
 #include "absl/status/status.h"
-#include "absl/strings/str_format.h"
 #include "ecclesia/lib/apifs/apifs.h"
 #include "ecclesia/magent/lib/io/pci.h"
+#include "ecclesia/magent/lib/io/pci_location.h"
 
 namespace ecclesia {
 

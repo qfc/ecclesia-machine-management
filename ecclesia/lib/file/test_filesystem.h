@@ -14,6 +14,30 @@
  * limitations under the License.
  */
 
+// Filesystem utilities for testing. We provide both functions for finding
+// data file paths and temporary paths, as well as a utility class for setting
+// up simulated filesystem trees.
+
+#ifndef ECCLESIA_LIB_FILE_TEST_FILESYSTEM_H_
+#define ECCLESIA_LIB_FILE_TEST_FILESYSTEM_H_
+
+#include <string>
+
+#include "absl/strings/string_view.h"
+
+namespace ecclesia {
+
+// Find the path for a data dependency in a test. The given path should be
+// relative to the "ecclesia" root in the source tree. For example if this
+// header was used as a data dependency then the path to pass into the function
+// would be "lib/file/test_filesystem.h".
+std::string GetTestDataDependencyPath(absl::string_view path);
+
+// Find a path in the test temporary directory. Also provided as a 0-arg version
+// that simply returns the test temporary directory itself.
+std::string GetTestTempdirPath();
+std::string GetTestTempdirPath(absl::string_view path);
+
 // A utility class to make it easy to set up a filesystem layout for testing.
 //
 // The class is designed to be pointed at a directory which will be acting as
@@ -37,16 +61,6 @@
 //
 // The functions are expected to be given absolute paths, with "/" corresponding
 // to the root of the filesystem.
-
-#ifndef ECCLESIA_LIB_FILE_TEST_FILESYSTEM_H_
-#define ECCLESIA_LIB_FILE_TEST_FILESYSTEM_H_
-
-#include <string>
-
-#include "absl/strings/string_view.h"
-
-namespace ecclesia {
-
 class TestFilesystem {
  public:
   // Create a test filesystem object rooted at the given directory path. This

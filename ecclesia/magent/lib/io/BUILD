@@ -76,6 +76,7 @@ cc_library(
     visibility = ["//ecclesia:magent_library_users"],
     deps = [
         ":pci",
+        ":pci_location",
         "//ecclesia/lib/apifs",
         "//ecclesia/lib/codec:endian",
         "@com_google_absl//absl/status",

@@ -19,10 +19,14 @@
 #ifndef ECCLESIA_MAGENT_LIB_IPMI_IPMI_H_
 #define ECCLESIA_MAGENT_LIB_IPMI_IPMI_H_
 
+#include <cstddef>
 #include <cstdint>
+#include <string>
 #include <tuple>
+#include <vector>
 
 #include "absl/status/status.h"
+#include "absl/types/span.h"
 
 namespace ecclesia {
 

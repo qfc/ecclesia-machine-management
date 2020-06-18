@@ -33,6 +33,9 @@
 #ifndef ECCLESIA_LIB_CACHE_RCU_VIEW_H_
 #define ECCLESIA_LIB_CACHE_RCU_VIEW_H_
 
+#include <utility>
+
+#include "absl/base/thread_annotations.h"
 #include "absl/synchronization/mutex.h"
 #include "ecclesia/lib/cache/rcu_snapshot.h"
 #include "ecclesia/lib/cache/rcu_store.h"
