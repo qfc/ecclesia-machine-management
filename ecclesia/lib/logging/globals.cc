@@ -50,6 +50,14 @@ void DefaultLogger::Write(WriteParameters params) {
   }
 }
 
+LogMessageStreamAndAbort::LogMessageStreamAndAbort(LogMessageStream lms)
+    : WrappedLogMessageStream(*this, std::move(lms)) {}
+
+LogMessageStreamAndAbort::~LogMessageStreamAndAbort() {
+  lms_.Flush();
+  std::abort();
+}
+
 LoggerStreamFactory::LoggerStreamFactory(
     std::unique_ptr<LoggerInterface> logger)
     : logger_(std::move(logger)) {}

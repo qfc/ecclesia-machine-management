@@ -48,7 +48,7 @@ constexpr absl::string_view kEcclesiaRoot = "ecclesia";
 void MakeDirectoryExist(const std::string &path) {
   int rc = mkdir(path.c_str(), 0755);
   if (rc < 0 && errno != EEXIST) {
-    PosixLog(FatalLog) << "mkdir() failed for dir " << path;
+    PosixFatalLog() << "mkdir() failed for dir " << path;
   }
 }
 
@@ -59,14 +59,14 @@ void OpenAndWriteFile(const std::string &path, int flags,
   // Open the file.
   int fd = open(path.c_str(), flags, S_IRWXU);
   if (fd == -1) {
-    PosixLog(FatalLog) << "open() failed for file " << path;
+    PosixFatalLog() << "open() failed for file " << path;
   }
   auto fd_closer = FdCloser(fd);
 
   // Write the file. Fail if the write fails, OR if it's too short.
   int rc = write(fd, data.data(), data.size());
   if (rc == -1) {
-    PosixLog(FatalLog) << "write() failed for file " << path;
+    PosixFatalLog() << "write() failed for file " << path;
   } else if (rc < data.size()) {
     FatalLog() << "write() was unable to write the full contents to " << path;
   }
@@ -86,7 +86,7 @@ void RemoveDirectoryTree(const std::string &path) {
     }
     // If the last remove failed the we can't recover.
     if (rc == -1) {
-      PosixLog(FatalLog) << "remove() failed for path " << path;
+      PosixFatalLog() << "remove() failed for path " << path;
     }
   });
 }
@@ -164,7 +164,7 @@ void TestFilesystem::CreateSymlink(absl::string_view target,
   // Create the symlink.
   int rc = symlink(full_target.c_str(), GetTruePath(link_path).c_str());
   if (rc == -1) {
-    PosixLog(FatalLog) << "symlink() failed for " << link_path << " -> "
+    PosixFatalLog() << "symlink() failed for " << link_path << " -> "
                        << "target";
   }
 }

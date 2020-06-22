@@ -65,35 +65,26 @@
 
 namespace ecclesia {
 
-// Generic function for logging to a numeric log level. Normally only needed in
-// contexts where you need the log level to be parameterized.
-template <int LogLevel>
-LogMessageStream WriteLog(SourceLocation loc = SourceLocation::current()) {
-  static_assert(LogLevel >= 0, "log levels must be positive");
-  return GetGlobalLogger().MakeStream(LogLevel, loc);
-}
-
-// Alias functions with more meaningful names for log levels 0-4. Generally
-// preferred in most code.
-inline LogMessageStream FatalLog(
+// Logging functions for the 5 standard log levels.
+inline LogMessageStreamAndAbort FatalLog(
     SourceLocation loc = SourceLocation::current()) {
-  return WriteLog<0>(loc);
+  return LogMessageStreamAndAbort(GetGlobalLogger().MakeStream(0, loc));
 }
 inline LogMessageStream ErrorLog(
     SourceLocation loc = SourceLocation::current()) {
-  return WriteLog<1>(loc);
+  return GetGlobalLogger().MakeStream(1, loc);
 }
 inline LogMessageStream WarningLog(
     SourceLocation loc = SourceLocation::current()) {
-  return WriteLog<2>(loc);
+  return GetGlobalLogger().MakeStream(2, loc);
 }
 inline LogMessageStream InfoLog(
     SourceLocation loc = SourceLocation::current()) {
-  return WriteLog<3>(loc);
+  return GetGlobalLogger().MakeStream(3, loc);
 }
 inline LogMessageStream DebugLog(
     SourceLocation loc = SourceLocation::current()) {
-  return WriteLog<4>(loc);
+  return GetGlobalLogger().MakeStream(4, loc);
 }
 
 // An function that will check a condition and log a fatal error if it fails.
@@ -116,7 +107,9 @@ inline LogMessageStream Check(bool condition, absl::string_view description,
   if (condition) {
     return GetGlobalLogger().MakeNullStream();
   } else {
-    return FatalLog(loc) << "Check (" << description << ") failed ";
+    auto fatal_logger = GetGlobalLogger().MakeStream(0, loc);
+    fatal_logger << "Check (" << description << ") failed ";
+    return fatal_logger;
   }
 }
 

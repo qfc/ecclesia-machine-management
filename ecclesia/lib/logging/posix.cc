@@ -17,8 +17,10 @@
 #include "ecclesia/lib/logging/posix.h"
 
 #include <cerrno>
+#include <cstdlib>
 #include <string>
 #include <system_error>
+#include <utility>
 
 #include "absl/strings/str_format.h"
 #include "ecclesia/lib/logging/globals.h"
@@ -31,10 +33,55 @@ std::string PosixErrorMessage(int errno_value) {
   return absl::StrFormat("POSIX error %d [%s]", errno_value, ec.message());
 }
 
-LogMessageStream PosixLog(LogMessageStream (*log_func)(SourceLocation),
-                          SourceLocation loc) {
+PosixLogMessageStream::PosixLogMessageStream(int captured_errno,
+                                             LogMessageStream lms)
+    : WrappedLogMessageStream(*this, std::move(lms)),
+      captured_errno_(captured_errno) {}
+
+PosixLogMessageStream::~PosixLogMessageStream() {
+  lms_ << PosixErrorMessage(captured_errno_);
+  lms_.Flush();
+}
+
+PosixLogMessageStreamAndAbort::PosixLogMessageStreamAndAbort(
+    int captured_errno, LogMessageStream lms)
+    : WrappedLogMessageStream(*this, std::move(lms)),
+      captured_errno_(captured_errno) {}
+
+PosixLogMessageStreamAndAbort::~PosixLogMessageStreamAndAbort() {
+  lms_ << PosixErrorMessage(captured_errno_);
+  lms_.Flush();
+  std::abort();
+}
+
+PosixLogMessageStreamAndAbort PosixFatalLog(SourceLocation loc) {
   int captured_errno = errno;
-  return log_func(loc) << PosixErrorMessage(captured_errno) << " ";
+  return PosixLogMessageStreamAndAbort(captured_errno,
+                                       GetGlobalLogger().MakeStream(0, loc));
+};
+
+PosixLogMessageStream PosixErrorLog(SourceLocation loc) {
+  int captured_errno = errno;
+  return PosixLogMessageStream(captured_errno,
+                               GetGlobalLogger().MakeStream(1, loc));
+}
+
+PosixLogMessageStream PosixWarningLog(SourceLocation loc) {
+  int captured_errno = errno;
+  return PosixLogMessageStream(captured_errno,
+                               GetGlobalLogger().MakeStream(2, loc));
+}
+
+PosixLogMessageStream PosixInfoLog(SourceLocation loc) {
+  int captured_errno = errno;
+  return PosixLogMessageStream(captured_errno,
+                               GetGlobalLogger().MakeStream(3, loc));
+}
+
+PosixLogMessageStream PosixDebugLog(SourceLocation loc) {
+  int captured_errno = errno;
+  return PosixLogMessageStream(captured_errno,
+                               GetGlobalLogger().MakeStream(4, loc));
 }
 
 }  // namespace ecclesia

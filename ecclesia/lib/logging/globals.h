@@ -51,6 +51,7 @@
 #include <memory>
 #include <utility>
 
+#include "absl/base/attributes.h"
 #include "absl/synchronization/mutex.h"
 #include "ecclesia/lib/logging/interfaces.h"
 #include "ecclesia/lib/time/clock.h"
@@ -88,14 +89,8 @@ class DefaultLogger : public LoggerInterface {
 class LogMessageStream {
  public:
   // When the LogMessage is destroyed it will flush its contents out to the
-  // underlying logger. If logger is null then it does nothing.
-  ~LogMessageStream() {
-    if (logger_) {
-      logger_->Write({.log_level = log_level_,
-                      .source_location = source_location_,
-                      .text = stream_.str()});
-    }
-  }
+  // underlying logger.
+  ~LogMessageStream() { Flush(); }
 
   // You can't copy or assign to a message stream, but you can move it. This is
   // because message stream is basically intended to be used as a temporary
@@ -115,12 +110,23 @@ class LogMessageStream {
   }
   LogMessageStream &operator=(LogMessageStream &&other) = delete;
 
+  // Manually flush the log message stream out. After this is called the logger
+  // will be set to nullptr and subsequent flushes will do nothing.
+  void Flush() {
+    if (logger_) {
+      logger_->Write({.log_level = log_level_,
+                      .source_location = source_location_,
+                      .text = stream_.str()});
+      logger_ = nullptr;
+    }
+  }
+
   // Implement the stream operator (<<) for the log message stream. Under the
   // covers this writes to the underlying ostringstream.
   template <typename T>
-  friend LogMessageStream operator<<(LogMessageStream lms, T &&value) {
-    lms.stream_ << std::forward<T>(value);
-    return lms;
+  LogMessageStream &operator<<(T &&value) {
+    stream_ << std::forward<T>(value);
+    return *this;
   }
 
  private:
@@ -140,6 +146,45 @@ class LogMessageStream {
 
   // A string stream used to accumulate the log text.
   std::ostringstream stream_;
+};
+
+// CRTP style wrapper class that can be used to wrap a log messages stream
+// and hook additional behavior into its destruction, in particular appending
+// messages to the stream _after_ the user messages. Classes which use this can
+// do this by implementing their own destructor.
+template <typename T>
+class WrappedLogMessageStream {
+ public:
+  // Subclasses must pass in a refernece to themselves as well as the wrapped
+  // stream object. The reference is needed to support generic functions that
+  // return a reference to T.
+  WrappedLogMessageStream(T &true_this, LogMessageStream lms)
+      : true_this_(true_this), lms_(std::move(lms)) {}
+
+  template <typename V>
+  T &operator<<(V &&value) {
+    lms_ << std::forward<V>(value);
+    return true_this_;
+  }
+
+ protected:
+  T &true_this_;
+  LogMessageStream lms_;
+};
+
+// Wrapper around LogMessageStream that will abort in its destructor. The
+// destructor is marked as noreturn so that the compiler will understand that
+// execution will not proceed after a fatal logging line.
+class LogMessageStreamAndAbort
+    : public WrappedLogMessageStream<LogMessageStreamAndAbort> {
+ public:
+  explicit LogMessageStreamAndAbort(LogMessageStream lms);
+
+  LogMessageStreamAndAbort(const LogMessageStreamAndAbort &other) = delete;
+  LogMessageStreamAndAbort &operator=(const LogMessageStreamAndAbort &other) =
+      delete;
+
+  ABSL_ATTRIBUTE_NORETURN ~LogMessageStreamAndAbort();
 };
 
 // Class that wraps a LoggerInterface implementation that can be used to

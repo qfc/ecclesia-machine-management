@@ -14,6 +14,7 @@ cc_library(
     visibility = ["//ecclesia:library_users"],
     deps = [
         "//ecclesia/lib/time:clock",
+        "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/strings:str_format",
@@ -29,6 +30,7 @@ cc_library(
     visibility = ["//ecclesia:library_users"],
     deps = [
         ":logging",
+        "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/strings:str_format",
     ],
 )

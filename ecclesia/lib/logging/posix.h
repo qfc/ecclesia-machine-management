@@ -23,6 +23,7 @@
 
 #include <string>
 
+#include "absl/base/attributes.h"
 #include "ecclesia/lib/logging/globals.h"
 #include "ecclesia/lib/logging/interfaces.h"
 
@@ -32,15 +33,52 @@ namespace ecclesia {
 // error number as well as a standard string message describing it.
 std::string PosixErrorMessage(int errno_value);
 
-// Logging function that can be used to wrap an standard log sink operation but
-// which will prepend the log message with a generic POSIX error, using the
-// message from PosixErrorMessage. Expected to be used as in the form of:
-//
-//   PosixLog(ErrorLog) << "my message";
-//
-// Which will write out an error log that starts with the generic POSIX error.
-LogMessageStream PosixLog(LogMessageStream (*log_func)(SourceLocation),
-                          SourceLocation loc = SourceLocation::current());
+// Wrapper around LogMessageStream that will append the PosixErrorMessage output
+// just before the contents are flushed.
+class PosixLogMessageStream
+    : public WrappedLogMessageStream<PosixLogMessageStream> {
+ public:
+  PosixLogMessageStream(int captured_errno, LogMessageStream lms);
+
+  PosixLogMessageStream(const PosixLogMessageStream &other) = delete;
+  PosixLogMessageStream &operator=(const PosixLogMessageStream &other) = delete;
+
+  ~PosixLogMessageStream();
+
+ private:
+  int captured_errno_;
+};
+
+// Wrapper that also adds in an abort for fatal logs, similar to the standard
+// wrapper used by FatalLog.
+class PosixLogMessageStreamAndAbort
+    : public WrappedLogMessageStream<PosixLogMessageStreamAndAbort> {
+ public:
+  PosixLogMessageStreamAndAbort(int captured_errno, LogMessageStream lms);
+
+  PosixLogMessageStreamAndAbort(const PosixLogMessageStreamAndAbort &other) =
+      delete;
+  PosixLogMessageStreamAndAbort &operator=(
+      const PosixLogMessageStreamAndAbort &other) = delete;
+
+  ABSL_ATTRIBUTE_NORETURN ~PosixLogMessageStreamAndAbort();
+
+ private:
+  int captured_errno_;
+};
+
+// Logging functions that capture errno append PosixErrorMessage to the logging.
+// Each Posix*Log corresponds to the standard *Log function.
+PosixLogMessageStreamAndAbort PosixFatalLog(
+    SourceLocation loc = SourceLocation::current());
+PosixLogMessageStream PosixErrorLog(
+    SourceLocation loc = SourceLocation::current());
+PosixLogMessageStream PosixWarningLog(
+    SourceLocation loc = SourceLocation::current());
+PosixLogMessageStream PosixInfoLog(
+    SourceLocation loc = SourceLocation::current());
+PosixLogMessageStream PosixDebugLog(
+    SourceLocation loc = SourceLocation::current());
 
 }  // namespace ecclesia
 
