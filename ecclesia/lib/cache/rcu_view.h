@@ -92,21 +92,18 @@ class TranslatedRcuView : public RcuView<ToType> {
   TranslatedRcuView(const TranslatedRcuView &other) = delete;
   TranslatedRcuView &operator=(const TranslatedRcuView &other) = delete;
 
-  // Read will check if the underlying store has reported a change. If so, it
-  // will rebuild the cache using the subclass Translate function and notify all
-  // snapshot that a change has occurred. If the store is unchanged, the cached
-  // snapshot will be returned.
+  // Read will check if the current snapshot is still fresh. If it is not it
+  // will rebuild the cache using the subclass Translate function. If the store
+  // is still fresh then the cached snapshot will be returned.
   RcuSnapshot<ToType> Read() const override {
     absl::MutexLock ml(&cache_.mutex);
-    if (cache_.change_notification.HasTriggered()) {
-      cache_.change_notification.Reset();
+    if (!cache_.to_snapshot.IsFresh()) {
       auto from_snapshot = store_.Read();
-      from_snapshot.RegisterNotification(cache_.change_notification);
       ToType new_translation = Translate(*from_snapshot);
-      cache_.info.invalidator.InvalidateSnapshot();
-      cache_.info = RcuSnapshot<ToType>::Create(std::move(new_translation));
+      cache_.to_snapshot = RcuSnapshot<ToType>::CreateDependent(
+          RcuSnapshotDependsOn(from_snapshot), std::move(new_translation));
     }
-    return cache_.info.snapshot;
+    return cache_.to_snapshot;
   }
 
   // Subclasses will override this with an implementation which translate the
@@ -117,12 +114,10 @@ class TranslatedRcuView : public RcuView<ToType> {
   const RcuStore<FromType> &store_;
   // Internal cache storing the translation of the ToType view based on store_.
   mutable struct Cache {
-    Cache() : info(RcuSnapshot<ToType>::Create()), change_notification(true) {}
+    Cache() : to_snapshot(RcuSnapshot<ToType>::CreateStale()) {}
 
     absl::Mutex mutex;
-    typename RcuSnapshot<ToType>::WithInvalidator info ABSL_GUARDED_BY(mutex);
-    // change_notification listens for a notification from store_.
-    RcuNotification change_notification ABSL_GUARDED_BY(mutex);
+    RcuSnapshot<ToType> to_snapshot ABSL_GUARDED_BY(mutex);
   } cache_;
 };
 

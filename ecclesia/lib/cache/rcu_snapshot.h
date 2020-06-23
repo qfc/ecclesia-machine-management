@@ -47,6 +47,12 @@
 // of the snapshot should invalidate the existing one and then create a new
 // snapshot instance.
 //
+// Alternatively, in cases where you have a snapshot that is derived from data
+// coming from other snapshots, instead of using Create to construct a snapshot
+// and manually checking if the underlying data is invalid, you can instead use
+// the alternative CreateDependent factory to explicitly indicate what snapshots
+// the base snapshot depends on. In that case the dependent snapshot will be
+// automatically invalidated when any of its dependencies are.
 //
 // Notes on thread safety:
 // In general, all of the (const) accessor functions provided by RcuSnapshot and
@@ -68,6 +74,7 @@
 #include <atomic>
 #include <functional>
 #include <memory>
+#include <tuple>
 #include <utility>
 #include <vector>
 
@@ -97,7 +104,10 @@ class RcuNotification {
 
   // Trigger the actual notification. The can be called more than once if a
   // notification is registered with multiple snapshots.
-  void Notify() { triggered_ = true; }
+  void Notify() {
+    triggered_ = true;
+    if (invalidate_func_) invalidate_func_();
+  }
 
   // Unregister the notification with any snapshots it is associated with and
   // reset it to an unfired state. This can be safely called on a notification
@@ -125,8 +135,17 @@ class RcuNotification {
   // function is still successful since there was nothing to remove from.
   std::vector<std::function<void()>> remove_from_snapshot_funcs_;
 
+  // Function to invalidate a snapshot when this notification is triggered. This
+  // is used by snapshots in their own internal "am I stale" notification so
+  // that when the snapshot gets invalidated any notifications watching it will
+  // also be triggered. A user-created notification will never have this set.
+  //
+  // Note that Notify can be called multiple times and can be called in parallel
+  // so it is important that this function is threadsafe and idempotent.
+  std::function<void()> invalidate_func_;
+
   // When a notification is registered with an RcuSnapshot it will add itself
-  // to the snapshots vector.
+  // to the remove-from-snapshots vector.
   template <typename T>
   friend class RcuSnapshot;
 };
@@ -164,6 +183,24 @@ class RcuInvalidator {
   friend class RcuSnapshot;
 };
 
+// Utility class used to encapsulate a variable set of snapshot arguments to the
+// RcuSnapshot::CreateDependent factory. Acts as a thin wrapper that captures a
+// tuple of references to all of the arguments. Includes a deduction guide so
+// that you can construct them with "RcuSnapshotDependsOn(s1, s2, s3)" style
+// calls instead of having to spell out the types.
+template <typename... SnapshotArgs>
+class RcuSnapshotDependsOn {
+ public:
+  RcuSnapshotDependsOn(SnapshotArgs &... args) : snapshots_(args...) {}
+
+ private:
+  template <typename T>
+  friend class RcuSnapshot;
+  std::tuple<SnapshotArgs &...> snapshots_;
+};
+template <class... SnapshotArgs>
+RcuSnapshotDependsOn(SnapshotArgs...) -> RcuSnapshotDependsOn<SnapshotArgs...>;
+
 template <typename T>
 class RcuSnapshot {
  public:
@@ -190,7 +227,7 @@ class RcuSnapshot {
                                                object.snapshot.data_ptr_)]() {
       if (auto shared_data_ptr = weak_data_ptr.lock()) {
         absl::MutexLock ml(&shared_data_ptr->mutex);
-        shared_data_ptr->fresh = false;
+        shared_data_ptr->stale.Notify();
         // Trigger all of the notifications. After this we can clear the
         // notifications since they'll never be re-triggered.
         for (RcuNotification *notification : shared_data_ptr->notifications) {
@@ -200,6 +237,61 @@ class RcuSnapshot {
       }
     };
     return object;
+  }
+
+  // Create a snapshot that depends on other snapshots.
+  //
+  // The first argument to the function is an RcuSnapshotDependsOn tuple where
+  // each member is either an RcuSnapshot instance, or a std::vector of
+  // RcuSnapshot instances.
+  //
+  // Unlike snapshots created via Create, this snapshot does not give you an
+  // invalidator that can be called directly. Instead it is automatically
+  // invalidated if any of the snapshots it depends on are. Note that this means
+  // the snapshot might not be fresh even at the moment it is constructed, if
+  // none of the snapshots are.
+  template <typename... Args, typename... SnapshotArgs>
+  static RcuSnapshot<T> CreateDependent(
+      const RcuSnapshotDependsOn<SnapshotArgs...> &depends_on,
+      Args &&... args) {
+    RcuSnapshot<T> snapshot(std::forward<Args>(args)...);
+
+    // Populate the notification with a function that can invalidate the newly
+    // created snapshot object. The function will be bound to a weak_ptr to the
+    // snapshot's underlying data block.
+    snapshot.data_ptr_->stale.invalidate_func_ =
+        [weak_data_ptr = std::weak_ptr<Data>(snapshot.data_ptr_)]() {
+          if (auto shared_data_ptr = weak_data_ptr.lock()) {
+            absl::MutexLock ml(&shared_data_ptr->mutex);
+            // Trigger all of the notifications. After this we can clear the
+            // notifications since they'll never be re-triggered.
+            for (RcuNotification *notification :
+                 shared_data_ptr->notifications) {
+              notification->Notify();
+            }
+            shared_data_ptr->notifications.clear();
+          }
+        };
+
+    // Register with all of the dependent snapshots.
+    std::apply(
+        [&](auto &... params) {
+          snapshot.RegisterWithDependentSnapshots(params...);
+        },
+        depends_on.snapshots_);
+    return snapshot;
+  }
+
+  // Create a pre-invalidated snapshot that contains some fixed data.
+  //
+  // The snapshot will work, but will be considered stale immediately upon
+  // creation. This is useful for situations where you have a snapshot that you
+  // want to initialize lazily.
+  template <typename... Args>
+  static RcuSnapshot<T> CreateStale(Args &&... args) {
+    RcuSnapshot<T> snapshot(std::forward<Args>(args)...);
+    snapshot.data_ptr_->stale.Notify();
+    return snapshot;
   }
 
   // The type is copyable and movable, just like a shared_ptr would be.
@@ -229,14 +321,14 @@ class RcuSnapshot {
   // underlying data store now has new data.
   bool IsFresh() const {
     absl::MutexLock ml(&data_ptr_->mutex);
-    return data_ptr_->fresh;
+    return !data_ptr_->stale.HasTriggered();
   }
 
   // Register a notification to be triggered. Note that if the snapshot is
   // already invalid this may immediately trigger it.
   void RegisterNotification(RcuNotification &notification) {
     absl::MutexLock ml(&data_ptr_->mutex);
-    if (data_ptr_->fresh) {
+    if (!data_ptr_->stale.HasTriggered()) {
       // The data is still fresh, so actually register the notification. This
       // requires provding the notification with a lambda that can remove itself
       // from this snapshot.
@@ -262,6 +354,28 @@ class RcuSnapshot {
   explicit RcuSnapshot(Args &&... args)
       : data_ptr_(std::make_shared<Data>(std::forward<Args>(args)...)) {}
 
+  // Helper template used by CreateDependent to register this snapshot's
+  // notification with the dependent notifications.
+  void RegisterWithDependentSnapshots() {
+    // No-op base case that terminates the recursion when no args are left.
+  }
+  template <typename V, typename... Args>
+  void RegisterWithDependentSnapshots(RcuSnapshot<V> &snapshot,
+                                      Args &&... args) {
+    // Handle arguments that are an RcuSnapshot.
+    snapshot.RegisterNotification(data_ptr_->stale);
+    RegisterWithDependentSnapshots(std::forward<Args>(args)...);
+  }
+  template <typename V, typename... Args>
+  void RegisterWithDependentSnapshots(std::vector<RcuSnapshot<V>> &container,
+                                      Args &&... args) {
+    // Handle arguments that are a vector of RcuSnapshot.
+    for (RcuSnapshot<V> &snapshot : container) {
+      snapshot.RegisterNotification(data_ptr_->stale);
+    }
+    RegisterWithDependentSnapshots(std::forward<Args>(args)...);
+  }
+
   // The underlying data stored in the snapshot. The core of this is the value
   // of type T, but there are also additional control structures used to track
   // the freshness of the data.
@@ -269,14 +383,14 @@ class RcuSnapshot {
     // Construct the data object. We need to keep forwarding the constructor
     // arguments that originally came from the RcuSnapshot constructor.
     template <typename... Args>
-    Data(Args &&... args) : value(std::forward<Args>(args)...), fresh(true) {}
+    Data(Args &&... args) : value(std::forward<Args>(args)...) {}
 
     // The underlying data value stored in the snapshot.
     T value;
 
     // A control block of additional metadata needed to handle notifications.
     absl::Mutex mutex;
-    bool fresh ABSL_GUARDED_BY(mutex);
+    RcuNotification stale ABSL_GUARDED_BY(mutex);
     std::vector<RcuNotification *> notifications ABSL_GUARDED_BY(mutex);
   };
   std::shared_ptr<Data> data_ptr_;
