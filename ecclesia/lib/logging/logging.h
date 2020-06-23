@@ -123,6 +123,21 @@ inline LogMessageStream Check(bool condition, absl::string_view description,
 // with the rest of the logging API.
 #define CheckCondition(expr) Check(expr, #expr)
 
+// A function that will check if a given pointer is null and report a fatal log
+// if it is. Otherwise it will return the pointer.
+//
+// This should not be used as a standalone statement, prefer to use Check in
+// those cases. This should be reserved for situations where you require the
+// "returns the pointer" behavior, e.g. in a variable declaration or class
+// member initializer.
+template <typename T>
+T &&DieIfNull(T &&ptr, SourceLocation loc = SourceLocation::current()) {
+  if (ptr == nullptr) {
+    FatalLog(loc) << "pointer is null";
+  }
+  return std::forward<T>(ptr);
+}
+
 }  // namespace ecclesia
 
 #endif  // ECCLESIA_LIB_LOGGING_LOGGING_H_
