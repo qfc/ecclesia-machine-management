@@ -20,6 +20,7 @@ cc_library(
         "service_root.h",
         "system.h",
         "systems.h",
+        "thermal.h",
     ],
     visibility = ["//ecclesia:magent_frontend_users"],
     deps = [

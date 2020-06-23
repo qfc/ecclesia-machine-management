@@ -30,6 +30,7 @@
 #include "ecclesia/magent/redfish/indus/processor.h"
 #include "ecclesia/magent/redfish/indus/processor_collection.h"
 #include "ecclesia/magent/redfish/indus/processor_metrics.h"
+#include "ecclesia/magent/redfish/indus/thermal.h"
 #include "ecclesia/magent/redfish/indus/root.h"
 #include "ecclesia/magent/redfish/indus/service_root.h"
 #include "ecclesia/magent/redfish/indus/system.h"
@@ -63,6 +64,7 @@ class IndusRedfishService {
     resources_.push_back(CreateResource<Processor>(server, system_model));
     resources_.push_back(
         CreateResource<ProcessorMetrics>(server, system_model));
+    resources_.push_back(CreateResource<Thermal>(server, system_model));
   }
 
   IndusRedfishService(const IndusRedfishService &) = delete;

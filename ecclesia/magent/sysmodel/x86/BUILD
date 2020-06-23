@@ -9,6 +9,7 @@ cc_library(
         ":cpu",
         ":dimm",
         ":sysmodel_fru",
+        ":thermal",
         "//ecclesia/lib/smbios:reader",
         "//ecclesia/lib/time:clock",
         "//ecclesia/magent/lib/eeprom",
@@ -72,5 +73,20 @@ cc_library(
         "@com_google_absl//absl/strings:str_format",
         "@com_google_absl//absl/types:optional",
         "@com_google_absl//absl/types:span",
+    ],
+)
+
+cc_library(
+    name = "thermal",
+    srcs = ["thermal.cc"],
+    hdrs = ["thermal.h"],
+    visibility = ["//ecclesia/magent/redfish/indus:__pkg__"],
+    deps = [
+        "//ecclesia/magent/lib/io:pci",
+        "//ecclesia/magent/lib/io:pci_sys",
+        "//ecclesia/magent/sysmodel:thermal",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
+        "@com_google_emboss//runtime/cpp:cpp_utils",
     ],
 )

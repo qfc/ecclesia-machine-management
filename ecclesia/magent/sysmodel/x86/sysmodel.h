@@ -36,6 +36,7 @@
 #include "ecclesia/magent/sysmodel/x86/cpu.h"
 #include "ecclesia/magent/sysmodel/x86/dimm.h"
 #include "ecclesia/magent/sysmodel/x86/fru.h"
+#include "ecclesia/magent/sysmodel/x86/thermal.h"
 
 namespace ecclesia {
 
@@ -47,6 +48,7 @@ struct SysmodelParams {
   std::string mced_socket_path;
   std::string sysfs_mem_file_path;
   absl::Span<SmbusEeprom2ByteAddr::Option> eeprom_options;
+  absl::Span<const PciSensorParams> dimm_thermal_params;
 };
 
 // The SystemModel must be thread safe
@@ -57,6 +59,13 @@ class SystemModel {
 
   std::size_t NumDimms() const;
   absl::optional<Dimm> GetDimm(std::size_t index);
+
+  // The number of DIMM thermal sensors. This should be the same as the number
+  // of DIMMs.
+  std::size_t NumDimmThermalSensors() const;
+  // Return the sensor for DIMM at “index”. Return nullptr if index is out of
+  // bounds.
+  PciThermalSensor *GetDimmThermalSensor(std::size_t index);
 
   std::size_t NumCpus() const;
   absl::optional<Cpu> GetCpu(std::size_t index);
@@ -96,9 +105,14 @@ class SystemModel {
   absl::flat_hash_map<std::string, SysmodelFru> frus_
       ABSL_GUARDED_BY(frus_lock_);
 
+  mutable absl::Mutex dimm_thermal_sensors_lock_;
+  std::vector<PciThermalSensor> dimm_thermal_sensors_
+      ABSL_GUARDED_BY(dimm_thermal_sensors_lock_);
+
   std::unique_ptr<SystemEventLogger> event_logger_;
 
   absl::Span<SmbusEeprom2ByteAddr::Option> eeprom_options_;
+  const absl::Span<const PciSensorParams> dimm_thermal_params_;
 };
 
 }  // namespace ecclesia

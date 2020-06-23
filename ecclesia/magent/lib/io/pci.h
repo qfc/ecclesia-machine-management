@@ -126,6 +126,9 @@ class PciDevice {
   PciDevice(const PciDevice &) = delete;
   PciDevice &operator=(const PciDevice &) = delete;
 
+  PciDevice(PciDevice&&) = default;
+  PciDevice &operator=(PciDevice &&) = default;
+
   // Get this device address.
   const PciLocation &location() const { return location_; }
 

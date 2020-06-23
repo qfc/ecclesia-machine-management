@@ -118,6 +118,9 @@ inline constexpr char kReading[] = "Reading";
 inline constexpr char kReadingUnits[] = "ReadingUnits";
 inline constexpr char kMinReadingRange[] = "MinReadingRange";
 inline constexpr char kMaxReadingRange[] = "MaxReadingRange";
+inline constexpr char kRelatedItem[] = "RelatedItem";
+inline constexpr char kEnabled[] = "Enabled";
+inline constexpr char kAbsent[] = "Absent";
 
 // Redfish resource URIs
 inline constexpr char kServiceRootUri[] = "/redfish/v1";

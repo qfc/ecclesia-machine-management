@@ -71,7 +71,7 @@ class Memory : public IndexResource {
     (*metrics)[kOdataId] = absl::StrCat(req->uri_path(), "/", kMemoryMetrics);
 
     auto *status = GetJsonObject(&json, kStatus);
-    (*status)[kState] = dimm_info.present ? "Enabled" : "Absent";
+    (*status)[kState] = dimm_info.present ? kEnabled : kAbsent;
 
     JSONResponseOK(json, req);
   }

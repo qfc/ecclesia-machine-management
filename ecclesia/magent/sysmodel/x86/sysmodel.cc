@@ -35,6 +35,7 @@
 #include "ecclesia/magent/sysmodel/x86/cpu.h"
 #include "ecclesia/magent/sysmodel/x86/dimm.h"
 #include "ecclesia/magent/sysmodel/x86/fru.h"
+#include "ecclesia/magent/sysmodel/x86/thermal.h"
 
 namespace ecclesia {
 
@@ -49,6 +50,19 @@ absl::optional<Dimm> SystemModel::GetDimm(std::size_t index) {
     return dimms_[index];
   }
   return absl::nullopt;
+}
+
+std::size_t SystemModel::NumDimmThermalSensors() const {
+  absl::ReaderMutexLock ml(&dimm_thermal_sensors_lock_);
+  return dimm_thermal_sensors_.size();
+}
+
+PciThermalSensor *SystemModel::GetDimmThermalSensor(std::size_t index) {
+  absl::ReaderMutexLock ml(&dimm_thermal_sensors_lock_);
+  if (index < dimm_thermal_sensors_.size()) {
+    return &dimm_thermal_sensors_[index];
+  }
+  return nullptr;
 }
 
 std::size_t SystemModel::NumCpus() const {
@@ -83,7 +97,8 @@ SystemModel::SystemModel(SysmodelParams params)
     : smbios_reader_(absl::make_unique<SmbiosReader>(
           params.smbios_entry_point_path, params.smbios_tables_path)),
       field_translator_(std::move(params.field_translator)),
-      eeprom_options_(std::move(params.eeprom_options)) {
+      eeprom_options_(std::move(params.eeprom_options)),
+      dimm_thermal_params_(std::move(params.dimm_thermal_params)) {
   // Construct system model objects
   auto dimms = CreateDimms(smbios_reader_.get(), field_translator_.get());
   {
@@ -101,6 +116,12 @@ SystemModel::SystemModel(SysmodelParams params)
   {
     absl::WriterMutexLock ml(&frus_lock_);
     frus_ = std::move(frus);
+  }
+
+  auto dimm_thermal_sensors = CreatePciThermalSensors(dimm_thermal_params_);
+  {
+    absl::WriterMutexLock ml(&dimm_thermal_sensors_lock_);
+    dimm_thermal_sensors_ = std::move(dimm_thermal_sensors);
   }
 
   // Create event readers to feed into the event logger

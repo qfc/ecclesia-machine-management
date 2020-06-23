@@ -119,107 +119,91 @@ absl::optional<ecclesia::SmbusBus> GetEepromSmbusBus() {
 // https://www.intel.com/content/dam/www/public/us/en/documents/product-briefs/platform-management-fru-document-rev-1-2-feb-2013.pdf
 constexpr auto kEepromSmbusAddress = ecclesia::SmbusAddress::Make<0x55>();
 
-struct SkylakeImcDimmChannel {
-  const absl::string_view name;
-  ecclesia::PciLocation loc;
-  // thermal info offset for channel0 is 0x150, for channel1 is 0x154
-  std::array<size_t, 2> offset;
-};
-
-constexpr SkylakeImcDimmChannel dimm_channel_info[]{
-    {"cpu0_1lms_0",
-     ecclesia::PciLocation::Make<0, 0x3a, 0x0a, 2>(),
-     {0x150, 0x154}},
-    {"cpu0_1lms_1",
-     ecclesia::PciLocation::Make<0, 0x3a, 0x0a, 6>(),
-     {0x150, 0x154}},
-    {"cpu0_1lms_2",
-     ecclesia::PciLocation::Make<0, 0x3a, 0x0b, 2>(),
-     {0x150, 0x154}},
-    {"cpu0_1lms_5",
-     ecclesia::PciLocation::Make<0, 0x3a, 0x0d, 2>(),
-     {0x154, 0x150}},
-    {"cpu0_1lms_4",
-     ecclesia::PciLocation::Make<0, 0x3a, 0x0c, 6>(),
-     {0x154, 0x150}},
-    {"cpu0_1lms_3",
+// Info to Build DIMM thermal sensors using hardcoded infomation for SkylakeImc.
+// Each entry is associated with a DIMM. Each sensor device can have up to 2
+// DIMMs. The indices should coincide with the indices of DIMMs. The order of
+// the devices (that are mapped to DIMM0, DIMM1, ..., DIMM23), according to the
+// motherboard schematic mapping memory channels to silkscreen labels, is:
+//
+// - cpu0: 1lms3, 1lms4, 1lms5, 1lms2, 1lms1, 1lms0
+// - cpu1: 1lms0, 1lms1, 1lms2, 1lms5, 1lms4, 1lms3
+//
+// Thermal info offset for channel0 is 0x150, for channel1 is 0x154.
+constexpr ecclesia::PciSensorParams dimm_channel_info[]{
+    {"dimm0",    // cpu0_1lms_3
      ecclesia::PciLocation::Make<0, 0x3a, 0x0c, 2>(),
-     {0x154, 0x150}},
+     0x150, 85},
+    {"dimm1",    // cpu0_1lms_3
+     ecclesia::PciLocation::Make<0, 0x3a, 0x0c, 2>(),
+     0x154, 85},
+    {"dimm2",    // cpu0_1lms_4
+     ecclesia::PciLocation::Make<0, 0x3a, 0x0c, 6>(),
+     0x150, 85},
+    {"dimm3",    // cpu0_1lms_4
+     ecclesia::PciLocation::Make<0, 0x3a, 0x0c, 6>(),
+     0x154, 85},
+    {"dimm4",    // cpu0_1lms_5
+     ecclesia::PciLocation::Make<0, 0x3a, 0x0d, 2>(),
+     0x150, 85},
+    {"dimm5",    // cpu0_1lms_5
+     ecclesia::PciLocation::Make<0, 0x3a, 0x0d, 2>(),
+     0x154, 85},
+    {"dimm6",    // cpu0_1lms_2
+     ecclesia::PciLocation::Make<0, 0x3a, 0x0b, 2>(),
+     0x154, 85},
+    {"dimm7",    // cpu0_1lms_2
+     ecclesia::PciLocation::Make<0, 0x3a, 0x0b, 2>(),
+     0x150, 85},
+    {"dimm8",    // cpu0_1lms_1
+     ecclesia::PciLocation::Make<0, 0x3a, 0x0a, 6>(),
+     0x154, 85},
+    {"dimm9",    // cpu0_1lms_1
+     ecclesia::PciLocation::Make<0, 0x3a, 0x0a, 6>(),
+     0x150, 85},
+    {"dimm10",    // cpu0_1lms_0
+     ecclesia::PciLocation::Make<0, 0x3a, 0x0a, 2>(),
+     0x154, 85},
+    {"dimm11",    // cpu0_1lms_0
+     ecclesia::PciLocation::Make<0, 0x3a, 0x0a, 2>(),
+     0x150, 85},
 
-    {"cpu1_1lms_0",
+    {"dimm12",    // cpu1_1lms_0
      ecclesia::PciLocation::Make<0, 0xae, 0x0a, 2>(),
-     {0x150, 0x154}},
-    {"cpu1_1lms_1",
+     0x150, 85},
+    {"dimm13",    // cpu1_1lms_0
+     ecclesia::PciLocation::Make<0, 0xae, 0x0a, 2>(),
+     0x154, 85},
+    {"dimm14",    // cpu1_1lms_1
      ecclesia::PciLocation::Make<0, 0xae, 0x0a, 6>(),
-     {0x150, 0x154}},
-    {"cpu1_1lms_2",
+     0x150, 85},
+    {"dimm15",    // cpu1_1lms_1
+     ecclesia::PciLocation::Make<0, 0xae, 0x0a, 6>(),
+     0x154, 85},
+    {"dimm16",    // cpu1_1lms_2
      ecclesia::PciLocation::Make<0, 0xae, 0x0b, 2>(),
-     {0x150, 0x154}},
-    {"cpu1_1lms_5",
+     0x150, 85},
+    {"dimm17",    // cpu1_1lms_2
+     ecclesia::PciLocation::Make<0, 0xae, 0x0b, 2>(),
+     0x154, 85},
+    {"dimm18",    // cpu1_1lms_5
      ecclesia::PciLocation::Make<0, 0xae, 0x0d, 2>(),
-     {0x154, 0x150}},
-    {"cpu1_1lms_4",
+     0x154, 85},
+    {"dimm19",    // cpu1_1lms_5
+     ecclesia::PciLocation::Make<0, 0xae, 0x0d, 2>(),
+     0x150, 85},
+    {"dimm20",    // cpu1_1lms_4
      ecclesia::PciLocation::Make<0, 0xae, 0x0c, 6>(),
-     {0x154, 0x150}},
-    {"cpu1_1lms_3",
+     0x154, 85},
+    {"dimm21",    // cpu1_1lms_4
+     ecclesia::PciLocation::Make<0, 0xae, 0x0c, 6>(),
+     0x150, 85},
+    {"dimm22",    // cpu1_1lms_3
      ecclesia::PciLocation::Make<0, 0xae, 0x0c, 2>(),
-     {0x154, 0x150}}};
-
-// Build dimm_thermal_devices using hardcoded infomation for SkylakeImc.
-// return 12 pci devices, each devices can have up to 2 dimms.
-// The order of the devices:
-// cpu0: 1lms0, 1lms1, 1lms2, 1lms5, 1lms4, 1lms3
-// cpu1: 1lms0, 1lms1, 1lms2, 1lms5, 1lms4, 1lms3
-std::vector<std::unique_ptr<ecclesia::PciDevice>> CreateDimmThermalDevices() {
-  std::vector<std::unique_ptr<ecclesia::PciDevice>> dimm_thermal_devices;
-  dimm_thermal_devices.reserve(sizeof(dimm_channel_info) /
-                               sizeof(dimm_channel_info[0]));
-  for (const auto &info : dimm_channel_info) {
-    auto pci_loc = info.loc;
-    dimm_thermal_devices.push_back(std::make_unique<ecclesia::PciDevice>(
-        pci_loc, std::make_unique<ecclesia::SysPciRegion>(pci_loc)));
-  }
-
-  return dimm_thermal_devices;
-}
-
-// Read dimm temperature in degree.
-// We return a vector of int representing temperature,
-// vector index corresponds with dimm index, nunllopt means "not present".
-std::vector<absl::optional<int>> ReadAllDimmThermalDegrees(
-    const std::vector<std::unique_ptr<ecclesia::PciDevice>> &devices,
-    ecclesia::SystemModel *system_model) {
-  std::vector<absl::optional<int>> dimm_thermal(devices.size() * 2);
-  for (int i = 0; i < devices.size(); i++) {
-    uint16_t t;
-    auto config = devices[i]->config_space();
-
-    // there are 2 dimms per channel
-    auto dimm0 = system_model->GetDimm(i * 2);
-    if (dimm0->GetDimmInfo().present) {
-      absl::Status status =
-          config.region()->Read16(dimm_channel_info[i].offset[0], &t);
-      if (status.ok()) {
-        dimm_thermal[i * 2] = t;
-      } else {
-        dimm_thermal[i * 2] = absl::nullopt;
-      }
-    }
-
-    auto dimm1 = system_model->GetDimm(i * 2 + 1);
-    if (dimm1->GetDimmInfo().present) {
-      absl::Status status =
-          config.region()->Read16(dimm_channel_info[i].offset[1], &t);
-      if (status.ok()) {
-        dimm_thermal[i * 2 + 1] = t;
-      } else {
-        dimm_thermal[i * 2 + 1] = absl::nullopt;
-      }
-    }
-  }
-
-  return dimm_thermal;
-}
+     0x154, 85},
+    {"dimm23",    // cpu1_1lms_3
+     ecclesia::PciLocation::Make<0, 0xae, 0x0c, 2>(),
+     0x150, 85},
+};
 
 }  // namespace
 
@@ -252,6 +236,7 @@ int main(int argc, char **argv) {
 
     eeprom_options.push_back(motherboard_eeprom_option);
   }
+
   ecclesia::SysmodelParams params = {
       .field_translator =
           absl::make_unique<ecclesia::IndusSmbiosFieldTranslator>(),
@@ -259,18 +244,12 @@ int main(int argc, char **argv) {
       .smbios_tables_path = kSmbiosTablesPath,
       .mced_socket_path = absl::GetFlag(FLAGS_mced_socket_path),
       .sysfs_mem_file_path = kSysfsMemFilePath,
-      .eeprom_options = absl::MakeSpan(eeprom_options)};
+      .eeprom_options = absl::MakeSpan(eeprom_options),
+      .dimm_thermal_params = absl::MakeSpan(dimm_channel_info),
+  };
 
   std::unique_ptr<ecclesia::SystemModel> system_model =
       absl::make_unique<ecclesia::SystemModel>(std::move(params));
-
-  auto dimm_thermal_devices = CreateDimmThermalDevices();
-
-  // We haven't decided on the API for getting dimm thermal, so here we simply
-  // return a vector of int to represent temperature in degree, the vector index
-  // corresponds to dimm index.
-  auto dimm_thermal =
-      ReadAllDimmThermalDegrees(dimm_thermal_devices, system_model.get());
 
   auto server = ecclesia::CreateServer(absl::GetFlag(FLAGS_port));
   ecclesia::IndusRedfishService redfish_service(

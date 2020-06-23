@@ -61,6 +61,9 @@ void Chassis::Get(ServerRequestInterface *req, const ParamsType &params) {
   auto *links = GetJsonObject(&json, "Links");
   auto *computer_systems = GetJsonObject(links, "ComputerSystems");
   (*computer_systems)[kOdataId] = kComputerSystemUri;
+  auto *thermal = GetJsonObject(&json, "Thermal");
+  (*thermal)[kOdataId] = kThermalUri;
+
   JSONResponseOK(json, req);
 }
 
