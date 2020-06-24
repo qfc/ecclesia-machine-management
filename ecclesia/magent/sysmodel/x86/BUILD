@@ -82,6 +82,8 @@ cc_library(
     hdrs = ["thermal.h"],
     visibility = ["//ecclesia/magent/redfish/indus:__pkg__"],
     deps = [
+        "//ecclesia/lib/io:msr",
+        "//ecclesia/magent/lib/event_logger:indus_cpu_topology",
         "//ecclesia/magent/lib/io:pci",
         "//ecclesia/magent/lib/io:pci_sys",
         "//ecclesia/magent/sysmodel:thermal",

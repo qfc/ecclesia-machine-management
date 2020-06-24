@@ -26,6 +26,8 @@
 
 namespace ecclesia {
 
+// PCI thermal device
+
 // Parameters to construct PciThermalSensor. Note that the actual name string
 // object should outlive the params object because of the string_view.
 struct PciSensorParams {
@@ -59,6 +61,29 @@ class PciThermalSensor : public ThermalSensor {
 
 std::vector<PciThermalSensor> CreatePciThermalSensors(
     const absl::Span<const PciSensorParams> param_set);
+
+// CPU thermal
+
+// Note that the actual name string object should outlive the params object
+// because of the string_view.
+struct CpuMarginSensorParams {
+  absl::string_view name;
+  int cpu_index;
+};
+
+class CpuMarginSensor : public ThermalSensor {
+ public:
+  explicit CpuMarginSensor(const CpuMarginSensorParams &params);
+  virtual ~CpuMarginSensor() = default;
+
+  absl::optional<int> Read() override;
+
+ private:
+  absl::optional<std::string> lpu_path_;
+};
+
+std::vector<CpuMarginSensor> CreateCpuMarginSensors(
+    const absl::Span<const CpuMarginSensorParams> param_set);
 
 }  // namespace ecclesia
 #endif  // ECCLESIA_MAGENT_X86_THERMAL_H_

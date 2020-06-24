@@ -43,8 +43,8 @@ class Thermal : public Resource {
     json[kMembersCount] = num_sensors;
     auto *members = GetJsonArray(&json, kMembers);
 
-    // and number of members in this node would be the number of DIMM sensors +
-    // number of CPU sensors.
+    // CPU thermal is not listed here, because (at least some Intel) CPU only
+    // reports thermal margin. Those are listed in ProcessorMetrics.
     for (int i = 0; i < num_sensors; i++) {
       PciThermalSensor *sensor = system_model_->GetDimmThermalSensor(i);
 

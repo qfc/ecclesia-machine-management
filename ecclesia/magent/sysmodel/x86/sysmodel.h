@@ -49,6 +49,7 @@ struct SysmodelParams {
   std::string sysfs_mem_file_path;
   absl::Span<SmbusEeprom2ByteAddr::Option> eeprom_options;
   absl::Span<const PciSensorParams> dimm_thermal_params;
+  absl::Span<const CpuMarginSensorParams> cpu_margin_params;
 };
 
 // The SystemModel must be thread safe
@@ -69,6 +70,9 @@ class SystemModel {
 
   std::size_t NumCpus() const;
   absl::optional<Cpu> GetCpu(std::size_t index);
+
+  std::size_t NumCpuMarginSensors() const;
+  absl::optional<CpuMarginSensor> GetCpuMarginSensor(std::size_t index);
 
   std::size_t NumFrus() const;
   template <typename IteratorF>
@@ -109,10 +113,15 @@ class SystemModel {
   std::vector<PciThermalSensor> dimm_thermal_sensors_
       ABSL_GUARDED_BY(dimm_thermal_sensors_lock_);
 
+  mutable absl::Mutex cpu_margin_sensors_lock_;
+  std::vector<CpuMarginSensor> cpu_margin_sensors_
+      ABSL_GUARDED_BY(cpu_margin_sensors_lock_);
+
   std::unique_ptr<SystemEventLogger> event_logger_;
 
   absl::Span<SmbusEeprom2ByteAddr::Option> eeprom_options_;
   const absl::Span<const PciSensorParams> dimm_thermal_params_;
+  const absl::Span<const CpuMarginSensorParams> cpu_margin_params_;
 };
 
 }  // namespace ecclesia
