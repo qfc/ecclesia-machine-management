@@ -25,6 +25,7 @@ package_group(
     name = "redfish_users",
     packages = [
         "//ecclesia/lib/redfish/...",
+        "//ecclesia/magent/redfish/...",
         "//ecclesia/mmaster/backends/redfish/...",
         "//ecclesia/mmaster/frontends/...",
         "//ops/hardware/hydra/common/megapede_power/...",
