@@ -89,3 +89,19 @@ message OneofMessage {
     int32 another_not_devpath = 11;
   }
 }
+
+message NestedRepeatedOneof {
+  message A {
+    string devpath_a = 1;
+  }
+  message B {
+    string devpath_b = 1;
+  }
+  message Repeated {
+    oneof o {
+      A sub_a = 1;
+      B sub_b = 2;
+    }
+  }
+  repeated Repeated r = 1;
+}
