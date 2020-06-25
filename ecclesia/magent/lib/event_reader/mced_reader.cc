@@ -47,9 +47,10 @@ constexpr absl::Duration kRetryDelay = absl::Seconds(10);
 
 // Given a path to the unix domain socket, return a file stream to read mces
 // from
-FILE *InitSocket(const std::string &socket_path) {
+FILE *InitSocket(const std::string &socket_path,
+                 McedaemonSocketInterface *socket_intf) {
   // Open a unix domain socket.
-  int socket_fd = socket(AF_UNIX, SOCK_STREAM, 0);
+  int socket_fd = socket_intf->CallSocket(AF_UNIX, SOCK_STREAM, 0);
   if (socket_fd == -1) {
     std::cerr << "Failed opening socket to mced. errno = " << errno
               << std::endl;
@@ -59,17 +60,18 @@ FILE *InitSocket(const std::string &socket_path) {
   struct sockaddr_un remote;
   remote.sun_family = AF_UNIX;
   strncpy(remote.sun_path, socket_path.c_str(), sizeof(remote.sun_path));
-  if (connect(socket_fd, reinterpret_cast<struct sockaddr *>(&remote),
-              sizeof(remote)) == -1) {
+  if (socket_intf->CallConnect(socket_fd,
+                               reinterpret_cast<struct sockaddr *>(&remote),
+                               sizeof(remote)) == -1) {
     std::cerr << "Failed to connect to mced. errno = " << errno << std::endl;
-    close(socket_fd);
+    socket_intf->CallClose(socket_fd);
     return nullptr;
   }
   // Construct a file stream from the file descriptor
-  FILE *socket_file = fdopen(socket_fd, "r");
+  FILE *socket_file = socket_intf->CallFdopen(socket_fd, "r");
   if (!socket_file) {
     std::cerr << "error during fdopen(). errno = " << errno << std::endl;
-    close(socket_fd);
+    socket_intf->CallClose(socket_fd);
     return nullptr;
   }
   return socket_file;
@@ -163,10 +165,11 @@ absl::optional<MachineCheck> ParseLine(absl::string_view mced_line) {
 }
 
 // Return value absl::nullopt implies error in parsing the mce
-absl::optional<MachineCheck> ReadOneMce(FILE *socket_file) {
+absl::optional<MachineCheck> ReadOneMce(FILE *socket_file,
+                                        McedaemonSocketInterface *socket_intf) {
   char line_buffer[kMcedMaxLineLength];
 
-  if (!fgets(line_buffer, kMcedMaxLineLength, socket_file)) {
+  if (!socket_intf->CallFgets(line_buffer, kMcedMaxLineLength, socket_file)) {
     std::cerr << "error reading line from socket_file. errno = " << errno
               << std::endl;
     return absl::nullopt;
@@ -179,22 +182,39 @@ absl::optional<MachineCheck> ReadOneMce(FILE *socket_file) {
 
 }  // namespace
 
-McedaemonReader::McedaemonReader(std::string mced_socket_path)
+int LibcMcedaemonSocket::CallSocket(int domain, int type, int protocol) {
+  return socket(domain, type, protocol);
+}
+FILE *LibcMcedaemonSocket::CallFdopen(int fd, const char *mode) {
+  return fdopen(fd, mode);
+}
+char *LibcMcedaemonSocket::CallFgets(char *s, int size, FILE *stream) {
+  return fgets(s, size, stream);
+}
+int LibcMcedaemonSocket::CallFclose(FILE *stream) { return fclose(stream); }
+int LibcMcedaemonSocket::CallConnect(int sockfd, const struct sockaddr *addr,
+                                     socklen_t addrlen) {
+  return connect(sockfd, addr, addrlen);
+}
+int LibcMcedaemonSocket::CallClose(int fd) { return close(fd); }
+
+McedaemonReader::McedaemonReader(std::string mced_socket_path,
+                                 McedaemonSocketInterface *socket_intf)
     : mced_socket_path_(std::move(mced_socket_path)),
+      socket_intf_(socket_intf),
       reader_loop_(&McedaemonReader::Loop, this) {}
 
 // Scan for MCEs from the mcedaemon and log them into mces_
 void McedaemonReader::Loop() {
-  FILE *socket_file = nullptr;
   do {
     // Open a socket and get a file stream to read mces from
-    if ((socket_file = InitSocket(mced_socket_path_))) {
+    if (FILE *socket_file = InitSocket(mced_socket_path_, socket_intf_)) {
       absl::optional<MachineCheck> mce;
-      while ((mce = ReadOneMce(socket_file))) {
+      while ((mce = ReadOneMce(socket_file, socket_intf_))) {
         absl::MutexLock l(&mces_lock_);
         mces_.push({.record = mce.value()});
       }
-      fclose(socket_file);
+      socket_intf_->CallFclose(socket_file);
     }
   } while (!exit_loop_.WaitForNotificationWithTimeout(kRetryDelay));
 }

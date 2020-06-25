@@ -83,8 +83,8 @@ std::size_t SystemModel::NumCpuMarginSensors() const {
   return cpu_margin_sensors_.size();
 }
 
-absl::optional<CpuMarginSensor>
-SystemModel::GetCpuMarginSensor(std::size_t index) {
+absl::optional<CpuMarginSensor> SystemModel::GetCpuMarginSensor(
+    std::size_t index) {
   absl::ReaderMutexLock ml(&cpu_margin_sensors_lock_);
   if (index < cpu_margin_sensors_.size()) {
     return cpu_margin_sensors_[index];
@@ -147,8 +147,8 @@ SystemModel::SystemModel(SysmodelParams params)
 
   // Create event readers to feed into the event logger
   std::vector<std::unique_ptr<SystemEventReader>> readers;
-  readers.push_back(
-      absl::make_unique<McedaemonReader>(params.mced_socket_path));
+  readers.push_back(absl::make_unique<McedaemonReader>(params.mced_socket_path,
+                                                       &mcedaemon_socket_));
   if (auto system_event_log = smbios_reader_->GetSystemEventLog()) {
     readers.push_back(absl::make_unique<ElogReader>(
         std::move(system_event_log), params.sysfs_mem_file_path));

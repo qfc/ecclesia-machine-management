@@ -33,6 +33,7 @@
 #include "ecclesia/lib/smbios/reader.h"
 #include "ecclesia/magent/lib/eeprom/smbus_eeprom.h"
 #include "ecclesia/magent/lib/event_logger/event_logger.h"
+#include "ecclesia/magent/lib/event_reader/mced_reader.h"
 #include "ecclesia/magent/sysmodel/x86/cpu.h"
 #include "ecclesia/magent/sysmodel/x86/dimm.h"
 #include "ecclesia/magent/sysmodel/x86/fru.h"
@@ -97,6 +98,8 @@ class SystemModel {
   // Platform interfaces
   std::unique_ptr<SmbiosReader> smbios_reader_;
   std::unique_ptr<SmbiosFieldTranslator> field_translator_;
+  LibcMcedaemonSocket mcedaemon_socket_;
+
   // System model objects
 
   mutable absl::Mutex dimms_lock_;
