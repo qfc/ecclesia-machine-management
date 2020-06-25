@@ -30,6 +30,7 @@ package_group(
         "//ops/hardware/hydra/common/megapede_power/...",
         "//platforms/ecclesia/mmaster/backends/redfish/...",
         "//platforms/ecclesia/mmaster/frontends/...",
+        "//platforms/ecclesia/mmaster/services/...",
     ],
 )
 
