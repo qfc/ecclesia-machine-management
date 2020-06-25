@@ -31,7 +31,7 @@
 #include <string>
 #include <vector>
 
-#include "net/proto2/io/public/tokenizer.h"
+#include "google/protobuf/io/tokenizer.h"
 #include "google/protobuf/text_format.h"
 #include "absl/strings/str_format.h"
 #include "absl/strings/str_join.h"
