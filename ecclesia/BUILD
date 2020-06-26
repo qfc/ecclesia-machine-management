@@ -28,6 +28,7 @@ package_group(
         "//ecclesia/magent/redfish/...",
         "//ecclesia/mmaster/backends/redfish/...",
         "//ecclesia/mmaster/frontends/...",
+        "//ecclesia/mmaster/middles/collector/...",
         "//ops/hardware/hydra/common/megapede_power/...",
         "//platforms/ecclesia/mmaster/backends/redfish/...",
         "//platforms/ecclesia/mmaster/frontends/...",
