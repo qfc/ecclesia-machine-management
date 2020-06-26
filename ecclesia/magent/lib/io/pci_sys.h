@@ -32,6 +32,7 @@ namespace ecclesia {
 class SysPciRegion : public PciRegion {
  public:
   explicit SysPciRegion(PciLocation pci_loc);
+  SysPciRegion(std::string sys_root, PciLocation pci_loc);
 
   absl::Status Read8(size_t offset, uint8_t *data) override;
   absl::Status Write8(size_t offset, uint8_t data) override;
@@ -43,6 +44,7 @@ class SysPciRegion : public PciRegion {
   absl::Status Write32(size_t offset, uint32_t data) override;
 
  private:
+  std::string sys_root_;
   PciLocation loc_;
   ApifsFile apifs_;
 };

@@ -31,14 +31,17 @@
 namespace ecclesia {
 
 namespace {
-constexpr char kSysPciRoot[] = "/sys/bus/pci/devices/";
+constexpr char kSysPciRoot[] = "/sys/bus/pci/devices";
 constexpr size_t kMaxSysFileSize = 4096;
 }  // namespace
 
-SysPciRegion::SysPciRegion(PciLocation loc)
+SysPciRegion::SysPciRegion(PciLocation loc) : SysPciRegion(kSysPciRoot, loc) {}
+
+SysPciRegion::SysPciRegion(std::string sys_root, PciLocation loc)
     : PciRegion(kMaxSysFileSize),
+      sys_root_(std::move(sys_root)),
       loc_(loc),
-      apifs_(absl::StrFormat("%s%s/config", kSysPciRoot,
+      apifs_(absl::StrFormat("%s/%s/config", sys_root_,
                              absl::FormatStreamed(loc))) {}
 
 absl::Status SysPciRegion::Read8(size_t offset, uint8_t *data) {
