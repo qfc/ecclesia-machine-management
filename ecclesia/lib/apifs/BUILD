@@ -15,3 +15,16 @@ cc_library(
         "@com_google_absl//absl/types:span",
     ],
 )
+
+cc_test(
+    name = "apifs_test",
+    size = "small",
+    srcs = ["apifs_test.cc"],
+    deps = [
+        ":apifs",
+        "//ecclesia/lib/file:test_filesystem",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/types:span",
+        "@com_google_googletest//:gtest_main",
+    ],
+)

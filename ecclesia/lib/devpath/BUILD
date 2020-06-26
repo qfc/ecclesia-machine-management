@@ -12,6 +12,17 @@ cc_library(
     ],
 )
 
+cc_test(
+    name = "devpath_test",
+    srcs = ["devpath_test.cc"],
+    deps = [
+        ":devpath",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/types:optional",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
 cc_library(
     name = "transform",
     srcs = ["transform.cc"],
@@ -35,4 +46,18 @@ cc_proto_library(
     name = "transform_test_cc_proto",
     testonly = True,
     deps = [":transform_test_proto"],
+)
+
+cc_test(
+    name = "transform_test",
+    srcs = ["transform_test.cc"],
+    deps = [
+        ":transform",
+        ":transform_test_cc_proto",
+        "//ecclesia/lib/protobuf:parse",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/types:optional",
+        "@com_google_googletest//:gtest_main",
+        "@com_google_protobuf//:protobuf",
+    ],
 )

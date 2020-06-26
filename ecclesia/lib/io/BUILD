@@ -25,3 +25,15 @@ cc_library(
         "@com_google_absl//absl/types:span",
     ],
 )
+
+cc_test(
+    name = "msr_test",
+    size = "small",
+    srcs = ["msr_test.cc"],
+    deps = [
+        ":msr",
+        "//ecclesia/lib/file:test_filesystem",
+        "@com_google_absl//absl/status",
+        "@com_google_googletest//:gtest_main",
+    ],
+)

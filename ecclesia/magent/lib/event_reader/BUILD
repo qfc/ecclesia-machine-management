@@ -56,3 +56,37 @@ emboss_cc_library(
     srcs = ["elog.emb"],
     visibility = ["//ecclesia:magent_library_users"],
 )
+
+cc_test(
+    name = "mced_reader_test",
+    srcs = ["mced_reader_test.cc"],
+    deps = [
+        ":event_reader",
+        ":mced_reader",
+        "@com_google_absl//absl/time",
+        "@com_google_absl//absl/types:optional",
+        "@com_google_absl//absl/types:variant",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "elog_reader_test",
+    srcs = ["elog_reader_test.cc"],
+    data = [
+        ":test_data/elog.bin",
+    ],
+    deps = [
+        ":elog_emb",
+        ":elog_reader",
+        ":event_reader",
+        "//ecclesia/lib/file:test_filesystem",
+        "//ecclesia/lib/smbios:reader",
+        "//ecclesia/lib/smbios:structures_emb",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/types:optional",
+        "@com_google_absl//absl/types:variant",
+        "@com_google_emboss//runtime/cpp:cpp_utils",
+        "@com_google_googletest//:gtest_main",
+    ],
+)

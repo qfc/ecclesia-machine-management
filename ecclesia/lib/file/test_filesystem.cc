@@ -41,7 +41,7 @@ namespace ecclesia {
 namespace {
 
 // Path of the ecclesia root, relative to the build environment WORKSPACE root.
-constexpr absl::string_view kEcclesiaRoot = "ecclesia";
+constexpr absl::string_view kEcclesiaRoot = "com_google_ecclesia/ecclesia";
 
 // Make a directory exist. This will create the directory if it does not exist
 // and do nothing if it already does.
@@ -165,7 +165,7 @@ void TestFilesystem::CreateSymlink(absl::string_view target,
   int rc = symlink(full_target.c_str(), GetTruePath(link_path).c_str());
   if (rc == -1) {
     PosixFatalLog() << "symlink() failed for " << link_path << " -> "
-                       << "target";
+                    << "target";
   }
 }
 

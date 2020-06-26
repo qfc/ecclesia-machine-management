@@ -7,11 +7,33 @@ cc_library(
     deps = ["@com_google_absl//absl/time"],
 )
 
+cc_test(
+    name = "task_test",
+    srcs = ["task_test.cc"],
+    deps = [
+        ":task",
+        "@com_google_absl//absl/time",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
 cc_library(
     name = "manager",
     hdrs = ["manager.h"],
     visibility = ["//ecclesia:library_users"],
     deps = [":task"],
+)
+
+cc_test(
+    name = "manager_test",
+    srcs = ["manager_test.cc"],
+    deps = [
+        ":manager",
+        ":task",
+        "@com_google_absl//absl/container:flat_hash_set",
+        "@com_google_absl//absl/time",
+        "@com_google_googletest//:gtest_main",
+    ],
 )
 
 cc_library(

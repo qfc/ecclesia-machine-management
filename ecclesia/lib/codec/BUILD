@@ -14,11 +14,31 @@ cc_library(
     deps = ["@com_google_absl//absl/base:core_headers"],
 )
 
+cc_test(
+    name = "bits_test",
+    size = "small",
+    srcs = ["bits_test.cc"],
+    deps = [
+        ":bits",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
 cc_library(
     name = "endian",
     hdrs = ["endian.h"],
     visibility = ["//ecclesia:library_users"],
     deps = ["@com_google_absl//absl/numeric:int128"],
+)
+
+cc_test(
+    name = "endian_test",
+    srcs = ["endian_test.cc"],
+    deps = [
+        ":endian",
+        "@com_google_absl//absl/numeric:int128",
+        "@com_google_googletest//:gtest_main",
+    ],
 )
 
 cc_library(
@@ -29,5 +49,15 @@ cc_library(
         ":bits",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/types:span",
+    ],
+)
+
+cc_test(
+    name = "text_test",
+    srcs = ["text_test.cc"],
+    deps = [
+        ":text",
+        "@com_google_absl//absl/status",
+        "@com_google_googletest//:gtest_main",
     ],
 )

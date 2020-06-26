@@ -25,3 +25,19 @@ cc_library(
         "@com_google_emboss//runtime/cpp:cpp_utils",
     ],
 )
+
+cc_test(
+    name = "fru_test",
+    size = "small",
+    srcs = ["fru_test.cc"],
+    deps = [
+        ":common_header_emb",
+        ":ipmi_fru",
+        "@com_google_absl//absl/base:core_headers",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings:str_format",
+        "@com_google_absl//absl/types:span",
+        "@com_google_emboss//runtime/cpp:cpp_utils",
+        "@com_google_googletest//:gtest_main",
+    ],
+)

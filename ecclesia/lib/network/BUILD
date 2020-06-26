@@ -12,3 +12,12 @@ cc_library(
         "//ecclesia/lib/logging:posix",
     ],
 )
+
+cc_test(
+    name = "testing_test",
+    srcs = ["testing_test.cc"],
+    deps = [
+        ":testing",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
