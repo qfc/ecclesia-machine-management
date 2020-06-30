@@ -65,11 +65,11 @@ class IpmiInterface {
   // Reads FRU raw data
   // We will read bytes starting from offset from fru identified by fru_id
   // The number of bytes read is equal to the size of data.
-  virtual absl::Status ReadFru(uint8_t fru_id, size_t offset,
+  virtual absl::Status ReadFru(uint16_t fru_id, size_t offset,
                                absl::Span<unsigned char> data) = 0;
 
   // Gets the FRU size
-  virtual absl::Status GetFruSize(uint8_t fru_id, uint16_t *size) = 0;
+  virtual absl::Status GetFruSize(uint16_t fru_id, uint16_t *size) = 0;
 };
 
 }  // namespace ecclesia

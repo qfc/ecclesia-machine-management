@@ -1,9 +1,29 @@
 licenses(["notice"])
 
-cc_binary(
-    name = "magent_indus",
-    srcs = ["main_indus.cc"],
+config_setting(
+    name = "external_build",
+    values = {"define": "build=external"},
     visibility = ["//ecclesia:magent_library_users"],
+)
+
+proto_library(
+    name = "magent_config_proto",
+    srcs = ["config.proto"],
+    visibility = ["//ecclesia:magent_library_users"],
+)
+
+cc_proto_library(
+    name = "magent_config_cc_proto",
+    visibility = ["//ecclesia:magent_library_users"],
+    deps = [":magent_config_proto"],
+)
+
+cc_binary(
+    name = "magent_indus_oss",
+    srcs = ["main_indus.cc"],
+    visibility = [
+        "//ecclesia:magent_library_users",
+    ],
     deps = [
         ":magent_hdr",
         "//ecclesia/lib/apifs",
@@ -16,6 +36,7 @@ cc_binary(
         "//ecclesia/magent/lib/io:pci_sys",
         "//ecclesia/magent/lib/io:smbus",
         "//ecclesia/magent/lib/io:smbus_kernel_dev",
+        "//ecclesia/magent/lib/ipmi:ipmitool",
         "//ecclesia/magent/redfish/indus",
         "//ecclesia/magent/sysmodel/x86:dimm",
         "//ecclesia/magent/sysmodel/x86:x86_sysmodel",
@@ -34,6 +55,7 @@ cc_binary(
 cc_library(
     name = "magent_hdr",
     hdrs = ["main_common.h"],
+    visibility = ["//ecclesia:magent_library_users"],
     deps = [
         "//ecclesia/magent/lib/thread_pool",
         "@com_google_tensorflow_serving//tensorflow_serving/util/net_http/server/public:http_server",

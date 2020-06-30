@@ -163,7 +163,7 @@ http_archive(
         "//ecclesia/oss:ipmitool.lanplus_crypt_impl.patch"
     ],
     patch_cmds = [
-        "./configure",
+        "./configure CFLAGS=-fPIC CXXFLAGS=-fPIC --enable-shared=no",
         "cp ./config.h include",
     ],
 )

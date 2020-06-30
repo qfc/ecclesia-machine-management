@@ -47,6 +47,7 @@
 #include "ecclesia/magent/lib/io/pci_sys.h"
 #include "ecclesia/magent/lib/io/smbus.h"
 #include "ecclesia/magent/lib/io/smbus_kernel_dev.h"
+#include "ecclesia/magent/lib/ipmi/ipmitool.h"
 #include "ecclesia/magent/main_common.h"
 #include "ecclesia/magent/redfish/indus/redfish_service.h"
 #include "ecclesia/magent/sysmodel/x86/dimm.h"
@@ -67,6 +68,7 @@ constexpr char kSmbiosEntryPointPath[] =
     "/sys/firmware/dmi/tables/smbios_entry_point";
 constexpr char kSmbiosTablesPath[] = "/sys/firmware/dmi/tables/DMI";
 constexpr char kSysfsMemFilePath[] = "/dev/mem";
+constexpr char kMagentConfigPath[] = "/etc/google/magent/config.pb";
 
 // Indus machine specific settings.
 // Please refer to: platforms/gsys/daemon/platform/indus/layout/indus.board
@@ -205,10 +207,6 @@ constexpr ecclesia::PciSensorParams dimm_channel_info[]{
      0x150, 85},
 };
 
-constexpr ecclesia::CpuMarginSensorParams cpu_margin_sensor_info[] {
-    {"cpu0", 0}, {"cpu1", 1}
-};
-
 }  // namespace
 
 int main(int argc, char **argv) {
@@ -250,11 +248,13 @@ int main(int argc, char **argv) {
       .sysfs_mem_file_path = kSysfsMemFilePath,
       .eeprom_options = absl::MakeSpan(eeprom_options),
       .dimm_thermal_params = absl::MakeSpan(dimm_channel_info),
-      .cpu_margin_params = absl::MakeSpan(cpu_margin_sensor_info),
   };
 
   std::unique_ptr<ecclesia::SystemModel> system_model =
       absl::make_unique<ecclesia::SystemModel>(std::move(params));
+
+  ecclesia::Ipmitool ipmi(ecclesia::GetIpmiCredentialFromPb(kMagentConfigPath));
+  auto frus = ipmi.GetAllFrus();
 
   auto server = ecclesia::CreateServer(absl::GetFlag(FLAGS_port));
   ecclesia::IndusRedfishService redfish_service(
