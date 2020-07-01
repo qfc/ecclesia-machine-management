@@ -77,9 +77,21 @@ bool SetUpUnixDomainSocket(
     return false;
   }
 
-  // At this point all validation has succeeded, the socket directory exists
-  // and the socket path does not.
-  return true;
+  // At this point we know the socket directory is ready. There may already be
+  // an existing socket file, so we want to remove that. It's okay for the
+  // remove to fail because the file already doesn't exist, but any other
+  // failure is an error.
+  //
+  // After this point, all validation has succeeded if the socket directory
+  // exists and the socket path does not.
+  return CleanUpUnixDomainSocket(socket_path);
+}
+
+bool CleanUpUnixDomainSocket(const std::string &socket_path) {
+  std::filesystem::path socket(socket_path);
+  // It's okay for the remove to fail because the file already doesn't exist,
+  // but any other failure is an error.
+  return (unlink(socket.c_str()) == 0 || errno == ENOENT);
 }
 
 }  // namespace ecclesia

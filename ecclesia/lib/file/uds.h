@@ -58,6 +58,14 @@ bool SetUpUnixDomainSocket(
     const std::string &socket_path,
     const std::function<bool(const std::string &)> &is_root_safe);
 
+// Given a path to a domain socket, delete it.
+// Assumes that the socket is no longer in use. This function should only
+// be called after SetUpUnixDomainSocket has been called on the same socket
+// prior in the process and that all services serving on the socket are shut
+// down.
+// Returns true if the socket was deleted successfully, false otherwise.
+bool CleanUpUnixDomainSocket(const std::string &socket_path);
+
 }  // namespace ecclesia
 
 #endif  // ECCLESIA_LIB_FILE_UDS_H_
