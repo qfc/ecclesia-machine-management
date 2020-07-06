@@ -167,3 +167,14 @@ http_archive(
         "cp ./config.h include",
     ],
 )
+
+http_archive(
+    name = "curl",
+    build_file = "@//ecclesia/oss:curl.BUILD",
+    sha256 = "01ae0c123dee45b01bbaef94c0bc00ed2aec89cb2ee0fd598e0d302a6b5e0a98",
+    strip_prefix = "curl-7.69.1",
+    urls = [
+        "https://storage.googleapis.com/mirror.tensorflow.org/curl.haxx.se/download/curl-7.69.1.tar.gz",
+        "https://curl.haxx.se/download/curl-7.69.1.tar.gz",
+    ],
+)
