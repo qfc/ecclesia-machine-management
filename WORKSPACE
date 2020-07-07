@@ -178,3 +178,13 @@ http_archive(
         "https://curl.haxx.se/download/curl-7.69.1.tar.gz",
     ],
 )
+
+http_archive(
+    name = "jansson",
+    build_file = "@//ecclesia/oss:jansson.BUILD",
+    sha256 = "5f8dec765048efac5d919aded51b26a32a05397ea207aa769ff6b53c7027d2c9",
+    strip_prefix = "jansson-2.12",
+    urls = [
+        "https://digip.org/jansson/releases/jansson-2.12.tar.gz",
+    ],
+)
