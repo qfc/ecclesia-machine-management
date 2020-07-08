@@ -65,6 +65,15 @@ package_group(
     ],
 )
 
+# Machine master shared libraries
+package_group(
+    name = "mmaster_library_users",
+    packages = [
+        "//ecclesia/mmaster/...",
+        "//platforms/ecclesia/mmaster/...",
+    ],
+)
+
 # Machine master backend code.
 package_group(
     name = "mmaster_backend_users",
