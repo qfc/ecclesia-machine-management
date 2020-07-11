@@ -47,6 +47,30 @@ cc_library(
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/strings:str_format",
+        "@com_google_absl//absl/types:span",
+        "@ipmitool//:ipmi",
+    ],
+)
+
+cc_library(
+    name = "ipmitool_mock",
+    testonly = 1,
+    hdrs = ["ipmitool_mock.h"],
+    deps = [
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "ipmitool_test",
+    size = "small",
+    srcs = ["ipmitool_test.cc"],
+    deps = [
+        ":ipmitool",
+        ":ipmitool_mock",
+        "//ecclesia/lib/file:test_filesystem",
+        "//ecclesia/lib/logging",
+        "@com_google_googletest//:gtest_main",
         "@ipmitool//:ipmi",
     ],
 )
