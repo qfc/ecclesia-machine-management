@@ -19,15 +19,7 @@
 #ifndef ECCLESIA_MAGENT_LIB_IPMI_IPMITOOL_H_
 #define ECCLESIA_MAGENT_LIB_IPMI_IPMITOOL_H_
 
-#include <stddef.h>
-#include <stdint.h>
-
-#include <memory>
-#include <optional>
-#include <vector>
-
 #include "absl/status/status.h"
-#include "absl/types/span.h"
 #include "ecclesia/magent/config.pb.h"
 #include "ecclesia/magent/lib/ipmi/interface_options.h"
 #include "ecclesia/magent/lib/ipmi/ipmi.h"
