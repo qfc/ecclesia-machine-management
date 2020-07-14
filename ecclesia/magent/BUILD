@@ -9,13 +9,11 @@ config_setting(
 proto_library(
     name = "magent_config_proto",
     srcs = ["config.proto"],
-    compatible_with = ["//buildenv/target:gce"],
     visibility = ["//ecclesia:magent_library_users"],
 )
 
 cc_proto_library(
     name = "magent_config_cc_proto",
-    compatible_with = ["//buildenv/target:gce"],
     visibility = ["//ecclesia:magent_library_users"],
     deps = [":magent_config_proto"],
 )
@@ -23,7 +21,6 @@ cc_proto_library(
 cc_binary(
     name = "magent_indus_oss",
     srcs = ["main_indus.cc"],
-    compatible_with = ["//buildenv/target:gce"],
     visibility = [
         "//ecclesia:magent_library_users",
     ],
@@ -58,7 +55,6 @@ cc_binary(
 cc_library(
     name = "magent_hdr",
     hdrs = ["main_common.h"],
-    compatible_with = ["//buildenv/target:gce"],
     visibility = ["//ecclesia:magent_library_users"],
     deps = [
         "//ecclesia/magent/lib/thread_pool",

@@ -12,7 +12,6 @@ cc_library(
         "eeprom.h",
         "smbus_eeprom.h",
     ],
-    compatible_with = ["//buildenv/target:gce"],
     deps = [
         "//ecclesia/magent/lib/io:smbus",
         "@com_google_absl//absl/base:core_headers",

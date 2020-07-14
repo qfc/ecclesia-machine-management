@@ -8,14 +8,12 @@ licenses(["notice"])
 emboss_cc_library(
     name = "common_header_emb",
     srcs = ["common_header.emb"],
-    compatible_with = ["//buildenv/target:gce"],
 )
 
 cc_library(
     name = "ipmi_fru",
     srcs = ["fru.cc"],
     hdrs = ["fru.h"],
-    compatible_with = ["//buildenv/target:gce"],
     visibility = ["//ecclesia:magent_library_users"],
     deps = [
         ":common_header_emb",

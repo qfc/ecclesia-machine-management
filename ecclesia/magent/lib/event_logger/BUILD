@@ -4,7 +4,6 @@ cc_library(
     name = "event_logger",
     srcs = ["event_logger.cc"],
     hdrs = ["event_logger.h"],
-    compatible_with = ["//buildenv/target:gce"],
     visibility = ["//ecclesia:magent_library_users"],
     deps = [
         "//ecclesia/lib/time:clock",
@@ -38,7 +37,6 @@ cc_library(
     name = "system_event_visitors",
     srcs = ["system_event_visitors.cc"],
     hdrs = ["system_event_visitors.h"],
-    compatible_with = ["//buildenv/target:gce"],
     visibility = ["//ecclesia:magent_library_users"],
     deps = [
         ":event_logger",
@@ -58,7 +56,6 @@ cc_library(
     name = "indus_system_event_visitors",
     srcs = ["indus_system_event_visitors.cc"],
     hdrs = ["indus_system_event_visitors.h"],
-    compatible_with = ["//buildenv/target:gce"],
     visibility = ["//ecclesia:magent_library_users"],
     deps = [
         ":system_event_visitors",
@@ -73,7 +70,6 @@ cc_library(
     name = "indus_cpu_topology",
     srcs = ["indus_cpu_topology.cc"],
     hdrs = ["indus_cpu_topology.h"],
-    compatible_with = ["//buildenv/target:gce"],
     visibility = ["//ecclesia:magent_library_users"],
     deps = [
         "//ecclesia/lib/apifs",

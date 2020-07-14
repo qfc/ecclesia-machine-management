@@ -12,7 +12,6 @@ cc_library(
         "redfish_keywords.h",
         "resource.h",
     ],
-    compatible_with = ["//buildenv/target:gce"],
     visibility = ["//ecclesia:magent_library_users"],
     deps = [
         "@com_google_absl//absl/container:flat_hash_map",

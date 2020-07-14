@@ -4,7 +4,6 @@ cc_library(
     name = "x86_sysmodel",
     srcs = ["sysmodel.cc"],
     hdrs = ["sysmodel.h"],
-    compatible_with = ["//buildenv/target:gce"],
     visibility = ["//ecclesia:magent_library_users"],
     deps = [
         ":cpu",
@@ -31,7 +30,6 @@ cc_library(
     name = "dimm",
     srcs = ["dimm.cc"],
     hdrs = ["dimm.h"],
-    compatible_with = ["//buildenv/target:gce"],
     visibility = ["//ecclesia:magent_library_users"],
     deps = [
         "//ecclesia/lib/smbios:reader",
@@ -46,7 +44,6 @@ cc_library(
     name = "cpu",
     srcs = ["cpu.cc"],
     hdrs = ["cpu.h"],
-    compatible_with = ["//buildenv/target:gce"],
     visibility = ["//ecclesia:magent_library_users"],
     deps = [
         "//ecclesia/lib/io:msr",
@@ -66,7 +63,6 @@ cc_library(
     name = "sysmodel_fru",
     srcs = ["fru.cc"],
     hdrs = ["fru.h"],
-    compatible_with = ["//buildenv/target:gce"],
     visibility = ["//ecclesia:magent_library_users"],
     deps = [
         "//ecclesia/magent/lib/eeprom",
@@ -84,7 +80,6 @@ cc_library(
     name = "thermal",
     srcs = ["thermal.cc"],
     hdrs = ["thermal.h"],
-    compatible_with = ["//buildenv/target:gce"],
     visibility = ["//ecclesia/magent/redfish/indus:__pkg__"],
     deps = [
         "//ecclesia/lib/io:msr",

@@ -22,7 +22,6 @@ cc_library(
         "systems.h",
         "thermal.h",
     ],
-    compatible_with = ["//buildenv/target:gce"],
     visibility = ["//ecclesia:magent_frontend_users"],
     deps = [
         "//ecclesia/lib/mcedecoder:cpu_topology",

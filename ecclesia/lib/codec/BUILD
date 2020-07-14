@@ -11,7 +11,6 @@ package(default_visibility = ["//ecclesia:library_users"])
 cc_library(
     name = "bits",
     hdrs = ["bits.h"],
-    compatible_with = ["//buildenv/target:gce"],
     deps = ["@com_google_absl//absl/base:core_headers"],
 )
 
@@ -28,7 +27,6 @@ cc_test(
 cc_library(
     name = "endian",
     hdrs = ["endian.h"],
-    compatible_with = ["//buildenv/target:gce"],
     visibility = ["//ecclesia:library_users"],
     deps = ["@com_google_absl//absl/numeric:int128"],
 )
@@ -47,7 +45,6 @@ cc_library(
     name = "text",
     srcs = ["text.cc"],
     hdrs = ["text.h"],
-    compatible_with = ["//buildenv/target:gce"],
     deps = [
         ":bits",
         "@com_google_absl//absl/status",

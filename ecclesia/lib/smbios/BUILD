@@ -5,13 +5,11 @@ licenses(["notice"])
 emboss_cc_library(
     name = "entry_point_emb",
     srcs = ["entry_point.emb"],
-    compatible_with = ["//buildenv/target:gce"],
 )
 
 emboss_cc_library(
     name = "structures_emb",
     srcs = ["structures.emb"],
-    compatible_with = ["//buildenv/target:gce"],
     visibility = ["//ecclesia:library_users"],
 )
 
@@ -30,7 +28,6 @@ cc_library(
         "reader.h",
         "system_event_log.h",
     ],
-    compatible_with = ["//buildenv/target:gce"],
     visibility = [
         "//ecclesia:library_users",
     ],

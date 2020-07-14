@@ -3,7 +3,6 @@ licenses(["notice"])
 cc_library(
     name = "dir",
     hdrs = ["dir.h"],
-    compatible_with = ["//buildenv/target:gce"],
     visibility = ["//ecclesia:library_users"],
     deps = ["@com_google_absl//absl/strings"],
 )
@@ -23,7 +22,6 @@ cc_library(
     name = "path",
     srcs = ["path.cc"],
     hdrs = ["path.h"],
-    compatible_with = ["//buildenv/target:gce"],
     visibility = ["//ecclesia:library_users"],
     deps = [
         "@com_google_absl//absl/strings",
@@ -72,7 +70,6 @@ cc_library(
     name = "uds",
     srcs = ["uds.cc"],
     hdrs = ["uds.h"],
-    compatible_with = ["//buildenv/target:gce"],
     visibility = ["//ecclesia:library_users"],
 )
 

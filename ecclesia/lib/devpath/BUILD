@@ -4,7 +4,6 @@ cc_library(
     name = "devpath",
     srcs = ["devpath.cc"],
     hdrs = ["devpath.h"],
-    compatible_with = ["//buildenv/target:gce"],
     visibility = ["//ecclesia:library_users"],
     deps = [
         "@com_google_absl//absl/strings",
@@ -28,7 +27,6 @@ cc_library(
     name = "transform",
     srcs = ["transform.cc"],
     hdrs = ["transform.h"],
-    compatible_with = ["//buildenv/target:gce"],
     visibility = ["//ecclesia:mmaster_middle_users"],
     deps = [
         "@com_google_absl//absl/strings",
