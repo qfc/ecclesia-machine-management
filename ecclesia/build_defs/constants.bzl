@@ -1,4 +1,4 @@
-"""Skylark definitions for build rules to generate cross-language constants.
+"""Starlark definitions for build rules to generate cross-language constants.
 
 This file defines macros that can be used to define integer and string constants
 which can then be embedded into language-specifc libraries. For more complex

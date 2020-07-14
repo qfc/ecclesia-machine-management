@@ -12,3 +12,8 @@ bzl_library(
     srcs = ["constants.bzl"],
     deps = [":file"],
 )
+
+bzl_library(
+    name = "query",
+    srcs = ["query.bzl"],
+)

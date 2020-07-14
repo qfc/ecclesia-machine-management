@@ -1,4 +1,4 @@
-"""Skylark definitions for build rules to write files.
+"""Starlark definitions for build rules to write files.
 
 For simple cases where you just want to write fixed string content into a file
 you can use write_file. Typical usage:
