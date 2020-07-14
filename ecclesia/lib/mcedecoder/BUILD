@@ -14,6 +14,7 @@ package_group(
 cc_library(
     name = "cpu_topology",
     hdrs = ["cpu_topology.h"],
+    compatible_with = ["//buildenv/target:gce"],
     visibility = [":mcedecoder_users"],
 )
 
@@ -21,24 +22,28 @@ cc_library(
     name = "dimm_translator",
     srcs = ["dimm_translator.cc"],
     hdrs = ["dimm_translator.h"],
+    compatible_with = ["//buildenv/target:gce"],
     visibility = [":mcedecoder_users"],
 )
 
 cc_library(
     name = "mce_messages",
     hdrs = ["mce_messages.h"],
+    compatible_with = ["//buildenv/target:gce"],
     visibility = [":mcedecoder_users"],
 )
 
 cc_library(
     name = "bit_operator",
     hdrs = ["bit_operator.h"],
+    compatible_with = ["//buildenv/target:gce"],
 )
 
 cc_library(
     name = "mce_decode",
     srcs = ["mce_decode.cc"],
     hdrs = ["mce_decode.h"],
+    compatible_with = ["//buildenv/target:gce"],
     visibility = [":mcedecoder_users"],
     deps = [
         ":bit_operator",
@@ -53,6 +58,7 @@ cc_library(
     name = "skylake_mce_decode",
     srcs = ["skylake_mce_decode.cc"],
     hdrs = ["skylake_mce_decode.h"],
+    compatible_with = ["//buildenv/target:gce"],
     deps = [
         ":bit_operator",
         ":dimm_translator",

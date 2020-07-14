@@ -11,6 +11,7 @@ cc_library(
         "interfaces.h",
         "logging.h",
     ],
+    compatible_with = ["//buildenv/target:gce"],
     visibility = ["//ecclesia:library_users"],
     deps = [
         "//ecclesia/lib/time:clock",
@@ -41,6 +42,7 @@ cc_library(
     name = "posix",
     srcs = ["posix.cc"],
     hdrs = ["posix.h"],
+    compatible_with = ["//buildenv/target:gce"],
     visibility = ["//ecclesia:library_users"],
     deps = [
         ":logging",

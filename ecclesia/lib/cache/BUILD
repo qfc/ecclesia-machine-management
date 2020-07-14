@@ -12,6 +12,7 @@ cc_library(
         "rcu_store.h",
         "rcu_view.h",
     ],
+    compatible_with = ["//buildenv/target:gce"],
     deps = [
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/synchronization",

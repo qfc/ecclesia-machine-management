@@ -4,6 +4,7 @@ cc_library(
     name = "clock",
     srcs = ["clock.cc"],
     hdrs = ["clock.h"],
+    compatible_with = ["//buildenv/target:gce"],
     visibility = ["//ecclesia:library_users"],
     deps = ["@com_google_absl//absl/time"],
 )

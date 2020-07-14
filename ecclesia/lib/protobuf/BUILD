@@ -3,6 +3,7 @@ licenses(["notice"])
 cc_library(
     name = "parse",
     hdrs = ["parse.h"],
+    compatible_with = ["//buildenv/target:gce"],
     visibility = ["//ecclesia:library_users"],
     deps = [
         "//ecclesia/lib/logging",

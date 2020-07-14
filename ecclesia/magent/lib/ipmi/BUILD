@@ -5,6 +5,7 @@ licenses(["notice"])
 cc_library(
     name = "ipmi",
     hdrs = ["ipmi.h"],
+    compatible_with = ["//buildenv/target:gce"],
     visibility = ["//ecclesia:magent_library_users"],
     deps = [
         "@com_google_absl//absl/status",
@@ -16,6 +17,7 @@ cc_library(
     name = "interface_options",
     srcs = ["interface_options.cc"],
     hdrs = ["interface_options.h"],
+    compatible_with = ["//buildenv/target:gce"],
     visibility = ["//ecclesia:magent_library_users"],
     deps = [
         "//ecclesia/lib/cleanup",
@@ -36,6 +38,7 @@ cc_library(
     hdrs = [
         "ipmitool.h",
     ],
+    compatible_with = ["//buildenv/target:gce"],
     visibility = ["//ecclesia:magent_library_users"],
     deps = [
         ":interface_options",

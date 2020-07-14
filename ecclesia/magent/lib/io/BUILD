@@ -7,6 +7,7 @@ licenses(["notice"])
 cc_library(
     name = "smbus",
     hdrs = ["smbus.h"],
+    compatible_with = ["//buildenv/target:gce"],
     visibility = ["//ecclesia:magent_library_users"],
     deps = [
         "//ecclesia/lib/types:fixed_range_int",
@@ -33,6 +34,7 @@ cc_library(
     name = "smbus_kernel_dev",
     srcs = ["smbus_kernel_dev.cc"],
     hdrs = ["smbus_kernel_dev.h"],
+    compatible_with = ["//buildenv/target:gce"],
     visibility = ["//ecclesia:magent_library_users"],
     deps = [
         ":smbus",
@@ -77,6 +79,7 @@ cc_library(
     name = "pci_location",
     srcs = ["pci_location.cc"],
     hdrs = ["pci_location.h"],
+    compatible_with = ["//buildenv/target:gce"],
     visibility = ["//ecclesia:magent_library_users"],
     deps = [
         "//ecclesia/lib/types:fixed_range_int",
@@ -107,6 +110,7 @@ cc_library(
         "pci_consts.h",
         "pci_regs.h",
     ],
+    compatible_with = ["//buildenv/target:gce"],
     visibility = ["//ecclesia:magent_library_users"],
     deps = [
         ":pci_location",
@@ -128,6 +132,7 @@ cc_library(
     name = "pci_sys",
     srcs = ["pci_sys.cc"],
     hdrs = ["pci_sys.h"],
+    compatible_with = ["//buildenv/target:gce"],
     visibility = ["//ecclesia:magent_library_users"],
     deps = [
         ":pci",

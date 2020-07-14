@@ -5,6 +5,7 @@ licenses(["notice"])
 cc_library(
     name = "event_reader",
     hdrs = ["event_reader.h"],
+    compatible_with = ["//buildenv/target:gce"],
     visibility = ["//ecclesia:magent_library_users"],
     deps = [
         ":elog_emb",
@@ -23,6 +24,7 @@ cc_library(
     hdrs = [
         "mced_reader.h",
     ],
+    compatible_with = ["//buildenv/target:gce"],
     visibility = ["//ecclesia:magent_library_users"],
     deps = [
         ":event_reader",
@@ -40,6 +42,7 @@ cc_library(
     name = "elog_reader",
     srcs = ["elog_reader.cc"],
     hdrs = ["elog_reader.h"],
+    compatible_with = ["//buildenv/target:gce"],
     visibility = ["//ecclesia:magent_library_users"],
     deps = [
         ":elog_emb",
@@ -54,6 +57,7 @@ cc_library(
 emboss_cc_library(
     name = "elog_emb",
     srcs = ["elog.emb"],
+    compatible_with = ["//buildenv/target:gce"],
     visibility = ["//ecclesia:magent_library_users"],
 )
 

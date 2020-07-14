@@ -7,6 +7,7 @@ cc_library(
     name = "apifs",
     srcs = ["apifs.cc"],
     hdrs = ["apifs.h"],
+    compatible_with = ["//buildenv/target:gce"],
     visibility = ["//visibility:public"],
     deps = [
         "//ecclesia/lib/cleanup",

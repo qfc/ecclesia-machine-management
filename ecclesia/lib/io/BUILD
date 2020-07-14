@@ -7,6 +7,7 @@ cc_library(
     name = "ioctl",
     srcs = ["ioctl.cc"],
     hdrs = ["ioctl.h"],
+    compatible_with = ["//buildenv/target:gce"],
     visibility = ["//ecclesia:library_users"],
 )
 
@@ -17,6 +18,7 @@ cc_library(
         "constants.h",
         "msr.h",
     ],
+    compatible_with = ["//buildenv/target:gce"],
     visibility = ["//ecclesia:library_users"],
     deps = [
         "//ecclesia/lib/apifs",
