@@ -43,7 +43,7 @@ cc_library(
     testonly = True,
     srcs = ["test_filesystem.cc"],
     hdrs = ["test_filesystem.h"],
-    visibility = ["//ecclesia:library_users"],
+    visibility = ["//visibility:public"],
     deps = [
         ":dir",
         ":path",
