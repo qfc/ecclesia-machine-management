@@ -30,7 +30,7 @@ constexpr int kIndusSlotNumGldnMap[] = {11, 10, 9,  8,  7,  6,  0,  1,
 }  // namespace
 
 bool IndusDimmTranslator::GetGLDN(int socket_id, int imc_channel,
-                                  int channel_slot, int *gldn) {
+                                  int channel_slot, int *gldn) const {
   if (socket_id < 0 || socket_id >= kIndusNumCpuSocket || imc_channel < 0 ||
       imc_channel >= kIndusNumImcChannelsPerCpu || channel_slot < 0 ||
       channel_slot >= kIndusNumDimmSlotPerImcChannel) {
@@ -41,6 +41,26 @@ bool IndusDimmTranslator::GetGLDN(int socket_id, int imc_channel,
       imc_channel * kIndusNumDimmSlotPerImcChannel + channel_slot;
   *gldn = kIndusSlotNumGldnMap[slot_num];
   return true;
+}
+
+bool IndusDimmTranslator::GldnToSlot(int gldn, DimmSlotId *dimm_slot) const {
+  int num_slots = kIndusNumCpuSocket * kIndusNumImcChannelsPerCpu *
+                  kIndusNumDimmSlotPerImcChannel;
+  if (gldn < 0 || gldn >= num_slots) {
+    return false;
+  }
+  for (int slot_idx = 0; slot_idx < num_slots; ++slot_idx) {
+    if (kIndusSlotNumGldnMap[slot_idx] == gldn) {
+      int num_dimm_slot_per_cpu =
+          kIndusNumImcChannelsPerCpu * kIndusNumDimmSlotPerImcChannel;
+      dimm_slot->socket_id = slot_idx / num_dimm_slot_per_cpu;
+      dimm_slot->imc_channel =
+          (slot_idx % num_dimm_slot_per_cpu) / kIndusNumDimmSlotPerImcChannel;
+      dimm_slot->channel_slot = slot_idx % kIndusNumDimmSlotPerImcChannel;
+      return true;
+    }
+  }
+  return false;
 }
 
 }  // namespace mcedecoder

@@ -19,6 +19,14 @@
 
 namespace mcedecoder {
 
+// A DIMM slot can be uniquely identified by CPU socket ID, the IMC channel ID
+// within CPU socket and the channel slot within a IMC channel.
+struct DimmSlotId {
+  int socket_id;
+  int imc_channel;
+  int channel_slot;
+};
+
 // Interface class of DIMM translator.
 class DimmTranslatorInterface {
  public:
@@ -28,7 +36,11 @@ class DimmTranslatorInterface {
   // success. otherwise return false. Here imc_channel is per socket based
   // channel number, channel_slot is per imc_channel based slot number.
   virtual bool GetGLDN(int socket_id, int imc_channel, int channel_slot,
-                       int *gldn) = 0;
+                       int *gldn) const = 0;
+
+  // This method translates a GLDN to a DIMM slot. If the given GLDN is invalid,
+  // return false; otherwise fill in the DIMM slot and return true.
+  virtual bool GldnToSlot(int gldn, DimmSlotId *dimm_slot) const = 0;
 };
 
 // DIMM translator class for Indus server which has 2 CPU sockets, each CPU with
@@ -39,7 +51,10 @@ class IndusDimmTranslator : public DimmTranslatorInterface {
   // imc_channel_id (0~2) are given instead, then the input imc_channel = imc_id
   // * 3 + imc_channel_id.
   bool GetGLDN(int socket_id, int imc_channel, int channel_slot,
-               int *gldn) override;
+               int *gldn) const override;
+
+  // A valid GLDN is 0~23.
+  bool GldnToSlot(int gldn, DimmSlotId *dimm_slot) const override;
 };
 
 }  // namespace mcedecoder
