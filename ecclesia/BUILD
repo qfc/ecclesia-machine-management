@@ -26,13 +26,13 @@ package_group(
     packages = [
         "//ecclesia/lib/redfish/...",
         "//ecclesia/magent/redfish/...",
-        "//ecclesia/mmaster/backends/redfish/...",
-        "//ecclesia/mmaster/frontends/...",
-        "//ecclesia/mmaster/middles/collector/...",
+        "//ecclesia/mmanager/backends/redfish/...",
+        "//ecclesia/mmanager/frontends/...",
+        "//ecclesia/mmanager/middles/collector/...",
         "//ops/hardware/hydra/common/megapede_power/...",
-        "//platforms/ecclesia/mmaster/backends/redfish/...",
-        "//platforms/ecclesia/mmaster/frontends/...",
-        "//platforms/ecclesia/mmaster/services/...",
+        "//platforms/ecclesia/mmanager/backends/redfish/...",
+        "//platforms/ecclesia/mmanager/frontends/...",
+        "//platforms/ecclesia/mmanager/services/...",
     ],
 )
 
@@ -51,65 +51,65 @@ package_group(
     packages = ["//ecclesia/magent"],
 )
 
-# Allowed users of the machine master API.
+# Allowed users of the machine manager API.
 package_group(
-    name = "mmaster_users",
+    name = "mmanager_users",
     packages = [
         "//borg/integration/...",
         "//borg/slave/...",
         "//borg/test/...",
         "//cloud/platforms/hammurabi/netboot/...",
-        "//ecclesia/mmaster/...",
+        "//ecclesia/mmanager/...",
         "//platforms/ecclesia/lib/rpc/...",
-        "//platforms/ecclesia/mmaster/...",
+        "//platforms/ecclesia/mmanager/...",
     ],
 )
 
-# Machine master shared libraries
+# Machine manager shared libraries
 package_group(
-    name = "mmaster_library_users",
+    name = "mmanager_library_users",
     packages = [
-        "//ecclesia/mmaster/...",
-        "//platforms/ecclesia/mmaster/...",
+        "//ecclesia/mmanager/...",
+        "//platforms/ecclesia/mmanager/...",
     ],
 )
 
-# Machine master backend code.
+# Machine manager backend code.
 package_group(
-    name = "mmaster_backend_users",
+    name = "mmanager_backend_users",
     packages = [
-        "//ecclesia/mmaster/backends/...",
-        "//ecclesia/mmaster/frontends/...",
-        "//ecclesia/mmaster/middles/...",
+        "//ecclesia/mmanager/backends/...",
+        "//ecclesia/mmanager/frontends/...",
+        "//ecclesia/mmanager/middles/...",
     ],
 )
 
-# Machine master middle layer code.
+# Machine manager middle layer code.
 package_group(
-    name = "mmaster_middle_users",
+    name = "mmanager_middle_users",
     packages = [
-        "//ecclesia/mmaster/frontends/...",
-        "//ecclesia/mmaster/middles/...",
+        "//ecclesia/mmanager/frontends/...",
+        "//ecclesia/mmanager/middles/...",
     ],
 )
 
-# Machine master frontend code.
+# Machine manager frontend code.
 package_group(
-    name = "mmaster_frontend_users",
-    packages = ["//ecclesia/mmaster/mock/..."],
+    name = "mmanager_frontend_users",
+    packages = ["//ecclesia/mmanager/mock/..."],
 )
 
-# Machine master config code.
+# Machine manager config code.
 package_group(
-    name = "mmaster_config_users",
-    packages = ["//ecclesia/mmaster/..."],
+    name = "mmanager_config_users",
+    packages = ["//ecclesia/mmanager/..."],
 )
 
-# Users of the machine master mock daemon.
+# Users of the machine manager mock daemon.
 package_group(
-    name = "mmaster_mock_users",
-    packages = ["//ecclesia/mmaster/mock/..."],
+    name = "mmanager_mock_users",
+    packages = ["//ecclesia/mmanager/mock/..."],
 )
 
-# Tests which use the mmaster binary directly.
-package_group(name = "mmaster_binary_tests")
+# Tests which use the mmanager binary directly.
+package_group(name = "mmanager_binary_tests")

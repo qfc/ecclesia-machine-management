@@ -27,7 +27,7 @@ cc_library(
     name = "transform",
     srcs = ["transform.cc"],
     hdrs = ["transform.h"],
-    visibility = ["//ecclesia:mmaster_middle_users"],
+    visibility = ["//ecclesia:mmanager_middle_users"],
     deps = [
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/types:optional",

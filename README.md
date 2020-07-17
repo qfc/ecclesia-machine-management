@@ -13,6 +13,6 @@ project also contains a set of tools for building *more* implementations, as
 well as a variety of smaller libraries to simplify accessing the lower-level
 system interfaces needed to interact with hardware.
 
-This project also provides an implementation of a machine master service that
+This project also provides an implementation of a machine manager service that
 can provide a single unified RPC interface (defined and implemented using
 [gRPC](https://grpc.io/)) using one or more Redfish agents as backends.

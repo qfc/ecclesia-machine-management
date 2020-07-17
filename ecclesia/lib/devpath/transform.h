@@ -19,8 +19,8 @@
 // that contains devpath fields and switching them between being machine paths
 // or domain-specific ones.
 
-#ifndef ECCLESIA_MMASTER_LIB_DEVPATH_TRANSFORM_H_
-#define ECCLESIA_MMASTER_LIB_DEVPATH_TRANSFORM_H_
+#ifndef ECCLESIA_MMANAGER_LIB_DEVPATH_TRANSFORM_H_
+#define ECCLESIA_MMANAGER_LIB_DEVPATH_TRANSFORM_H_
 
 #include <functional>
 #include <string>
@@ -50,4 +50,4 @@ bool TransformProtobufDevpaths(const TransformDevpathFunction &transform,
                                ::google::protobuf::Message *message);
 }  // namespace ecclesia
 
-#endif  // ECCLESIA_MMASTER_LIB_DEVPATH_TRANSFORM_H_
+#endif  // ECCLESIA_MMANAGER_LIB_DEVPATH_TRANSFORM_H_
