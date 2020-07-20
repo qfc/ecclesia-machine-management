@@ -35,6 +35,7 @@ cc_library(
     ],
     hdrs = [
         "ipmitool.h",
+        "ipmitool_interface.h",
     ],
     visibility = ["//ecclesia:magent_library_users"],
     deps = [

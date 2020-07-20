@@ -23,6 +23,7 @@
 #include "absl/strings/str_format.h"
 #include "ecclesia/lib/logging/logging.h"
 #include "ecclesia/magent/lib/fru/fru.h"
+#include "ecclesia/magent/lib/ipmi/ipmitool_interface.h"
 
 extern "C" {
 #include "include/ipmitool/helper.h"
@@ -36,7 +37,6 @@ extern "C" {
 #include "include/ipmitool/ipmi_sol.h"
 #include "include/ipmitool/log.h"
 
-struct ipmi_intf ipmi_open_intf;
 extern const struct valstr completion_code_vals[];
 
 extern int read_fru_area(struct ipmi_intf *intf, struct fru_info *fru,
@@ -63,51 +63,151 @@ constexpr uint8_t IPMI_INVALID_CMD_COMPLETION_CODE = 0xC1;
 constexpr uint8_t IPMI_TIMEOUT_COMPLETION_CODE = 0xC3;
 constexpr uint8_t IPMI_UNKNOWN_ERR_COMPLETION_CODE = 0xff;
 
-namespace {
-
-std::string IpmiResponseToString(uint8_t code) {
-  const struct valstr *curr = &completion_code_vals[0];
-
-  // completion_code_vals is a null-entry terminated array.
-  while (curr->str != nullptr) {
-    if (curr->val == code) return curr->str;
-
-    curr++;
+void IpmitoolInterface::SessionSetKgkey(std::any intf, const uint8_t *kgkey) {
+  if (!intf.has_value()) {
+    FatalLog() << "intf is empty.";
+    return;
   }
-
-  return "unknown response code";
+  return ipmi_intf_session_set_kgkey(std::any_cast<struct ipmi_intf *>(intf),
+                                     kgkey);
 }
 
-void ConfigureLanPlusInterface(ipmi_intf *intf) {
-  // Default is name-only lookup, from ipmitool's ipmi_main.c
-  constexpr uint8_t kIpmiDefaultLookupBit = 0x10;
-
-  // Default from table 22-19 of the IPMIv2 spec, from ipmitool's ipmi_main.c
-  constexpr uint8_t kIpmiDefaultCipherSuiteId = 3;
-
-  // Default is empty, from ipmitool's ipmi_main.c
-  uint8_t kgkey[IPMI_KG_BUFFER_SIZE] = {0};
-
-  // The following values are all defaults taken from the implementation in
-  // google3/v1_8_18/lib/ipmi_main.c.
-  ipmi_intf_session_set_kgkey(intf, kgkey);
-  ipmi_intf_session_set_privlvl(intf, IPMI_SESSION_PRIV_ADMIN);
-  ipmi_intf_session_set_lookupbit(intf, kIpmiDefaultLookupBit);
-  ipmi_intf_session_set_sol_escape_char(intf, SOL_ESCAPE_CHARACTER_DEFAULT);
-  ipmi_intf_session_set_cipher_suite_id(intf, kIpmiDefaultCipherSuiteId);
-  intf->devnum = 0;
-  intf->devfile = nullptr;
-  intf->ai_family = AF_UNSPEC;
-  intf->my_addr = IPMI_BMC_SLAVE_ADDR;
-  intf->target_addr = IPMI_BMC_SLAVE_ADDR;
+void IpmitoolInterface::SessionSetPrivlvl(std::any intf, uint8_t privlvl) {
+  if (!intf.has_value()) {
+    FatalLog() << "intf is empty.";
+    return;
+  }
+  return ipmi_intf_session_set_privlvl(std::any_cast<struct ipmi_intf *>(intf),
+                                       privlvl);
 }
 
-std::string ReadFruNameInternal(struct sdr_record_fru_locator *fru) {
-  return std::string(reinterpret_cast<const char *>(fru->id_string),
-                     fru->id_code & 0x1f);
+void IpmitoolInterface::SessionSetLookupbit(std::any intf, uint8_t lookupbit) {
+  if (!intf.has_value()) {
+    FatalLog() << "intf is empty.";
+    return;
+  }
+  return ipmi_intf_session_set_lookupbit(
+      std::any_cast<struct ipmi_intf *>(intf), lookupbit);
 }
 
-}  // namespace
+void IpmitoolInterface::SessionSetSolEscapeChar(std::any intf,
+                                                char sol_escape_char) {
+  if (!intf.has_value()) {
+    FatalLog() << "intf is empty.";
+    return;
+  }
+  return ipmi_intf_session_set_sol_escape_char(
+      std::any_cast<struct ipmi_intf *>(intf), sol_escape_char);
+}
+
+void IpmitoolInterface::SessionSetCipherSuiteId(std::any intf,
+                                                uint8_t cipher_suite_id) {
+  if (!intf.has_value()) {
+    FatalLog() << "intf is empty.";
+    return;
+  }
+  return ipmi_intf_session_set_cipher_suite_id(
+      std::any_cast<struct ipmi_intf *>(intf), cipher_suite_id);
+}
+
+void IpmitoolInterface::SessionSetRetry(std::any intf, int retry) {
+  if (!intf.has_value()) {
+    FatalLog() << "intf is empty.";
+    return;
+  }
+  return ipmi_intf_session_set_retry(std::any_cast<struct ipmi_intf *>(intf),
+                                     retry);
+}
+
+void IpmitoolInterface::SessionSetTimeout(std::any intf, uint32_t timeout) {
+  if (!intf.has_value()) {
+    FatalLog() << "intf is empty.";
+    return;
+  }
+  return ipmi_intf_session_set_timeout(std::any_cast<struct ipmi_intf *>(intf),
+                                       timeout);
+}
+
+void IpmitoolInterface::SessionSetHostname(std::any intf, char *hostname) {
+  if (!intf.has_value()) {
+    FatalLog() << "intf is empty.";
+    return;
+  }
+  return ipmi_intf_session_set_hostname(std::any_cast<struct ipmi_intf *>(intf),
+                                        hostname);
+}
+
+void IpmitoolInterface::SessionSetPort(std::any intf, int port) {
+  if (!intf.has_value()) {
+    FatalLog() << "intf is empty.";
+    return;
+  }
+  return ipmi_intf_session_set_port(std::any_cast<struct ipmi_intf *>(intf),
+                                    port);
+}
+
+void IpmitoolInterface::SessionSetUsername(std::any intf, char *username) {
+  if (!intf.has_value()) {
+    FatalLog() << "intf is empty.";
+    return;
+  }
+  return ipmi_intf_session_set_username(std::any_cast<struct ipmi_intf *>(intf),
+                                        username);
+}
+
+void IpmitoolInterface::SessionSetPassword(std::any intf, char *password) {
+  if (!intf.has_value()) {
+    FatalLog() << "intf is empty.";
+    return;
+  }
+  return ipmi_intf_session_set_password(std::any_cast<struct ipmi_intf *>(intf),
+                                        password);
+}
+
+std::any IpmitoolInterface::SdrStart(std::any intf, int use_builtin) {
+  if (!intf.has_value()) {
+    FatalLog() << "intf is empty.";
+    return nullptr;
+  }
+  return ipmi_sdr_start(std::any_cast<struct ipmi_intf *>(intf), use_builtin);
+}
+
+std::any IpmitoolInterface::SdrGetNextHeader(std::any intf, std::any i) {
+  if (!intf.has_value()) {
+    FatalLog() << "intf is empty.";
+    return nullptr;
+  }
+  return ipmi_sdr_get_next_header(std::any_cast<struct ipmi_intf *>(intf),
+                                  std::any_cast<struct ipmi_sdr_iterator *>(i));
+}
+
+uint8_t *IpmitoolInterface::SdrGetRecord(std::any intf, std::any header,
+                                         std::any i) {
+  if (!intf.has_value()) {
+    FatalLog() << "intf is empty.";
+    return nullptr;
+  }
+  if (!header.has_value()) {
+    ErrorLog() << "header is empty.";
+    return nullptr;
+  }
+  if (!i.has_value()) {
+    ErrorLog() << "iterator is empty.";
+    return nullptr;
+  }
+  return ipmi_sdr_get_record(std::any_cast<struct ipmi_intf *>(intf),
+                             std::any_cast<struct sdr_get_rs *>(header),
+                             std::any_cast<struct ipmi_sdr_iterator *>(i));
+}
+
+void IpmitoolInterface::SdrEnd(std::any intf, std::any i) {
+  if (!intf.has_value()) {
+    FatalLog() << "intf is empty.";
+    return;
+  }
+  return ipmi_sdr_end(std::any_cast<struct ipmi_intf *>(intf),
+                      std::any_cast<struct ipmi_sdr_iterator *>(i));
+}
 
 class IpmitoolImpl : public IpmiInterface {
  public:
@@ -136,7 +236,7 @@ class IpmitoolImpl : public IpmiInterface {
           entity.id,
           static_cast<uint8_t>((entity.logical << 7) | entity.instance)};
       fru.entity = fru_entity;
-      fru.name = ReadFruNameInternal(fru_pair.second.get());
+      fru.name = ReadFruName(fru_pair.second.get());
       frus.push_back(fru);
     }
     return frus;
@@ -183,6 +283,7 @@ class IpmitoolImpl : public IpmiInterface {
       frus_cache_;
   absl::optional<ecclesia::MagentConfig::IpmiCredential> cred_;
   ipmi_intf *intf_;
+  IpmitoolInterface ipmitool_intf_;
 
   ipmi_intf *GetIpmiIntf() {
     if (cred_ == absl::nullopt) {
@@ -202,16 +303,16 @@ class IpmitoolImpl : public IpmiInterface {
       intf->close(intf);
     }
 
-    ipmi_intf_session_set_retry(intf, 5);
-    ipmi_intf_session_set_timeout(intf, 30);
+    ipmitool_intf_.SessionSetRetry(intf, 5);
+    ipmitool_intf_.SessionSetTimeout(intf, 30);
 
-    ipmi_intf_session_set_hostname(intf,
-                                   cred_->mutable_ipmi_hostname()->data());
-    ipmi_intf_session_set_port(intf, cred_->ipmi_port());
-    ipmi_intf_session_set_username(intf,
-                                   cred_->mutable_ipmi_username()->data());
-    ipmi_intf_session_set_password(intf,
-                                   cred_->mutable_ipmi_password()->data());
+    ipmitool_intf_.SessionSetHostname(intf,
+                                      cred_->mutable_ipmi_hostname()->data());
+    ipmitool_intf_.SessionSetPort(intf, cred_->ipmi_port());
+    ipmitool_intf_.SessionSetUsername(intf,
+                                      cred_->mutable_ipmi_username()->data());
+    ipmitool_intf_.SessionSetPassword(intf,
+                                      cred_->mutable_ipmi_password()->data());
 
     ConfigureLanPlusInterface(intf);
 
@@ -220,7 +321,7 @@ class IpmitoolImpl : public IpmiInterface {
 
   absl::Status Raw(absl::Span<uint8_t> buffer, ipmi_rs **resp) {
     if (!intf_) {
-      ErrorLog() << "Ipmi interface: intf_ is nullptr.";
+      FatalLog() << "Ipmi interface: intf_ is nullptr.";
     }
 
     const uint8_t *bytes = buffer.data();
@@ -239,8 +340,8 @@ class IpmitoolImpl : public IpmiInterface {
       std::memcpy(data, &bytes[kMinimumIpmiPacketLength], data_len);
     }
 
-    ipmi_intf_session_set_timeout(intf_, 15);
-    ipmi_intf_session_set_retry(intf_, 1);
+    ipmitool_intf_.SessionSetTimeout(intf_, 15);
+    ipmitool_intf_.SessionSetRetry(intf_, 1);
 
     request.msg.netfn = bytes[0];
     request.msg.lun = 0x00;
@@ -365,17 +466,19 @@ class IpmitoolImpl : public IpmiInterface {
     }
 
     struct ipmi_sdr_iterator *itr = nullptr;
-    if ((itr = ipmi_sdr_start(intf_, 0)) == nullptr) {
+    if ((itr = std::any_cast<struct ipmi_sdr_iterator *>(
+             ipmitool_intf_.SdrStart(intf_, 0))) == nullptr) {
       return absl::InternalError("Unable to open SDR for reading.");
     }
 
     absl::Status status;
     struct sdr_get_rs *header;
     struct sdr_record_fru_locator *fru;
-    while ((header = ipmi_sdr_get_next_header(intf_, itr)) != nullptr) {
+    while ((header = std::any_cast<struct sdr_get_rs *>(
+                ipmitool_intf_.SdrGetNextHeader(intf_, itr))) != nullptr) {
       if (header->type == SDR_RECORD_TYPE_FRU_DEVICE_LOCATOR) {
         fru = reinterpret_cast<struct sdr_record_fru_locator *>(
-            ipmi_sdr_get_record(intf_, header, itr));
+            ipmitool_intf_.SdrGetRecord(intf_, header, itr));
         if (fru == nullptr || !fru->logical) {
           if (fru) {
             free(fru);
@@ -392,10 +495,52 @@ class IpmitoolImpl : public IpmiInterface {
             id, SdrRecordUniquePtr<struct sdr_record_fru_locator>(fru));
       }
     }
-    // Frees the memory allocated by ipmi_sdr_start
-    ipmi_sdr_end(intf_, itr);
+    // Frees the memory allocated by SdrStart
+    ipmitool_intf_.SdrEnd(intf_, itr);
 
     return status;
+  }
+
+  std::string IpmiResponseToString(uint8_t code) {
+    const struct valstr *curr = &completion_code_vals[0];
+
+    // completion_code_vals is a null-entry terminated array.
+    while (curr->str != nullptr) {
+      if (curr->val == code) return curr->str;
+
+      curr++;
+    }
+
+    return "unknown response code";
+  }
+
+  void ConfigureLanPlusInterface(ipmi_intf *intf) {
+    // Default is name-only lookup, from ipmitool's ipmi_main.c
+    constexpr uint8_t kIpmiDefaultLookupBit = 0x10;
+
+    // Default from table 22-19 of the IPMIv2 spec, from ipmitool's ipmi_main.c
+    constexpr uint8_t kIpmiDefaultCipherSuiteId = 3;
+
+    // Default is empty, from ipmitool's ipmi_main.c
+    uint8_t kgkey[IPMI_KG_BUFFER_SIZE] = {0};
+
+    // The following values are all defaults taken from the implementation in
+    // google3/v1_8_18/lib/ipmi_main.c.
+    ipmitool_intf_.SessionSetKgkey(intf, kgkey);
+    ipmitool_intf_.SessionSetPrivlvl(intf, IPMI_SESSION_PRIV_ADMIN);
+    ipmitool_intf_.SessionSetLookupbit(intf, kIpmiDefaultLookupBit);
+    ipmitool_intf_.SessionSetSolEscapeChar(intf, SOL_ESCAPE_CHARACTER_DEFAULT);
+    ipmitool_intf_.SessionSetCipherSuiteId(intf, kIpmiDefaultCipherSuiteId);
+    intf->devnum = 0;
+    intf->devfile = nullptr;
+    intf->ai_family = AF_UNSPEC;
+    intf->my_addr = IPMI_BMC_SLAVE_ADDR;
+    intf->target_addr = IPMI_BMC_SLAVE_ADDR;
+  }
+
+  std::string ReadFruName(struct sdr_record_fru_locator *fru) {
+    return std::string(reinterpret_cast<const char *>(fru->id_string),
+                       fru->id_code & 0x1f);
   }
 };
 
