@@ -41,6 +41,7 @@ package_group(
     name = "magent_library_users",
     packages = [
         "//ecclesia/magent/...",
+        "//platforms/ecclesia/assembly_generator/...",
         "//platforms/ecclesia/magent/...",
     ],
 )

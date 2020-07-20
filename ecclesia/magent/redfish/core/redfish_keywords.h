@@ -122,6 +122,17 @@ inline constexpr char kRelatedItem[] = "RelatedItem";
 inline constexpr char kEnabled[] = "Enabled";
 inline constexpr char kAbsent[] = "Absent";
 inline constexpr char kThrottlingCelsius[] = "ThrottlingCelsius";
+inline constexpr char kMemberId[] = "MemberId";
+
+// Assembly keywords
+inline constexpr char kAssemblies[] = "Assemblies";
+inline constexpr char kAssemblyDataType[] = "#Assembly.v1_2_0.Assembly";
+inline constexpr char kComponents[] = "Components";
+
+// Google Oem Keywords
+inline constexpr char kAssociatedWith[] = "AssociatedWith";
+inline constexpr char kAttachedTo[] = "AttachedTo";
+inline constexpr char kDevpath[] = "Devpath";
 
 // Redfish resource URIs
 inline constexpr char kServiceRootUri[] = "/redfish/v1";
@@ -154,6 +165,8 @@ inline constexpr char kEthernetInterfaceCollectionUri[] =
     "/redfish/v1/Systems/system/EthernetInterfaces";
 inline constexpr char kEthernetInterfaceUri[] =
     "/redfish/v1/Systems/system/EthernetInterfaces/0";
+inline constexpr char kStorageCollectionUri[] =
+    "/redfish/v1/Systems/system/Storage";
 
 }  // namespace ecclesia
 
