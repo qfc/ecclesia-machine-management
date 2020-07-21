@@ -167,6 +167,8 @@ inline constexpr char kEthernetInterfaceUri[] =
     "/redfish/v1/Systems/system/EthernetInterfaces/0";
 inline constexpr char kStorageCollectionUri[] =
     "/redfish/v1/Systems/system/Storage";
+inline constexpr char kDrivesCollectionUri[] =
+    "/redfish/v1/Systems/system/Storage/storage/Drives";
 
 }  // namespace ecclesia
 
