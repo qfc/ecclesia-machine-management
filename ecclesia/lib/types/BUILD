@@ -1,6 +1,12 @@
 licenses(["notice"])
 
 cc_library(
+    name = "bytes",
+    hdrs = ["bytes.h"],
+    visibility = ["//ecclesia:library_users"],
+)
+
+cc_library(
     name = "fixed_range_int",
     hdrs = ["fixed_range_int.h"],
     visibility = ["//ecclesia:library_users"],
