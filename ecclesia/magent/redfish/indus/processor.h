@@ -21,6 +21,7 @@
 #include <type_traits>
 
 #include "absl/strings/str_cat.h"
+#include "absl/strings/str_format.h"
 #include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
 #include "absl/types/variant.h"
@@ -69,9 +70,12 @@ class Processor : public IndexResource {
       if (cpu_info.cpu_signature) {
         json[kManufacturer] = cpu_info.cpu_signature->vendor;
         auto *processor_id = GetJsonObject(&json, kProcessorId);
-        (*processor_id)[kEffectiveFamily] = cpu_info.cpu_signature->family;
-        (*processor_id)[kEffectiveModel] = cpu_info.cpu_signature->model;
-        (*processor_id)[kStep] = cpu_info.cpu_signature->stepping;
+        (*processor_id)[kEffectiveFamily] =
+            absl::StrFormat("0x%x", cpu_info.cpu_signature->family);
+        (*processor_id)[kEffectiveModel] =
+            absl::StrFormat("0x%x", cpu_info.cpu_signature->model);
+        (*processor_id)[kStep] =
+            absl::StrFormat("0x%x", cpu_info.cpu_signature->stepping);
         (*processor_id)[kVendorId] = cpu_info.cpu_signature->vendor;
       }
     }
