@@ -41,7 +41,7 @@ class Thermal : public Resource {
     AddStaticFields(&json);
     int num_sensors = system_model_->NumDimmThermalSensors();
     json[kMembersCount] = num_sensors;
-    auto *members = GetJsonArray(&json, kMembers);
+    auto *members = GetJsonArray(&json, kTemperatures);
 
     // CPU thermal is not listed here, because (at least some Intel) CPU only
     // reports thermal margin. Those are listed in ProcessorMetrics.
