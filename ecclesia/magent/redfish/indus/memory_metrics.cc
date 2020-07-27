@@ -100,14 +100,12 @@ void MemoryMetrics::Get(ServerRequestInterface *req, const ParamsType &params) {
   auto *memory_error_counts = GetJsonObject(google, kMemoryErrorCounts);
 
   if (mem_errors.contains(dimm_num)) {
-    (*memory_error_counts)[kCorrectable] =
-        absl::StrCat(mem_errors.at(dimm_num).correctable);
-
+    (*memory_error_counts)[kCorrectable] = mem_errors.at(dimm_num).correctable;
     (*memory_error_counts)[kUncorrectable] =
-        absl::StrCat(mem_errors.at(dimm_num).uncorrectable);
+        mem_errors.at(dimm_num).uncorrectable;
   } else {
-    (*memory_error_counts)[kCorrectable] = "0";
-    (*memory_error_counts)[kUncorrectable] = "0";
+    (*memory_error_counts)[kCorrectable] = 0;
+    (*memory_error_counts)[kUncorrectable] = 0;
   }
 
   JSONResponseOK(json, req);

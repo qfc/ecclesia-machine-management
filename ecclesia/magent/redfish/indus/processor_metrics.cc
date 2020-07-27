@@ -101,14 +101,11 @@ void ProcessorMetrics::Get(ServerRequestInterface *req,
   auto *cpu_error_counts = GetJsonObject(google, kProcessorErrorCounts);
 
   if (cpu_errors.contains(cpu_num)) {
-    (*cpu_error_counts)[kCorrectable] =
-        absl::StrCat(cpu_errors.at(cpu_num).correctable);
-
-    (*cpu_error_counts)[kUncorrectable] =
-        absl::StrCat(cpu_errors.at(cpu_num).uncorrectable);
+    (*cpu_error_counts)[kCorrectable] = cpu_errors.at(cpu_num).correctable;
+    (*cpu_error_counts)[kUncorrectable] = cpu_errors.at(cpu_num).uncorrectable;
   } else {
-    (*cpu_error_counts)[kCorrectable] = "0";
-    (*cpu_error_counts)[kUncorrectable] = "0";
+    (*cpu_error_counts)[kCorrectable] = 0;
+    (*cpu_error_counts)[kUncorrectable] = 0;
   }
 
   // Get CPU thermal margin.
