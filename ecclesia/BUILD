@@ -63,6 +63,7 @@ package_group(
         "//ecclesia/mmanager/...",
         "//platforms/ecclesia/lib/rpc/...",
         "//platforms/ecclesia/mmanager/...",
+        "//platforms/syshealth/...",
     ],
 )
 
