@@ -12,12 +12,7 @@ exports_files(["LICENSE"])
 # Code allowed to use any of our generic libraries.
 package_group(
     name = "library_users",
-    packages = [
-        "//ecclesia/...",
-        "//platforms/ecclesia/...",
-        "//platforms/gsys/...",
-        "//third_party/blt/...",
-    ],
+    packages = ["//ecclesia/..."],
 )
 
 # Code intended for use in the Redfish backend.
@@ -29,21 +24,13 @@ package_group(
         "//ecclesia/mmanager/backends/redfish/...",
         "//ecclesia/mmanager/frontends/...",
         "//ecclesia/mmanager/middles/collector/...",
-        "//ops/hardware/hydra/common/megapede_power/...",
-        "//platforms/ecclesia/mmanager/backends/redfish/...",
-        "//platforms/ecclesia/mmanager/frontends/...",
-        "//platforms/ecclesia/mmanager/services/...",
     ],
 )
 
 # Machine agent shared libraries, for use in agent code.
 package_group(
     name = "magent_library_users",
-    packages = [
-        "//ecclesia/magent/...",
-        "//platforms/ecclesia/assembly_generator/...",
-        "//platforms/ecclesia/magent/...",
-    ],
+    packages = ["//ecclesia/magent/..."],
 )
 
 # Machine agent frontend code.
@@ -55,26 +42,13 @@ package_group(
 # Allowed users of the machine manager API.
 package_group(
     name = "mmanager_users",
-    packages = [
-        "//borg/integration/...",
-        "//borg/slave/...",
-        "//borg/test/...",
-        "//cloud/platforms/hammurabi/netboot/...",
-        "//ecclesia/mmanager/...",
-        "//platforms/ecclesia/lib/rpc/...",
-        "//platforms/ecclesia/mmanager/...",
-        "//platforms/syshealth/...",
-        "//production/aristotle/...",
-    ],
+    packages = ["//ecclesia/mmanager/..."],
 )
 
 # Machine manager shared libraries
 package_group(
     name = "mmanager_library_users",
-    packages = [
-        "//ecclesia/mmanager/...",
-        "//platforms/ecclesia/mmanager/...",
-    ],
+    packages = ["//ecclesia/mmanager/..."],
 )
 
 # Machine manager backend code.
