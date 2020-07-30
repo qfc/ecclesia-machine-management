@@ -117,3 +117,13 @@ cc_library(
         "@com_google_googletest//:gtest_main",
     ],
 )
+
+cc_library(
+    name = "utils",
+    hdrs = ["utils.h"],
+    visibility = ["//ecclesia:redfish_users"],
+    deps = [
+        ":interface",
+        ":property_definitions",
+    ],
+)
