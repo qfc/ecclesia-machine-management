@@ -195,3 +195,21 @@ http_archive(
         "https://digip.org/jansson/releases/jansson-2.12.tar.gz",
     ],
 )
+
+http_archive(
+    name = "libredfish",
+    build_file = "@//ecclesia/oss:libredfish.BUILD",
+    sha256 = "301563b061da5862e2dfa7da367d37298856eace5aabba80cabf15a42b6ed3d3",
+    strip_prefix = "libredfish-1.2.8",
+    urls = [
+        "https://github.com/DMTF/libredfish/archive/1.2.8.tar.gz",
+    ],
+    patches = [
+        "//ecclesia/oss:01.redfishService.h.patch",
+        "//ecclesia/oss:02.queue.h.patch",
+        "//ecclesia/oss:03.queue.c.patch",
+        "//ecclesia/oss:04.service.c.patch",
+        "//ecclesia/oss:05.internal_service.h.patch",
+        "//ecclesia/oss:06.asyncRaw.c.patch",
+    ],
+)
