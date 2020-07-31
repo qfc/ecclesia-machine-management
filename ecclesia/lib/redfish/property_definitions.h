@@ -76,6 +76,7 @@ DEFINE_REDFISH_PROPERTY(PropertyPartNumber, std::string, "PartNumber");
 DEFINE_REDFISH_PROPERTY(PropertyPhysicalContext, std::string,
                         "PhysicalContext");
 DEFINE_REDFISH_PROPERTY(PropertySerialNumber, std::string, "SerialNumber");
+DEFINE_REDFISH_PROPERTY(PropertySocket, std::string, "Socket");
 DEFINE_REDFISH_PROPERTY(PropertyTotalCores, int, "TotalCores");
 DEFINE_REDFISH_PROPERTY(PropertyTotalEnabledCores, int, "TotalEnabledCores");
 DEFINE_REDFISH_PROPERTY(PropertyTotalThreads, int, "TotalThreads");
