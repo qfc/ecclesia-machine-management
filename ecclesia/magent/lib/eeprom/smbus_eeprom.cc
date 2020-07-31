@@ -41,14 +41,17 @@ absl::optional<int> SmbusEeprom2ByteAddr::SequentialRead(
   // address write once, then calling read byte repeatedly to keep the overhead
   // to a minimum.
 
+  absl::optional<SmbusDevice> device = option_.get_device();
+  if (!device) return absl::nullopt;
+
   // Write the eeprom offset as a command byte + data byte.
   uint8_t hi = offset >> 8;
   uint8_t lo = offset & 0xff;
   size_t len = value.size();
 
-  absl::Status status = option_.device.Write8(hi, lo);
+  absl::Status status = device->Write8(hi, lo);
   if (!status.ok()) {
-    std::cout << "smbus device " << option_.device.location()
+    std::cout << "smbus device " << device->location()
               << " Failed to write smbus register 0x" << std::hex << offset
               << '\n';
     return absl::nullopt;
@@ -58,8 +61,8 @@ absl::optional<int> SmbusEeprom2ByteAddr::SequentialRead(
   int i = 0;
   for (i = 0; i < len; ++i) {
     uint8_t val;
-    if (!option_.device.ReceiveByte(&val).ok()) {
-      std::cout << "smbus device " << option_.device.location()
+    if (!device->ReceiveByte(&val).ok()) {
+      std::cout << "smbus device " << device->location()
                 << " Failed to read smbus register 0x" << std::hex
                 << offset + i;
       return absl::nullopt;

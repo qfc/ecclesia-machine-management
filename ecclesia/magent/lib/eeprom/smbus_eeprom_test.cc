@@ -41,7 +41,6 @@ using ::testing::StrictMock;
 TEST(SmbusEepromDeviceTest, Methods) {
   StrictMock<MockSmbusAccessInterface> access;
   auto loc = SmbusLocation::Make<37, 0x55>();
-  SmbusDevice device(loc, &access);
 
   EXPECT_CALL(access, SendByte(_, _)).WillOnce(Return(absl::OkStatus()));
 
@@ -72,7 +71,7 @@ TEST(SmbusEepromDeviceTest, Methods) {
       .name = "motherboard",
       .size = eeprom_size,
       .mode = eeprom_mode,
-      .device = device};
+      .get_device = [&loc, &access]() { return SmbusDevice(loc, &access); }};
 
   SmbusEeprom2ByteAddr eeprom(motherboard_eeprom_option);
 
@@ -87,26 +86,32 @@ TEST(SmbusEepromDeviceTest, Methods) {
   size_t len;
   std::vector<unsigned char> data1(6);
 
+  absl::optional<SmbusDevice> smbus_device =
+      motherboard_eeprom_option.get_device();
+  ASSERT_TRUE(smbus_device.has_value());
+
   EXPECT_TRUE(
-      device.ReadBlockI2C(0, absl::Span<unsigned char>(data1.data(), 4), &len)
+      smbus_device
+          ->ReadBlockI2C(0, absl::Span<unsigned char>(data1.data(), 4), &len)
           .ok());
   EXPECT_EQ(len, 4);
 
   std::vector<unsigned char> data2(6);
   EXPECT_TRUE(
-      device.WriteBlockI2C(0, absl::Span<const unsigned char>(data2.data(), 6))
+      smbus_device
+          ->WriteBlockI2C(0, absl::Span<const unsigned char>(data2.data(), 6))
           .ok());
 
   uint8_t data8;
-  EXPECT_TRUE(device.SendByte(6).ok());
-  EXPECT_TRUE(device.ReceiveByte(&data8).ok());
-  EXPECT_TRUE(device.Read8(0, &data8).ok());
+  EXPECT_TRUE(smbus_device->SendByte(6).ok());
+  EXPECT_TRUE(smbus_device->ReceiveByte(&data8).ok());
+  EXPECT_TRUE(smbus_device->Read8(0, &data8).ok());
 
   uint16_t data16;
-  EXPECT_TRUE(device.Read16(0, &data16).ok());
+  EXPECT_TRUE(smbus_device->Read16(0, &data16).ok());
 
-  EXPECT_TRUE(device.Write8(0, 6).ok());
-  EXPECT_TRUE(device.Write16(0, 16).ok());
+  EXPECT_TRUE(smbus_device->Write8(0, 6).ok());
+  EXPECT_TRUE(smbus_device->Write16(0, 16).ok());
 }
 
 constexpr SmbusLocation loc = SmbusLocation::Make<37, 0x55>();
@@ -117,16 +122,15 @@ constexpr Eeprom::ModeType eeprom_mode{.readable = 1, .writable = 1};
 class SmbusEepromTest : public ::testing::Test {
  public:
   SmbusEepromTest()
-      : device_(SmbusDevice(loc, &access_)),
-        motherboard_eeprom_option_({.name = "motherboard",
-                                    .size = eeprom_size,
-                                    .mode = eeprom_mode,
-                                    .device = device_}),
+      : motherboard_eeprom_option_(
+            {.name = "motherboard",
+             .size = eeprom_size,
+             .mode = eeprom_mode,
+             .get_device = [&]() { return SmbusDevice(loc, &access_); }}),
         eeprom_(motherboard_eeprom_option_) {}
 
  protected:
   StrictMock<MockSmbusAccessInterface> access_;
-  SmbusDevice device_;
   SmbusEeprom2ByteAddr::Option motherboard_eeprom_option_;
   SmbusEeprom2ByteAddr eeprom_;
 };
@@ -135,8 +139,11 @@ TEST_F(SmbusEepromTest, DeviceRead8Success) {
   uint8_t expected = 0xbe;
   EXPECT_CALL(access_, Read8(_, _, _)).WillOnce(SmbusRead8(&expected));
 
+  absl::optional<SmbusDevice> device = motherboard_eeprom_option_.get_device();
+  ASSERT_TRUE(device.has_value());
+
   uint8_t data;
-  EXPECT_TRUE(device_.Read8(0, &data).ok());
+  EXPECT_TRUE(device->Read8(0, &data).ok());
   EXPECT_EQ(data, expected);
 }
 
@@ -144,8 +151,11 @@ TEST_F(SmbusEepromTest, DeviceRead16Success) {
   uint16_t expected = 0xbeef;
   EXPECT_CALL(access_, Read16(_, _, _)).WillOnce(SmbusRead16(&expected));
 
+  absl::optional<SmbusDevice> device = motherboard_eeprom_option_.get_device();
+  ASSERT_TRUE(device.has_value());
+
   uint16_t data;
-  EXPECT_TRUE(device_.Read16(0, &data).ok());
+  EXPECT_TRUE(device->Read16(0, &data).ok());
   EXPECT_EQ(data, expected);
 }
 
@@ -154,9 +164,12 @@ TEST_F(SmbusEepromTest, ReadBlockI2cSuccess) {
   EXPECT_CALL(access_, ReadBlockI2C(_, _, _, _))
       .WillOnce(SmbusReadBlock(expected.data(), expected.size()));
 
+  absl::optional<SmbusDevice> device = motherboard_eeprom_option_.get_device();
+  ASSERT_TRUE(device.has_value());
+
   size_t len;
   std::vector<unsigned char> data(expected.size());
-  EXPECT_TRUE(device_.ReadBlockI2C(0, absl::MakeSpan(data), &len).ok());
+  EXPECT_TRUE(device->ReadBlockI2C(0, absl::MakeSpan(data), &len).ok());
   EXPECT_EQ(len, expected.size());
   EXPECT_EQ(data, expected);
 }
@@ -165,8 +178,11 @@ TEST_F(SmbusEepromTest, DeviceReceiveByteSuccess) {
   uint8_t expected = 0xbe;
   EXPECT_CALL(access_, ReceiveByte(_, _)).WillOnce(SmbusReceiveByte(&expected));
 
+  absl::optional<SmbusDevice> device = motherboard_eeprom_option_.get_device();
+  ASSERT_TRUE(device.has_value());
+
   uint8_t data;
-  EXPECT_TRUE(device_.ReceiveByte(&data).ok());
+  EXPECT_TRUE(device->ReceiveByte(&data).ok());
   EXPECT_EQ(data, expected);
 }
 

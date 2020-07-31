@@ -226,22 +226,18 @@ int main(int argc, char **argv) {
   ecclesia::KernelSmbusAccess access("/dev", &ioctl_intf);
 
   std::vector<ecclesia::SmbusEeprom2ByteAddr::Option> eeprom_options;
-
-  auto eeprom_smbus_bus = GetEepromSmbusBus();
-  if (eeprom_smbus_bus) {
-    ecclesia::SmbusLocation mainboard_loc(*eeprom_smbus_bus,
-                                          kEepromSmbusAddress);
-
-    ecclesia::SmbusDevice device(mainboard_loc, &access);
-
-    ecclesia::SmbusEeprom2ByteAddr::Option motherboard_eeprom_option{
-        .name = "motherboard",
-        .size = {.type = ecclesia::Eeprom::SizeType::kFixed, .size = 8 * 1024},
-        .mode = {.readable = 1, .writable = 0},
-        .device = device};
-
-    eeprom_options.push_back(motherboard_eeprom_option);
-  }
+  eeprom_options.push_back(ecclesia::SmbusEeprom2ByteAddr::Option{
+      .name = "motherboard",
+      .size = {.type = ecclesia::Eeprom::SizeType::kFixed, .size = 8 * 1024},
+      .mode = {.readable = 1, .writable = 0},
+      .get_device = [&]() -> absl::optional<ecclesia::SmbusDevice> {
+        auto eeprom_smbus_bus = GetEepromSmbusBus();
+        if (!eeprom_smbus_bus) return absl::nullopt;
+        ecclesia::SmbusLocation mainboard_loc(*eeprom_smbus_bus,
+                                              kEepromSmbusAddress);
+        ecclesia::SmbusDevice device(mainboard_loc, &access);
+        return device;
+      }});
 
   ecclesia::SysmodelParams params = {
       .field_translator =

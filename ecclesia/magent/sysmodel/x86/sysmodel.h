@@ -75,15 +75,15 @@ class SystemModel {
   std::size_t NumCpuMarginSensors() const;
   absl::optional<CpuMarginSensor> GetCpuMarginSensor(std::size_t index);
 
-  std::size_t NumFrus() const;
+  std::size_t NumFruReaders() const;
   template <typename IteratorF>
-  void GetFrus(IteratorF iterator) const {
-    absl::ReaderMutexLock ml(&frus_lock_);
-    for (const auto &f : frus_) {
+  void GetFruReaders(IteratorF iterator) const {
+    absl::ReaderMutexLock ml(&fru_readers_lock_);
+    for (const auto &f : fru_readers_) {
       iterator(f.first, f.second);
     }
   }
-  absl::optional<SysmodelFru> GetFru(absl::string_view fru_name) const;
+  SysmodelFruReader *GetFruReader(absl::string_view fru_name) const;
 
   // The event logger logs all of the system events with respect to cpu and dimm
   // errors. This method provides a mechanism to process the events for error
@@ -108,9 +108,9 @@ class SystemModel {
   mutable absl::Mutex cpus_lock_;
   std::vector<Cpu> cpus_ ABSL_GUARDED_BY(cpus_lock_);
 
-  mutable absl::Mutex frus_lock_;
-  absl::flat_hash_map<std::string, SysmodelFru> frus_
-      ABSL_GUARDED_BY(frus_lock_);
+  mutable absl::Mutex fru_readers_lock_;
+  absl::flat_hash_map<std::string, std::unique_ptr<SysmodelFruReader>>
+      fru_readers_ ABSL_GUARDED_BY(fru_readers_lock_);
 
   mutable absl::Mutex dimm_thermal_sensors_lock_;
   std::vector<PciThermalSensor> dimm_thermal_sensors_

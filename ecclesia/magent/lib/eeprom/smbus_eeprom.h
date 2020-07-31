@@ -39,7 +39,8 @@ class SmbusEeprom2ByteAddr : public Eeprom {
     std::string name;
     Eeprom::SizeType size;
     Eeprom::ModeType mode;
-    SmbusDevice device;
+    // Function which creates a SMBUS device for reading the EEPROM.
+    std::function<absl::optional<SmbusDevice>()> get_device;
   };
 
   explicit SmbusEeprom2ByteAddr(Option option);

@@ -92,19 +92,19 @@ absl::optional<CpuMarginSensor> SystemModel::GetCpuMarginSensor(
   return absl::nullopt;
 }
 
-std::size_t SystemModel::NumFrus() const {
-  absl::ReaderMutexLock ml(&frus_lock_);
-  return frus_.size();
+std::size_t SystemModel::NumFruReaders() const {
+  absl::ReaderMutexLock ml(&fru_readers_lock_);
+  return fru_readers_.size();
 }
 
-absl::optional<SysmodelFru> SystemModel::GetFru(
-    absl::string_view fru_name) const {
-  absl::ReaderMutexLock ml(&frus_lock_);
-  auto fru = frus_.find(fru_name);
-  if (fru != frus_.end()) {
-    return fru->second;
+SysmodelFruReader *SystemModel::GetFruReader(absl::string_view fru_name) const {
+  absl::ReaderMutexLock ml(&fru_readers_lock_);
+  auto fru = fru_readers_.find(fru_name);
+  if (fru != fru_readers_.end()) {
+    return fru->second.get();
   }
-  return absl::nullopt;
+
+  return nullptr;
 }
 
 SystemModel::SystemModel(SysmodelParams params)
@@ -127,10 +127,10 @@ SystemModel::SystemModel(SysmodelParams params)
     cpus_ = std::move(cpus);
   }
 
-  auto frus = CreateFrus(eeprom_options_);
+  auto fru_readers = CreateFrus(eeprom_options_);
   {
-    absl::WriterMutexLock ml(&frus_lock_);
-    frus_ = std::move(frus);
+    absl::WriterMutexLock ml(&fru_readers_lock_);
+    fru_readers_ = std::move(fru_readers);
   }
 
   auto dimm_thermal_sensors = CreatePciThermalSensors(dimm_thermal_params_);

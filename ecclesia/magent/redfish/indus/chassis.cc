@@ -34,9 +34,12 @@ namespace ecclesia {
 namespace {
 
 SysmodelFru GetFruInfo(SystemModel *system_model) {
-  auto mobo_fru = system_model->GetFru("motherboard");
-  if (mobo_fru.has_value()) return std::move(*mobo_fru);
-  return SysmodelFru({});
+  SysmodelFruReader *mobo_fru_reader =
+      system_model->GetFruReader("motherboard");
+  if (!mobo_fru_reader) return SysmodelFru({});
+  absl::optional<SysmodelFru> fru = mobo_fru_reader->Read();
+  if (!fru.has_value()) return SysmodelFru({});
+  return std::move(*fru);
 }
 
 }  // namespace

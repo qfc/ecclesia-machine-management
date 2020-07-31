@@ -141,20 +141,25 @@ absl::string_view SysmodelFru::GetPartNumber() const {
   return fru_info_.part_number;
 }
 
-absl::flat_hash_map<std::string, SysmodelFru> CreateFrus(
+absl::optional<SysmodelFru> SysmodelFruReader::Read() {
+  // If we have something valid in the cache, return it.
+  if (cached_fru_.has_value()) return cached_fru_;
+
+  // Otherwise try to read it into the cache for the first time.
+  FruInfo info;
+  absl::Status status = GetBoardInfo(option_, info);
+  if (!status.ok()) return absl::nullopt;
+  cached_fru_.emplace(info);
+  return cached_fru_;
+}
+
+absl::flat_hash_map<std::string, std::unique_ptr<SysmodelFruReader>> CreateFrus(
     absl::Span<SmbusEeprom2ByteAddr::Option> eeprom_options) {
-  absl::flat_hash_map<std::string, SysmodelFru> frus_map;
+  absl::flat_hash_map<std::string, std::unique_ptr<SysmodelFruReader>> frus_map;
 
   for (SmbusEeprom2ByteAddr::Option &eeprom_option : eeprom_options) {
-    if (eeprom_option.name == "motherboard") {
-      FruInfo info;
-      absl::Status status = GetBoardInfo(eeprom_option, info);
-      if (!status.ok()) {
-        std::cerr << "GetBoardInfo failed: " << status.message() << '\n';
-        continue;
-      }
-      frus_map.emplace(eeprom_option.name, SysmodelFru(std::move(info)));
-    }
+    frus_map.emplace(eeprom_option.name,
+                     absl::make_unique<SysmodelFruReader>(eeprom_option));
   }
 
   return frus_map;
