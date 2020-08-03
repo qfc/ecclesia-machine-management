@@ -21,7 +21,7 @@
               "Name": "ddr4",
               "AssociatedWith": [
                 {"@odata.id": "/redfish/v1/Systems/system/Memory/13"},
-                {"@odata.id": "/redfish/v1/Chassis/chassis/Thermal/#/Temperatures/13"}
+                {"@odata.id": "/redfish/v1/Chassis/chassis/Thermal#/Temperatures/13"}
               ]
             }
           ]
