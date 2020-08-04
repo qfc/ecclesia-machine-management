@@ -15,11 +15,7 @@
  */
 
 // Redfish server for the Ecclesia Management Agent on Indus
-#include <stdlib.h>
-
-#include <array>
-#include <cstddef>
-#include <cstdint>
+#include <cstdlib>
 #include <iostream>
 #include <memory>
 #include <string>
@@ -42,16 +38,15 @@
 #include "ecclesia/lib/types/fixed_range_int.h"
 #include "ecclesia/magent/lib/eeprom/eeprom.h"
 #include "ecclesia/magent/lib/eeprom/smbus_eeprom.h"
-#include "ecclesia/magent/lib/io/pci.h"
 #include "ecclesia/magent/lib/io/pci_location.h"
-#include "ecclesia/magent/lib/io/pci_sys.h"
 #include "ecclesia/magent/lib/io/smbus.h"
 #include "ecclesia/magent/lib/io/smbus_kernel_dev.h"
+#include "ecclesia/magent/lib/ipmi/interface_options.h"
 #include "ecclesia/magent/lib/ipmi/ipmitool.h"
 #include "ecclesia/magent/main_common.h"
 #include "ecclesia/magent/redfish/indus/redfish_service.h"
-#include "ecclesia/magent/sysmodel/x86/dimm.h"
 #include "ecclesia/magent/sysmodel/x86/sysmodel.h"
+#include "ecclesia/magent/sysmodel/x86/thermal.h"
 #include "tensorflow_serving/util/net_http/server/public/httpserver_interface.h"
 
 ABSL_FLAG(int, port, 3995, "Port number for the magent to listen on");

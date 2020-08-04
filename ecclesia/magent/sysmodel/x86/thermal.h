@@ -17,12 +17,16 @@
 #ifndef ECCLESIA_MAGENT_X86_THERMAL_H_
 #define ECCLESIA_MAGENT_X86_THERMAL_H_
 
-#include <cstdint>
+#include <cstddef>
 #include <string>
 #include <vector>
 
-#include "ecclesia/magent/sysmodel/thermal.h"
+#include "absl/strings/string_view.h"
+#include "absl/types/optional.h"
+#include "absl/types/span.h"
 #include "ecclesia/magent/lib/io/pci.h"
+#include "ecclesia/magent/lib/io/pci_location.h"
+#include "ecclesia/magent/sysmodel/thermal.h"
 
 namespace ecclesia {
 

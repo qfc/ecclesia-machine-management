@@ -21,6 +21,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <string>
 
 #include "absl/status/status.h"
 #include "ecclesia/lib/apifs/apifs.h"

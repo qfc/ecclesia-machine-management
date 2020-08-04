@@ -169,8 +169,8 @@ bool CpuErrorCountingVisitor::Visit(const SystemEventRecord &record) {
   if (!last_record_timestamp_) {
     last_record_timestamp_ = record.timestamp;
   }
-  std::visit(DecodeAndUpdateCpuCounts(mce_decoder_.get(), &cpu_error_counts_),
-             record.record);
+  absl::visit(DecodeAndUpdateCpuCounts(mce_decoder_.get(), &cpu_error_counts_),
+              record.record);
   return true;
 }
 
@@ -181,8 +181,9 @@ bool DimmErrorCountingVisitor::Visit(const SystemEventRecord &record) {
   if (!last_record_timestamp_) {
     last_record_timestamp_ = record.timestamp;
   }
-  std::visit(DecodeAndUpdateDimmCounts(mce_decoder_.get(), &dimm_error_counts_),
-             record.record);
+  absl::visit(
+      DecodeAndUpdateDimmCounts(mce_decoder_.get(), &dimm_error_counts_),
+      record.record);
   return true;
 }
 

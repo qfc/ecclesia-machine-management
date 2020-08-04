@@ -19,6 +19,8 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <string>
+#include <utility>
 
 #include "absl/status/status.h"
 #include "absl/strings/str_format.h"

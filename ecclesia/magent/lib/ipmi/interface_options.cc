@@ -17,18 +17,13 @@
 #include "ecclesia/magent/lib/ipmi/interface_options.h"
 
 #include <fcntl.h>
-#include <unistd.h>
-
-#include <filesystem>
-#include <fstream>
-#include <iostream>
-#include <string>
 
 #include "google/protobuf/io/zero_copy_stream_impl.h"
-#include "google/protobuf/text_format.h"
-#include "absl/flags/flag.h"
+#include "absl/types/optional.h"
 #include "ecclesia/lib/cleanup/cleanup.h"
+#include "ecclesia/lib/logging/globals.h"
 #include "ecclesia/lib/logging/logging.h"
+#include "ecclesia/magent/config.pb.h"
 
 namespace ecclesia {
 

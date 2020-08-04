@@ -30,6 +30,7 @@
 #include "absl/types/span.h"
 #include "ecclesia/lib/file/test_filesystem.h"
 #include "ecclesia/lib/io/ioctl.h"
+#include "ecclesia/lib/logging/globals.h"
 #include "ecclesia/lib/logging/logging.h"
 #include "ecclesia/magent/lib/io/smbus.h"
 

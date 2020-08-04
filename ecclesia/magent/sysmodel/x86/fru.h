@@ -17,7 +17,9 @@
 #ifndef ECCLESIA_MAGENT_SYSMODEL_X86_FRU_H_
 #define ECCLESIA_MAGENT_SYSMODEL_X86_FRU_H_
 
+#include <memory>
 #include <string>
+#include <utility>
 
 #include "absl/container/flat_hash_map.h"
 #include "absl/strings/string_view.h"

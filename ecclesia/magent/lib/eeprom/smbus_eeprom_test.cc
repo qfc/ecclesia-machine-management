@@ -18,6 +18,8 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <functional>
+#include <type_traits>
 #include <vector>
 
 #include "gmock/gmock.h"

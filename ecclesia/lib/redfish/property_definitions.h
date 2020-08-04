@@ -21,6 +21,7 @@
 #ifndef ECCLESIA_LIB_REDFISH_PROPERTY_DEFINITIONS_H_
 #define ECCLESIA_LIB_REDFISH_PROPERTY_DEFINITIONS_H_
 
+#include <cstdint>
 #include <string>
 
 #include "ecclesia/lib/redfish/property.h"

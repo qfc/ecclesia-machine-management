@@ -145,12 +145,10 @@ cc_test(
     size = "small",
     srcs = ["pci_sys_test.cc"],
     deps = [
+        ":pci_location",
         ":pci_sys",
         "//ecclesia/lib/file:test_filesystem",
-        "//ecclesia/lib/io:ioctl",
-        "//ecclesia/lib/logging",
         "@com_google_absl//absl/status",
-        "@com_google_absl//absl/types:span",
         "@com_google_googletest//:gtest_main",
     ],
 )

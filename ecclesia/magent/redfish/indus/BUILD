@@ -32,6 +32,7 @@ cc_library(
         "//ecclesia/magent/sysmodel/x86:cpu",
         "//ecclesia/magent/sysmodel/x86:dimm",
         "//ecclesia/magent/sysmodel/x86:sysmodel_fru",
+        "//ecclesia/magent/sysmodel/x86:thermal",
         "//ecclesia/magent/sysmodel/x86:x86_sysmodel",
         "@com_google_absl//absl/container:flat_hash_map",
         "@com_google_absl//absl/strings",

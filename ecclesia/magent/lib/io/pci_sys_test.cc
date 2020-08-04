@@ -16,11 +16,13 @@
 
 #include "ecclesia/magent/lib/io/pci_sys.h"
 
-#include <iostream>
+#include <cstdint>
+#include <string>
 
-#include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "ecclesia/lib/file/test_filesystem.h"
+#include "ecclesia/magent/lib/io/pci_location.h"
 
 namespace ecclesia {
 namespace {

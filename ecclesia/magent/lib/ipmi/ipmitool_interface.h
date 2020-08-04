@@ -21,6 +21,7 @@
 #define ECCLESIA_MAGENT_LIB_IPMI_IPMITOOL_INTERFACE_H_
 
 #include <any>
+#include <cstdint>
 
 namespace ecclesia {
 

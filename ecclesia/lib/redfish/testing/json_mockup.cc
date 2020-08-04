@@ -16,10 +16,9 @@
 
 #include "ecclesia/lib/redfish/testing/json_mockup.h"
 
-#include <stdlib.h>
-
 #include <cstddef>
 #include <cstdint>
+#include <cstdlib>
 #include <memory>
 #include <string>
 #include <utility>

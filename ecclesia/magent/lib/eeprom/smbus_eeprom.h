@@ -20,6 +20,7 @@
 #define ECCLESIA_MAGENT_LIB_EEPROM_SMBUS_EEPROM_H_
 
 #include <cstddef>
+#include <functional>
 #include <string>
 
 #include "absl/base/thread_annotations.h"

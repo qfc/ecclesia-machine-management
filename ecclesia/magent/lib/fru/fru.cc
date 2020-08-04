@@ -24,11 +24,11 @@
 #include "ecclesia/magent/lib/fru/fru.h"
 
 #include <assert.h>
-#include <stdlib.h>
 
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
+#include <cstdlib>
 #include <ctime>
 #include <iostream>
 #include <iterator>

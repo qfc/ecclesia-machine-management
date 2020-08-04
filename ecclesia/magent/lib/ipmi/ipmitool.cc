@@ -16,26 +16,39 @@
 
 #include "ecclesia/magent/lib/ipmi/ipmitool.h"
 
-#include <time.h>
+#include <string.h>
+#include <sys/socket.h>
+
+#include <any>
+#include <cstddef>
+#include <cstdint>
+#include <cstdlib>
+#include <ctime>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include "absl/container/flat_hash_map.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_format.h"
+#include "absl/strings/string_view.h"
+#include "absl/types/optional.h"
+#include "absl/types/span.h"
+#include "ecclesia/lib/logging/globals.h"
 #include "ecclesia/lib/logging/logging.h"
+#include "ecclesia/magent/config.pb.h"
 #include "ecclesia/magent/lib/fru/fru.h"
+#include "ecclesia/magent/lib/ipmi/ipmi.h"
 #include "ecclesia/magent/lib/ipmi/ipmitool_interface.h"
 
 extern "C" {
-#include "include/ipmitool/helper.h"
 #include "include/ipmitool/ipmi.h"
-#include "include/ipmitool/ipmi_constants.h"
 #include "include/ipmitool/ipmi_fru.h"
 #include "include/ipmitool/ipmi_intf.h"
-#include "include/ipmitool/ipmi_mc.h"
-#include "include/ipmitool/ipmi_raw.h"
 #include "include/ipmitool/ipmi_sdr.h"
 #include "include/ipmitool/ipmi_sol.h"
-#include "include/ipmitool/log.h"
 
 extern const struct valstr completion_code_vals[];
 

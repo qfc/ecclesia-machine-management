@@ -19,9 +19,15 @@
 #ifndef ECCLESIA_MAGENT_LIB_IPMI_IPMITOOL_H_
 #define ECCLESIA_MAGENT_LIB_IPMI_IPMITOOL_H_
 
+#include <cstddef>
+#include <cstdint>
+#include <memory>
+#include <vector>
+
 #include "absl/status/status.h"
+#include "absl/types/optional.h"
+#include "absl/types/span.h"
 #include "ecclesia/magent/config.pb.h"
-#include "ecclesia/magent/lib/ipmi/interface_options.h"
 #include "ecclesia/magent/lib/ipmi/ipmi.h"
 
 namespace ecclesia {

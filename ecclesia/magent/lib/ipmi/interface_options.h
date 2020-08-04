@@ -19,9 +19,6 @@
 #ifndef ECCLESIA_MAGENT_LIB_IPMI_INTERFACE_OPTIONS_H_
 #define ECCLESIA_MAGENT_LIB_IPMI_INTERFACE_OPTIONS_H_
 
-#include <string>
-
-#include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
 #include "ecclesia/magent/config.pb.h"
 

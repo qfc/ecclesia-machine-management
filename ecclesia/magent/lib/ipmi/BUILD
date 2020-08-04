@@ -21,8 +21,6 @@ cc_library(
         "//ecclesia/lib/cleanup",
         "//ecclesia/lib/logging",
         "//ecclesia/magent:magent_config_cc_proto",
-        "@com_google_absl//absl/flags:flag",
-        "@com_google_absl//absl/strings",
         "@com_google_absl//absl/types:optional",
         "@com_google_protobuf//:protobuf",
     ],
@@ -39,7 +37,6 @@ cc_library(
     ],
     visibility = ["//ecclesia:magent_library_users"],
     deps = [
-        ":interface_options",
         ":ipmi",
         "//ecclesia/lib/logging",
         "//ecclesia/magent:magent_config_cc_proto",
@@ -48,6 +45,8 @@ cc_library(
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/strings:str_format",
+        "@com_google_absl//absl/types:optional",
+        "@com_google_absl//absl/types:span",
         "@ipmitool//:ipmi",
     ],
 )

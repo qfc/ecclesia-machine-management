@@ -125,5 +125,6 @@ cc_library(
     deps = [
         ":interface",
         ":property_definitions",
+        "@com_google_absl//absl/types:optional",
     ],
 )

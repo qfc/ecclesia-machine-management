@@ -18,8 +18,8 @@
 #define ECCLESIA_LIB_FILE_DIR_H_
 
 #include <dirent.h>
-#include <stdlib.h>
 
+#include <cstdlib>
 #include <string>
 
 #include "absl/strings/string_view.h"
