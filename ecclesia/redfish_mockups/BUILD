@@ -19,6 +19,7 @@ redfish_mockup(
         "//ecclesia:mmanager_binary_tests",
         "//ecclesia:mmanager_middle_users",
         "//ecclesia:redfish_users",
+        "//platforms/ecclesia/mmanager/mock/mockups:mmanager_mockups",
     ],
 )
 
