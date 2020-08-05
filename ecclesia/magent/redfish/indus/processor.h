@@ -36,6 +36,15 @@
 #include "tensorflow_serving/util/net_http/server/public/server_request_interface.h"
 
 namespace ecclesia {
+namespace {
+
+// Intel® 64 and IA-32 Architectures Software Developer’s Manual, Volume 2A,
+// page 3-204. We always expect the MSR to return GenuineIntel, so we can just
+// hardcode it here for Intel CPUs.
+inline constexpr absl::string_view kGenuineIntelVendorSignature =
+    "GenuineIntel";
+
+}  // namespace
 
 class Processor : public IndexResource {
  public:
@@ -57,6 +66,7 @@ class Processor : public IndexResource {
     json[kOdataId] = std::string(req->uri_path());
     json[kOdataContext] = "/redfish/v1/$metadata#Processor.Processor";
     json[kName] = cpu_info.name;
+    json[kSocket] = cpu_info.name;
 
     if (cpu_info.enabled) {
       json[kMaxSpeedMHz] = cpu_info.max_speed_mhz;
@@ -76,7 +86,9 @@ class Processor : public IndexResource {
             absl::StrFormat("0x%x", cpu_info.cpu_signature->model);
         (*processor_id)[kStep] =
             absl::StrFormat("0x%x", cpu_info.cpu_signature->stepping);
-        (*processor_id)[kVendorId] = cpu_info.cpu_signature->vendor;
+        // CPU Signature vendor ID should be coming from MSR and not SMBIOS.
+        // Return the hardcoded signature instead of reading from MSR.
+        (*processor_id)[kVendorId] = std::string(kGenuineIntelVendorSignature);
       }
     }
 

@@ -64,6 +64,7 @@ inline constexpr char kProcessorId[] = "ProcessorId";
 inline constexpr char kEffectiveFamily[] = "EffectiveFamily";
 inline constexpr char kEffectiveModel[] = "EffectiveModel";
 inline constexpr char kStep[] = "Step";
+inline constexpr char kSocket[] = "Socket";
 inline constexpr char kVendorId[] = "VendorId";
 inline constexpr char kProcessorMetrics[] = "ProcessorMetrics";
 inline constexpr char kProcessorErrorCounts[] = "ProcessorErrorCounts";

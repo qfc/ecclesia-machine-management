@@ -35,20 +35,13 @@ enum ProcessorFamily {
   ARM_V8 = 0x101
 };
 
-// Intel® 64 and IA-32 Architectures Software Developer’s Manual, Volume 2A,
-// page 3-204. We always expect the MSR to return GenuineIntel, so we can just
-// hardcode it here for Intel CPUs instead of reading it from the SMBIOS table,
-// which might differ.
-inline constexpr absl::string_view kGenuineIntelVendorSignature =
-    "GenuineIntel";
-
 }  // namespace
 
 CpuSignature ProcessorInformation::GetSignaturex86() const {
   CpuSignature signature;
 
   auto view = this->GetMessageView();
-  signature.vendor = std::string(kGenuineIntelVendorSignature);
+  signature.vendor = this->GetString(view.manufacturer_snum().Read());
   signature.type = view.processor_id_x86().processor_type().Read();
   // From Intel's instruction set reference for CPUID
   signature.family = (view.processor_id_x86().family_id_ext().Read() << 4) +
