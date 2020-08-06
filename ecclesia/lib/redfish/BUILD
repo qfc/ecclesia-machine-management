@@ -94,7 +94,7 @@ cc_library(
 
 cc_library(
     name = "test_mockup",
-    testonly = 1,
+    testonly = True,
     srcs = ["test_mockup.cc"],
     hdrs = ["test_mockup.h"],
     visibility = [

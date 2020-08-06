@@ -18,7 +18,7 @@ cc_library(
 
 cc_library(
     name = "smbus_mocks",
-    testonly = 1,
+    testonly = True,
     hdrs = ["smbus_mocks.h"],
     visibility = ["//ecclesia:magent_library_users"],
     deps = [

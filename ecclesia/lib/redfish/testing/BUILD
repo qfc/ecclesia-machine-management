@@ -4,7 +4,7 @@ licenses(["notice"])
 
 cc_library(
     name = "json_mockup",
-    testonly = 1,
+    testonly = True,
     srcs = ["json_mockup.cc"],
     hdrs = ["json_mockup.h"],
     visibility = ["//ecclesia:redfish_users"],

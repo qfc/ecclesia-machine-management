@@ -62,7 +62,7 @@ cc_library(
 
 cc_library(
     name = "cpu_topology_mock",
-    testonly = 1,
+    testonly = True,
     hdrs = ["cpu_topology_mock.h"],
     visibility = [":mcedecoder_users"],
     deps = [
@@ -73,7 +73,7 @@ cc_library(
 
 cc_library(
     name = "mce_decode_mock",
-    testonly = 1,
+    testonly = True,
     hdrs = ["mce_decode_mock.h"],
     visibility = [":mcedecoder_users"],
     deps = [
