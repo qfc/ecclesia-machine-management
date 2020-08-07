@@ -55,19 +55,14 @@ class SysmodelFru {
   FruInfo fru_info_;
 };
 
-// SysmodelFruReader provides a caching interface for reading FRUs. If it is
-// successful in reading the FRU, it will return a copy of that successful
-// read for the rest of its lifetime.
+// SysmodelFruReader provides an interface for reading FRUs.
 class SysmodelFruReader {
  public:
-  SysmodelFruReader(SmbusEeprom2ByteAddr::Option option)
-      : option_(std::move(option)) {}
+  SysmodelFruReader() {}
+  virtual ~SysmodelFruReader() {}
 
   // Returns the FRU contents if available.
-  // If the FRU contents are cached, the cached content is returned. Otherwise
-  // performs the low level FRU read, and if successful, populates the cache
-  // and returns the read.
-  absl::optional<SysmodelFru> Read();
+  virtual absl::optional<SysmodelFru> Read() = 0;
 
   // Since we're holding caches, we should not allow copies.
   SysmodelFruReader(const SysmodelFruReader &dimm) = delete;
@@ -75,12 +70,62 @@ class SysmodelFruReader {
 
  private:
   SmbusEeprom2ByteAddr::Option option_;
+};
+
+// FileSysmodelFruReader provides a caching interface for reading FRUs from a
+// file. If it is successful in reading the FRU, it will return a copy of that
+// successful read for the rest of its lifetime.
+class FileSysmodelFruReader : public SysmodelFruReader {
+ public:
+  FileSysmodelFruReader(std::string filepath)
+      : filepath_(std::move(filepath)) {}
+
+  absl::optional<SysmodelFru> Read() override;
+
+ private:
+  std::string filepath_;
   // Stores the cached FRU that was read.
   absl::optional<SysmodelFru> cached_fru_;
 };
 
+// SmbusEeprom2ByteAddrFruReader provides a caching interface for reading FRUs
+// from an SMBUS eeprom. If it is successful in reading the FRU, it will return
+// a copy of that successful read for the rest of its lifetime.
+class SmbusEeprom2ByteAddrFruReader : public SysmodelFruReader {
+ public:
+  SmbusEeprom2ByteAddrFruReader(SmbusEeprom2ByteAddr::Option option)
+      : option_(std::move(option)) {}
+
+  // If the FRU contents are cached, the cached content is returned. Otherwise
+  // performs the low level FRU read, and if successful, populates the cache
+  // and returns the read.
+  absl::optional<SysmodelFru> Read() override;
+
+ private:
+  SmbusEeprom2ByteAddr::Option option_;
+  // Stores the cached FRU that was read.
+  absl::optional<SysmodelFru> cached_fru_;
+};
+
+// SysmodelFruReaderFactory wraps a lambda for constructing a SysmodelFruReader.
+class SysmodelFruReaderFactory {
+ public:
+  using FactoryFunction = std::function<std::unique_ptr<SysmodelFruReader>()>;
+  SysmodelFruReaderFactory(std::string name, FactoryFunction factory)
+      : name_(std::move(name)), factory_(std::move(factory)) {}
+
+  // Returns the name of the associated SysmodelFruReader.
+  absl::string_view Name() const { return name_; }
+  // Invokes the FactoryFunction to construct a SysmodelFruReader instance.
+  std::unique_ptr<SysmodelFruReader> Construct() const { return factory_(); }
+
+ private:
+  std::string name_;
+  FactoryFunction factory_;
+};
+
 absl::flat_hash_map<std::string, std::unique_ptr<SysmodelFruReader>> CreateFrus(
-    absl::Span<SmbusEeprom2ByteAddr::Option> options);
+    absl::Span<const SysmodelFruReaderFactory> fru_factories);
 
 }  // namespace ecclesia
 

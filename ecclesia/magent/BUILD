@@ -37,6 +37,7 @@ cc_binary(
         "//ecclesia/magent/lib/ipmi:interface_options",
         "//ecclesia/magent/lib/ipmi:ipmitool",
         "//ecclesia/magent/redfish/indus",
+        "//ecclesia/magent/sysmodel/x86:sysmodel_fru",
         "//ecclesia/magent/sysmodel/x86:thermal",
         "//ecclesia/magent/sysmodel/x86:x86_sysmodel",
         "@com_google_absl//absl/flags:flag",

@@ -18,6 +18,8 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <fstream>
+#include <iterator>
 #include <memory>
 #include <string>
 #include <utility>
@@ -82,8 +84,35 @@ absl::Status GetBoardInfoAreaSize(SmbusEeprom2ByteAddr &eeprom, size_t *size) {
   return status;
 }
 
-absl::Status GetBoardInfo(const SmbusEeprom2ByteAddr::Option &eeprom_option,
-                          FruInfo &info) {
+// Processes fru_data into info if the fru_data is valid.
+absl::Status ProcessBoardFromFruImage(absl::Span<unsigned char> fru_data,
+                                      FruInfo &info) {
+  absl::Status status = ValidateFruCommonHeader(
+      absl::MakeSpan(fru_data.data(), kFruCommonHeaderSize));
+  if (!status.ok()) {
+    return status;
+  }
+
+  VectorFruImageSource fru_image(fru_data);
+  BoardInfoArea board_info;
+
+  // BoardInfoArea is right after common header,
+  // starts from offset: 0 + kFruCommonHeaderSize
+  board_info.FillFromImage(fru_image, 0 + kFruCommonHeaderSize);
+
+  info = {
+      .product_name =
+          StringUpToNul(board_info.product_name().GetDataAsString()),
+      .manufacturer =
+          StringUpToNul(board_info.manufacturer().GetDataAsString()),
+      .serial_number =
+          StringUpToNul(board_info.serial_number().GetDataAsString()),
+      .part_number = StringUpToNul(board_info.part_number().GetDataAsString())};
+  return absl::OkStatus();
+}
+
+absl::Status SmbusGetBoardInfo(
+    const SmbusEeprom2ByteAddr::Option &eeprom_option, FruInfo &info) {
   absl::Status status;
 
   SmbusEeprom2ByteAddr eeprom(eeprom_option);
@@ -101,30 +130,7 @@ absl::Status GetBoardInfo(const SmbusEeprom2ByteAddr::Option &eeprom_option,
   // We read from offset 0, this will have common header
   eeprom.ReadBytes(0, absl::MakeSpan(fru_data.data(), fru_data.size()));
 
-  // Validate fru common header
-  status = ValidateFruCommonHeader(
-      absl::MakeSpan(fru_data.data(), kFruCommonHeaderSize));
-  if (!status.ok()) {
-    return status;
-  }
-
-  VectorFruImageSource fru_image(absl::MakeSpan(fru_data));
-  BoardInfoArea board_info;
-
-  // BoardInfoArea is right after common header,
-  // starts from offset: 0 + kFruCommonHeaderSize
-  board_info.FillFromImage(fru_image, 0 + kFruCommonHeaderSize);
-
-  info = {
-      .product_name =
-          StringUpToNul(board_info.product_name().GetDataAsString()),
-      .manufacturer =
-          StringUpToNul(board_info.manufacturer().GetDataAsString()),
-      .serial_number =
-          StringUpToNul(board_info.serial_number().GetDataAsString()),
-      .part_number = StringUpToNul(board_info.part_number().GetDataAsString())};
-
-  return status;
+  return ProcessBoardFromFruImage(absl::MakeSpan(fru_data), info);
 }
 
 }  // namespace
@@ -141,25 +147,47 @@ absl::string_view SysmodelFru::GetPartNumber() const {
   return fru_info_.part_number;
 }
 
-absl::optional<SysmodelFru> SysmodelFruReader::Read() {
+absl::optional<SysmodelFru> SmbusEeprom2ByteAddrFruReader::Read() {
   // If we have something valid in the cache, return it.
   if (cached_fru_.has_value()) return cached_fru_;
 
   // Otherwise try to read it into the cache for the first time.
   FruInfo info;
-  absl::Status status = GetBoardInfo(option_, info);
+  absl::Status status = SmbusGetBoardInfo(option_, info);
+  if (!status.ok()) return absl::nullopt;
+  cached_fru_.emplace(info);
+  return cached_fru_;
+}
+
+absl::optional<SysmodelFru> FileSysmodelFruReader::Read() {
+  // If we have something valid in the cache, return it.
+  if (cached_fru_.has_value()) return cached_fru_;
+
+  // Otherwise try to read it into the cache for the first time.
+  std::ifstream file(filepath_, std::ios::binary);
+  if (!file.is_open()) return absl::nullopt;
+
+  // Do not skip newlines in binary mode.
+  file.unsetf(std::ios::skipws);
+  std::vector<unsigned char> fru_data;
+  fru_data.reserve(file.tellg());
+  fru_data.insert(fru_data.begin(), std::istream_iterator<unsigned char>(file),
+                  std::istream_iterator<unsigned char>());
+
+  FruInfo info;
+  absl::Status status =
+      ProcessBoardFromFruImage(absl::MakeSpan(fru_data), info);
   if (!status.ok()) return absl::nullopt;
   cached_fru_.emplace(info);
   return cached_fru_;
 }
 
 absl::flat_hash_map<std::string, std::unique_ptr<SysmodelFruReader>> CreateFrus(
-    absl::Span<SmbusEeprom2ByteAddr::Option> eeprom_options) {
+    absl::Span<const SysmodelFruReaderFactory> fru_factories) {
   absl::flat_hash_map<std::string, std::unique_ptr<SysmodelFruReader>> frus_map;
 
-  for (SmbusEeprom2ByteAddr::Option &eeprom_option : eeprom_options) {
-    frus_map.emplace(eeprom_option.name,
-                     absl::make_unique<SysmodelFruReader>(eeprom_option));
+  for (const SysmodelFruReaderFactory &factory : fru_factories) {
+    frus_map.emplace(factory.Name(), factory.Construct());
   }
 
   return frus_map;

@@ -111,7 +111,6 @@ SystemModel::SystemModel(SysmodelParams params)
     : smbios_reader_(absl::make_unique<SmbiosReader>(
           params.smbios_entry_point_path, params.smbios_tables_path)),
       field_translator_(std::move(params.field_translator)),
-      eeprom_options_(std::move(params.eeprom_options)),
       dimm_thermal_params_(std::move(params.dimm_thermal_params)),
       cpu_margin_params_(std::move(params.cpu_margin_params)) {
   // Construct system model objects
@@ -127,7 +126,7 @@ SystemModel::SystemModel(SysmodelParams params)
     cpus_ = std::move(cpus);
   }
 
-  auto fru_readers = CreateFrus(eeprom_options_);
+  auto fru_readers = CreateFrus(params.fru_factories);
   {
     absl::WriterMutexLock ml(&fru_readers_lock_);
     fru_readers_ = std::move(fru_readers);
