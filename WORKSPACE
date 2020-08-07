@@ -213,3 +213,17 @@ http_archive(
         "//ecclesia/oss:06.asyncRaw.c.patch",
     ],
 )
+
+http_archive(
+    name = "redfishMockupServer",
+    build_file = "@//ecclesia/oss:redfishMockupServer.BUILD",
+    sha256 = "2a4663441b205189686dfcc9a4082fc8c30cb1637126281fb291ad69cabb43f9",
+    strip_prefix = "Redfish-Mockup-Server-1.1.0",
+    urls = ["https://github.com/DMTF/Redfish-Mockup-Server/archive/1.1.0.tar.gz"],
+    patches = [
+        "//ecclesia/oss:redfishMockupServer.patches/01.remove_grequest.patch",
+        "//ecclesia/oss:redfishMockupServer.patches/02.add_ipv6.patch",
+        "//ecclesia/oss:redfishMockupServer.patches/03.fix_traversal_vulnerability.patch",
+        "//ecclesia/oss:redfishMockupServer.patches/04.add_uds.patch",
+    ],
+)
