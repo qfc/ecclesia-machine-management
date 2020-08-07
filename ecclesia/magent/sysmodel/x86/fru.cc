@@ -174,6 +174,9 @@ absl::optional<SysmodelFru> FileSysmodelFruReader::Read() {
   fru_data.insert(fru_data.begin(), std::istream_iterator<unsigned char>(file),
                   std::istream_iterator<unsigned char>());
 
+  // Return if we failed to read anything
+  if (fru_data.empty()) return absl::nullopt;
+
   FruInfo info;
   absl::Status status =
       ProcessBoardFromFruImage(absl::MakeSpan(fru_data), info);
