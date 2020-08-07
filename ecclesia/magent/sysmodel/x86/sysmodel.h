@@ -48,7 +48,7 @@ struct SysmodelParams {
   std::string smbios_tables_path;
   std::string mced_socket_path;
   std::string sysfs_mem_file_path;
-  absl::Span<SmbusEeprom2ByteAddr::Option> eeprom_options;
+  absl::Span<const SysmodelFruReaderFactory> fru_factories;
   absl::Span<const PciSensorParams> dimm_thermal_params;
   absl::Span<const CpuMarginSensorParams> cpu_margin_params;
 };
@@ -122,7 +122,6 @@ class SystemModel {
 
   std::unique_ptr<SystemEventLogger> event_logger_;
 
-  absl::Span<SmbusEeprom2ByteAddr::Option> eeprom_options_;
   const absl::Span<const PciSensorParams> dimm_thermal_params_;
   const absl::Span<const CpuMarginSensorParams> cpu_margin_params_;
 };

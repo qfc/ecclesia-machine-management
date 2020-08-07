@@ -16,6 +16,7 @@
 
 // Redfish server for the Ecclesia Management Agent on Indus
 #include <cstdlib>
+#include <functional>
 #include <iostream>
 #include <memory>
 #include <string>
@@ -45,6 +46,7 @@
 #include "ecclesia/magent/lib/ipmi/ipmitool.h"
 #include "ecclesia/magent/main_common.h"
 #include "ecclesia/magent/redfish/indus/redfish_service.h"
+#include "ecclesia/magent/sysmodel/x86/fru.h"
 #include "ecclesia/magent/sysmodel/x86/sysmodel.h"
 #include "ecclesia/magent/sysmodel/x86/thermal.h"
 #include "tensorflow_serving/util/net_http/server/public/httpserver_interface.h"
@@ -54,6 +56,10 @@ ABSL_FLAG(std::string, assemblies_dir, "/etc/google/magent",
           "Path to a directory containing JSON Assemblies");
 ABSL_FLAG(std::string, mced_socket_path, "/var/run/mced2.socket",
           "Path to the mced unix domain socket");
+ABSL_FLAG(
+    std::string, mobo_raw_fru_path, "",
+    "Path to a file containing the raw EEPROM dump of the motherbord FRU. If "
+    "left empty, magent will read the EEPROM directly via SMBUS.");
 
 namespace {
 
@@ -221,18 +227,32 @@ int main(int argc, char **argv) {
   ecclesia::KernelSmbusAccess access("/dev", &ioctl_intf);
 
   std::vector<ecclesia::SmbusEeprom2ByteAddr::Option> eeprom_options;
-  eeprom_options.push_back(ecclesia::SmbusEeprom2ByteAddr::Option{
-      .name = "motherboard",
-      .size = {.type = ecclesia::Eeprom::SizeType::kFixed, .size = 8 * 1024},
-      .mode = {.readable = 1, .writable = 0},
-      .get_device = [&]() -> absl::optional<ecclesia::SmbusDevice> {
-        auto eeprom_smbus_bus = GetEepromSmbusBus();
-        if (!eeprom_smbus_bus) return absl::nullopt;
-        ecclesia::SmbusLocation mainboard_loc(*eeprom_smbus_bus,
-                                              kEepromSmbusAddress);
-        ecclesia::SmbusDevice device(mainboard_loc, &access);
-        return device;
-      }});
+  std::vector<ecclesia::SysmodelFruReaderFactory> fru_factories;
+  if (!absl::GetFlag(FLAGS_mobo_raw_fru_path).empty()) {
+    fru_factories.push_back(ecclesia::SysmodelFruReaderFactory(
+        "motherboard", [&]() -> std::unique_ptr<ecclesia::SysmodelFruReader> {
+          return absl::make_unique<ecclesia::FileSysmodelFruReader>(
+              absl::GetFlag(FLAGS_mobo_raw_fru_path));
+        }));
+  } else {
+    fru_factories.push_back(ecclesia::SysmodelFruReaderFactory(
+        "motherboard", [&]() -> std::unique_ptr<ecclesia::SysmodelFruReader> {
+          return absl::make_unique<ecclesia::SmbusEeprom2ByteAddrFruReader>(
+              ecclesia::SmbusEeprom2ByteAddr::Option{
+                  .name = "motherboard",
+                  .size = {.type = ecclesia::Eeprom::SizeType::kFixed,
+                           .size = 8 * 1024},
+                  .mode = {.readable = 1, .writable = 0},
+                  .get_device = [&]() -> absl::optional<ecclesia::SmbusDevice> {
+                    auto eeprom_smbus_bus = GetEepromSmbusBus();
+                    if (!eeprom_smbus_bus) return absl::nullopt;
+                    ecclesia::SmbusLocation mainboard_loc(*eeprom_smbus_bus,
+                                                          kEepromSmbusAddress);
+                    ecclesia::SmbusDevice device(mainboard_loc, &access);
+                    return device;
+                  }});
+        }));
+  }
 
   ecclesia::SysmodelParams params = {
       .field_translator =
@@ -241,7 +261,7 @@ int main(int argc, char **argv) {
       .smbios_tables_path = kSmbiosTablesPath,
       .mced_socket_path = absl::GetFlag(FLAGS_mced_socket_path),
       .sysfs_mem_file_path = kSysfsMemFilePath,
-      .eeprom_options = absl::MakeSpan(eeprom_options),
+      .fru_factories = absl::MakeSpan(fru_factories),
       .dimm_thermal_params = absl::MakeSpan(dimm_channel_info),
       .cpu_margin_params = absl::MakeSpan(cpu_margin_sensor_info),
   };
