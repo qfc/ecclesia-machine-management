@@ -22,6 +22,7 @@
 #define ECCLESIA_MAGENT_LIB_EEPROM_EEPROM_H_
 
 #include <cstddef>
+#include <cstdlib>
 
 #include "absl/types/optional.h"
 #include "absl/types/span.h"
