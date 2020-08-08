@@ -30,6 +30,7 @@ cc_binary(
         "//ecclesia/lib/io:ioctl",
         "//ecclesia/lib/smbios:reader",
         "//ecclesia/lib/types:fixed_range_int",
+        "//ecclesia/lib/version",
         "//ecclesia/magent/lib/eeprom",
         "//ecclesia/magent/lib/io:pci_location",
         "//ecclesia/magent/lib/io:smbus",

@@ -124,6 +124,9 @@ inline constexpr char kEnabled[] = "Enabled";
 inline constexpr char kAbsent[] = "Absent";
 inline constexpr char kThrottlingCelsius[] = "ThrottlingCelsius";
 inline constexpr char kMemberId[] = "MemberId";
+inline constexpr char kVersion[] = "Version";
+inline constexpr char kSoftwareInventory[] = "SoftwareInventory";
+inline constexpr char kFirmwareInventory[] = "FirmwareInventory";
 
 // Assembly keywords
 inline constexpr char kAssemblies[] = "Assemblies";
@@ -170,6 +173,15 @@ inline constexpr char kStorageCollectionUri[] =
     "/redfish/v1/Systems/system/Storage";
 inline constexpr char kDrivesCollectionUri[] =
     "/redfish/v1/Systems/system/Storage/storage/Drives";
+inline constexpr char kUpdateServiceUri[] = "/redfish/v1/UpdateService";
+inline constexpr char kSoftwareInventoryCollectionUri[] =
+    "/redfish/v1/UpdateService/SoftwareInventory";
+inline constexpr char kFirmwareInventoryCollectionUri[] =
+    "/redfish/v1/UpdateService/FirmwareInventory";
+inline constexpr char kSoftwareInventoryMagentIndusUri[] =
+    "/redfish/v1/UpdateService/SoftwareInventory/magent_indus";
+inline constexpr char kFirmwareInventoryMagentIndusUri[] =
+    "/redfish/v1/UpdateService/FirmwareInventory/magent_indus";
 
 }  // namespace ecclesia
 
