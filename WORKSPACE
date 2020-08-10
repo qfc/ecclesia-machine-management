@@ -55,6 +55,13 @@ http_archive(
     urls = ["https://github.com/bazelbuild/rules_pkg/archive/0.2.6-1.tar.gz"],
 )
 
+http_archive(
+    name = "subpar",
+    sha256 = "b80297a1b8d38027a86836dbadc22f55dc3ecad56728175381aa6330705ac10f",
+    strip_prefix = "subpar-2.0.0",
+    urls = ["https://github.com/google/subpar/archive/2.0.0.tar.gz"],
+)
+
 # TensorFlow depends on "io_bazel_rules_closure" so we need this here.
 # Needs to be kept in sync with the same target in TensorFlow's WORKSPACE file.
 http_archive(

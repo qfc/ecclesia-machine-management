@@ -1,8 +1,10 @@
+load("@subpar//:subpar.bzl", "par_binary")
+
 licenses(["notice"])
 
 exports_files(["LICENSE"])
 
-py_binary(
+par_binary(
     name = "redfishMockupServer",
     srcs = [
         "redfishMockupServer.py",
