@@ -15,6 +15,8 @@
  */
 
 // Classes to support ipmi access.
+// ref: IPMI Specification, V2.0, Rev. 1.1
+// https://www.intel.com/content/www/us/en/products/docs/servers/ipmi/ipmi-second-gen-interface-spec-v2-rev1-1.html
 
 #ifndef ECCLESIA_MAGENT_LIB_IPMI_IPMITOOL_H_
 #define ECCLESIA_MAGENT_LIB_IPMI_IPMITOOL_H_
@@ -76,6 +78,8 @@ class IpmiPair {
   IpmiCommand command_;
 };
 
+// Get FRU Inventory Area Info Command: ipmi spec #589
+// NetFn: Storage, CMD: 10h
 inline constexpr IpmiPair kGetFruInfo{IpmiNetworkFunction::kStorage,
                                       IpmiCommand::kGetFruInfo};
 
