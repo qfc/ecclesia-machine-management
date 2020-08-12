@@ -22,9 +22,17 @@
 #include <cstdlib>
 #include <string>
 
+#include "absl/status/status.h"
 #include "absl/strings/string_view.h"
 
 namespace ecclesia {
+
+// Given a path, create a directory at it, including creating any intervening
+// directories above it if they do not already exist.
+//
+// Returns a non-ok status if it is unable to create the directories for any
+// reason. Returns OK if the directory already exists.
+absl::Status MakeDirectories(absl::string_view dirname);
 
 // Iterates over a list of all filenames in directory, invoking output_func with
 // each filename. The filename will be passed as a string_view whose underlying

@@ -23,6 +23,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "ecclesia/lib/file/test_filesystem.h"
@@ -59,17 +60,52 @@ class DirTest : public ::testing::Test {
   std::string testdir_;
 };
 
-TEST_F(DirTest, EmptyDirectory) {
+TEST_F(DirTest, CreateDirectoriesNothingExists) {
+  std::string created_dir = absl::StrCat(TestDirName(), "/aaa/bbb/ccc");
+  ASSERT_FALSE(fs::exists(created_dir));
+  EXPECT_TRUE(MakeDirectories(created_dir).ok());
+  EXPECT_TRUE(fs::exists(created_dir));
+}
+
+TEST_F(DirTest, CreateDirectoriesEverythingButLeafExists) {
+  fs::create_directory(absl::StrCat(TestDirName(), "/aaa"));
+  fs::create_directory(absl::StrCat(TestDirName(), "/aaa/bbb"));
+  std::string created_dir = absl::StrCat(TestDirName(), "/aaa/bbb/ccc");
+  ASSERT_FALSE(fs::exists(created_dir));
+  EXPECT_TRUE(MakeDirectories(created_dir).ok());
+  EXPECT_TRUE(fs::exists(created_dir));
+}
+
+TEST_F(DirTest, CreateDirectoriesEverythingExists) {
+  fs::create_directory(absl::StrCat(TestDirName(), "/aaa"));
+  fs::create_directory(absl::StrCat(TestDirName(), "/aaa/bbb"));
+  fs::create_directory(absl::StrCat(TestDirName(), "/aaa/bbb/ccc"));
+  std::string created_dir = absl::StrCat(TestDirName(), "/aaa/bbb/ccc");
+  ASSERT_TRUE(fs::exists(created_dir));
+  EXPECT_TRUE(MakeDirectories(created_dir).ok());
+  EXPECT_TRUE(fs::exists(created_dir));
+}
+
+TEST_F(DirTest, CreateDirectoriesFailsWithFileInTheWay) {
+  fs::create_directory(absl::StrCat(TestDirName(), "/aaa"));
+  std::ofstream touch(absl::StrCat(TestDirName(), "/aaa/bbb"));
+  std::string created_dir = absl::StrCat(TestDirName(), "/aaa/bbb/ccc");
+  ASSERT_FALSE(fs::exists(created_dir));
+  EXPECT_FALSE(MakeDirectories(created_dir).ok());
+  EXPECT_FALSE(fs::exists(created_dir));
+}
+
+TEST_F(DirTest, WithEachFileEmptyDirectory) {
   EXPECT_THAT(WithEachFileInDirectoryVector(TestDirName()),
               UnorderedElementsAre());
 }
 
-TEST_F(DirTest, DirDoesntExist) {
+TEST_F(DirTest, WithEachFileDirDoesntExist) {
   std::string bad_dir = absl::StrCat(TestDirName(), "/baddir");
   EXPECT_THAT(WithEachFileInDirectoryVector(bad_dir), UnorderedElementsAre());
 }
 
-TEST_F(DirTest, DirIsAFile) {
+TEST_F(DirTest, WithEachFileDirIsAFile) {
   fs::path filepath = fs::path(TestDirName()) / "file1";
   std::ofstream touch(filepath);
   EXPECT_TRUE(fs::exists(filepath));
@@ -78,7 +114,7 @@ TEST_F(DirTest, DirIsAFile) {
               UnorderedElementsAre());
 }
 
-TEST_F(DirTest, OneFile) {
+TEST_F(DirTest, WithEachFileOneFile) {
   fs::path filepath = fs::path(TestDirName()) / "file1";
   std::ofstream touch(filepath);
   ASSERT_TRUE(fs::exists(filepath));
@@ -87,7 +123,7 @@ TEST_F(DirTest, OneFile) {
               UnorderedElementsAre("file1"));
 }
 
-TEST_F(DirTest, TwoFiles) {
+TEST_F(DirTest, WithEachFileTwoFiles) {
   fs::path f1 = fs::path(TestDirName()) / "file1";
   std::ofstream touch_f1(f1);
   EXPECT_TRUE(fs::exists(f1));
@@ -100,7 +136,7 @@ TEST_F(DirTest, TwoFiles) {
               UnorderedElementsAre("file1", "file2"));
 }
 
-TEST_F(DirTest, SubdirectoriesListed) {
+TEST_F(DirTest, WithEachFileSubdirectoriesListed) {
   fs::path subdir = fs::path(TestDirName()) / "subdir";
   fs::create_directories(subdir);
   EXPECT_TRUE(fs::exists(subdir));

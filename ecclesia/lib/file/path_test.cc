@@ -29,6 +29,18 @@ TEST(GetBasename, Works) {
   EXPECT_EQ(GetBasename("dir1"), "dir1");
   EXPECT_EQ(GetBasename("//////dir1//////"), "dir1");
   EXPECT_EQ(GetBasename(""), "");
+  EXPECT_EQ(GetBasename("/"), "");
+}
+
+TEST(GetDirname, Works) {
+  EXPECT_EQ(GetDirname("/dir1/dir2/dir3"), "/dir1/dir2");
+  EXPECT_EQ(GetDirname("dir1/dir2/dir3"), "dir1/dir2");
+  EXPECT_EQ(GetDirname("/dir1/dir2/dir3/"), "/dir1/dir2");
+  EXPECT_EQ(GetDirname("dir1/dir2/dir3/"), "dir1/dir2");
+  EXPECT_EQ(GetDirname("dir1"), "");
+  EXPECT_EQ(GetDirname("//////dir1//////"), "/");
+  EXPECT_EQ(GetDirname(""), "");
+  EXPECT_EQ(GetDirname("/"), "/");
 }
 
 TEST(JoinFilePaths, SimpleJoin) {

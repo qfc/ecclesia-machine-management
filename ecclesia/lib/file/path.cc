@@ -29,13 +29,35 @@ absl::string_view GetBasename(absl::string_view path) {
   // First remove any trailing slashes in the path. If we have a path of the
   // form /dir1/dir2/dir3/ we consider the basename to be "dir3" and not an
   // empty string.
-  while (!path.empty() && path.back() == '/') {
+  while (path.size() > 1 && path.back() == '/') {
     path.remove_suffix(1);
   }
   // Remove everything before the last /.
   auto last_slash = path.find_last_of('/');
   if (last_slash != path.npos) {
     path.remove_prefix(last_slash + 1);
+  }
+  return path;
+}
+
+absl::string_view GetDirname(absl::string_view path) {
+  // First remove any trailing slashes in the path. If we have a path of the
+  // form /dir1/dir2/dir3/ we consider the dirname to be "/dir1/dir2" and
+  // "/dir1/dir2/dir3".
+  while (path.size() > 1 && path.back() == '/') {
+    path.remove_suffix(1);
+  }
+  // Remove everything after the last /. If there isn't a slash then the dir is
+  // the empty string.
+  auto last_slash = path.find_last_of('/');
+  if (last_slash != path.npos) {
+    path.remove_suffix(path.size() - last_slash - 1);
+  } else {
+    path.remove_suffix(path.size());
+  }
+  // Remove any trailing slashes.
+  while (path.size() > 1 && path.back() == '/') {
+    path.remove_suffix(1);
   }
   return path;
 }

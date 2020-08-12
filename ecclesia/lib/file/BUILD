@@ -71,9 +71,15 @@ cc_test(
 
 cc_library(
     name = "dir",
+    srcs = ["dir.cc"],
     hdrs = ["dir.h"],
     visibility = ["//ecclesia:library_users"],
-    deps = ["@com_google_absl//absl/strings"],
+    deps = [
+        ":path",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:str_format",
+    ],
 )
 
 cc_test(
@@ -82,6 +88,7 @@ cc_test(
     deps = [
         ":dir",
         ":test_filesystem",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
