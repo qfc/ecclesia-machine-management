@@ -44,12 +44,24 @@ cc_data_library(
     var_name = "kAllFiles",
 )
 
+cc_data_library(
+    name = "flat_files",
+    cc_namespace = "ecclesia",
+    data = [
+        "test_data/blob.bin",
+        "test_data/text.txt",
+    ],
+    flatten = True,
+    var_name = "kFlatFiles",
+)
+
 cc_test(
     name = "cc_embed_interface_test",
     srcs = ["cc_embed_interface_test.cc"],
     deps = [
         ":all_files",
         ":cc_embed_interface",
+        ":flat_files",
         ":text_files",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/types:optional",
