@@ -5,7 +5,7 @@ of that rule out to a file. This is primarily useful for cases where you have an
 build rule that has a data dependency that takes a dynamic set of files (e.g. a
 test that has a bunch of data files coming from a glob). Typical usage:
 
-load("//third_party/ecclesia/build_defs:query.bzl", "rule_output_files")
+load("//ecclesia/build_defs:query.bzl", "rule_output_files")
 rule_output_files(
     name = "output_files",
     rule = ":some_build_rule",

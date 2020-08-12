@@ -3,7 +3,7 @@
 For simple cases where you just want to write fixed string content into a file
 you can use write_file. Typical usage:
 
-load("//third_party/ecclesia/build_defs:file.bzl", "write_file")
+load("//ecclesia/build_defs:file.bzl", "write_file")
 write_file(
     name = "my_generated_file",
     content = "my generated content!",
@@ -22,7 +22,7 @@ For more complex cases where the content of the file is mostly fixed but needs
 to be parameterized with some simple substitutions (e.g. inserting names or
 paths into a script) you can use expand_template. Typical usage:
 
-load("//third_party/ecclesia/build_defs:file.bzl", "expand_template")
+load("//ecclesia/build_defs:file.bzl", "expand_template")
 expand_template(
     name = "my_generated_file",
     template = "my.template",

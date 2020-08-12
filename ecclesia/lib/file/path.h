@@ -27,6 +27,10 @@
 
 namespace ecclesia {
 
+// Given a path return the basename of the path. The basename will be a
+// substring of the given path.
+absl::string_view GetBasename(absl::string_view path);
+
 // Function that will take a sequence of paths and join them all together. This
 // accepts both relative and absolute paths, but when an absolute path is passed
 // in then it will "override" any arguments that came before it.

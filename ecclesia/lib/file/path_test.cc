@@ -21,6 +21,16 @@
 namespace ecclesia {
 namespace {
 
+TEST(GetBasename, Works) {
+  EXPECT_EQ(GetBasename("/dir1/dir2/dir3"), "dir3");
+  EXPECT_EQ(GetBasename("dir1/dir2/dir3"), "dir3");
+  EXPECT_EQ(GetBasename("/dir1/dir2/dir3/"), "dir3");
+  EXPECT_EQ(GetBasename("dir1/dir2/dir3/"), "dir3");
+  EXPECT_EQ(GetBasename("dir1"), "dir1");
+  EXPECT_EQ(GetBasename("//////dir1//////"), "dir1");
+  EXPECT_EQ(GetBasename(""), "");
+}
+
 TEST(JoinFilePaths, SimpleJoin) {
   EXPECT_EQ(JoinFilePaths("a", "b", "c"), "a/b/c");
   EXPECT_EQ(JoinFilePaths("/a", "b", "c"), "/a/b/c");

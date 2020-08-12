@@ -25,6 +25,21 @@
 
 namespace ecclesia {
 
+absl::string_view GetBasename(absl::string_view path) {
+  // First remove any trailing slashes in the path. If we have a path of the
+  // form /dir1/dir2/dir3/ we consider the basename to be "dir3" and not an
+  // empty string.
+  while (!path.empty() && path.back() == '/') {
+    path.remove_suffix(1);
+  }
+  // Remove everything before the last /.
+  auto last_slash = path.find_last_of('/');
+  if (last_slash != path.npos) {
+    path.remove_prefix(last_slash + 1);
+  }
+  return path;
+}
+
 std::string JoinFilePaths(absl::Span<const absl::string_view> paths) {
   // Find the last absolute path in the span (if there is one). We can then
   // ignore all the paths that come before it.
