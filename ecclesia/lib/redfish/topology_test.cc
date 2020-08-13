@@ -264,7 +264,7 @@ TEST(NodeTopologiesHaveTheSameNodes, NewTypeDetected) {
 }
 
 TEST(RawInterfaceTestWithMockup, IndusHmbCnMockupNodesArePopulated) {
-  TestingMockupServer mockup("indus_hmb_cn_mockup.sar");
+  TestingMockupServer mockup("indus_hmb_cn_mockup.shar");
   auto raw_intf = mockup.RedfishClientInterface();
   NodeTopology topology = CreateTopologyFromRedfish(raw_intf.get());
 
@@ -388,7 +388,7 @@ TEST(RawInterfaceTestWithMockup, IndusHmbCnMockupNodesArePopulated) {
 }
 
 TEST(RawInterfaceTestWithMockup, IndusHmbCnMockupDevpathToNodeMapMatches) {
-  TestingMockupServer mockup("indus_hmb_cn_mockup.sar");
+  TestingMockupServer mockup("indus_hmb_cn_mockup.shar");
   auto raw_intf = mockup.RedfishClientInterface();
   NodeTopology topology = CreateTopologyFromRedfish(raw_intf.get());
 
@@ -400,7 +400,7 @@ TEST(RawInterfaceTestWithMockup, IndusHmbCnMockupDevpathToNodeMapMatches) {
 }
 
 TEST(RawInterfaceTestWithMockup, IndusHmbCnMockupUriMapIsCorrect) {
-  TestingMockupServer mockup("indus_hmb_cn_mockup.sar");
+  TestingMockupServer mockup("indus_hmb_cn_mockup.shar");
   auto raw_intf = mockup.RedfishClientInterface();
   NodeTopology topology = CreateTopologyFromRedfish(raw_intf.get());
 
@@ -596,7 +596,7 @@ TEST(RawInterfaceTestWithMockup, IndusHmbCnMockupUriMapIsCorrect) {
 }
 
 TEST(RawInterfaceTestWithMockup, NodesMatch) {
-  TestingMockupServer mockup("indus_hmb_cn_mockup.sar");
+  TestingMockupServer mockup("indus_hmb_cn_mockup.shar");
   auto raw_intf = mockup.RedfishClientInterface();
 
   NodeTopology topology1 = CreateTopologyFromRedfish(raw_intf.get());

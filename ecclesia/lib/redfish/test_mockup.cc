@@ -59,11 +59,11 @@ std::string ConfigToEndpoint(TestingMockupServer::ConfigNetwork config) {
 
 }  // namespace
 
-TestingMockupServer::TestingMockupServer(absl::string_view mockup_sar,
+TestingMockupServer::TestingMockupServer(absl::string_view mockup_shar,
                                          absl::string_view uds_path) {
   config_ = ConfigUnix{.socket_path = uds_path.data()};
   std::string mockup_path = ecclesia::GetTestDataDependencyPath(
-      ecclesia::JoinFilePaths("redfish_mockups", mockup_sar));
+      ecclesia::JoinFilePaths("redfish_mockups", mockup_shar));
   std::string string_argv[] = {mockup_path, "--unix", uds_path.data()};
   char *argv[ABSL_ARRAYSIZE(string_argv) + 1] = {};
   for (size_t i = 0; i < ABSL_ARRAYSIZE(string_argv); ++i) {
@@ -72,11 +72,11 @@ TestingMockupServer::TestingMockupServer(absl::string_view mockup_sar,
   SetUpMockupServer(argv);
 }
 
-TestingMockupServer::TestingMockupServer(absl::string_view mockup_sar) {
+TestingMockupServer::TestingMockupServer(absl::string_view mockup_shar) {
   config_ = ConfigNetwork{.hostname = "[::1]",
                           .port = ecclesia::FindUnusedPortOrDie()};
   std::string mockup_path = ecclesia::GetTestDataDependencyPath(
-      ecclesia::JoinFilePaths("redfish_mockups", mockup_sar));
+      ecclesia::JoinFilePaths("redfish_mockups", mockup_shar));
   std::string string_argv[] = {
       mockup_path,
       "--host",

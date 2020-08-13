@@ -32,7 +32,7 @@ namespace {
 using testing::Eq;
 
 TEST(RawInterfaceTestWithMockup, GetUriMatchesGetRoot) {
-  TestingMockupServer mockup("indus_hmb_cn_mockup.sar");
+  TestingMockupServer mockup("indus_hmb_cn_mockup.shar");
   auto raw_intf = mockup.RedfishClientInterface();
   auto root = raw_intf->GetRoot().AsObject();
   auto root_via_uri = raw_intf->GetUri("/redfish/v1").AsObject();
@@ -45,7 +45,7 @@ TEST(RawInterfaceTestWithMockup, GetUriMatchesGetRoot) {
 }
 
 TEST(RawInterfaceTestWithMockup, GetChildObjectByUriMatches) {
-  TestingMockupServer mockup("indus_hmb_cn_mockup.sar");
+  TestingMockupServer mockup("indus_hmb_cn_mockup.shar");
   auto raw_intf = mockup.RedfishClientInterface();
   auto root = raw_intf->GetRoot().AsObject();
   ASSERT_TRUE(root);
@@ -59,7 +59,7 @@ TEST(RawInterfaceTestWithMockup, GetChildObjectByUriMatches) {
 }
 
 TEST(RawInterfaceTestWithMockup, GetIndusObjectByUriMatches) {
-  TestingMockupServer mockup("indus_hmb_cn_mockup.sar");
+  TestingMockupServer mockup("indus_hmb_cn_mockup.shar");
   auto raw_intf = mockup.RedfishClientInterface();
   auto root = raw_intf->GetRoot().AsObject();
   ASSERT_TRUE(root);
@@ -75,7 +75,7 @@ TEST(RawInterfaceTestWithMockup, GetIndusObjectByUriMatches) {
 }
 
 TEST(RawInterfaceTestWithMockup, GetFragmentUriMatches) {
-  TestingMockupServer mockup("indus_hmb_cn_mockup.sar");
+  TestingMockupServer mockup("indus_hmb_cn_mockup.shar");
   auto raw_intf = mockup.RedfishClientInterface();
   auto root = raw_intf->GetRoot().AsObject();
   ASSERT_TRUE(root);
@@ -107,7 +107,7 @@ TEST(FactoryTest, FailedConnectionReturnsNullInterface) {
 }
 
 TEST(RawInterfaceTestWithMockup, PostUri) {
-  TestingMockupServer mockup("indus_hmb_cn_mockup.sar");
+  TestingMockupServer mockup("indus_hmb_cn_mockup.shar");
   auto raw_intf = mockup.RedfishClientInterface();
   auto origin_collection = raw_intf->GetUri("/redfish/v1/Chassis").AsIterable();
   ASSERT_TRUE(origin_collection);

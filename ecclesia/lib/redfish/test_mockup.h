@@ -39,15 +39,15 @@ class TestingMockupServer {
   // cc_test(
   //   ...
   //   data =
-  //   ["//ecclesia/redfish_mockups:indus_hmb_cn_mockup.sar"],
+  //   ["//ecclesia/redfish_mockups:indus_hmb_cn_mockup.shar"],
   //   ...
   // )
   //
-  // Then, provide the name of the mockup .sar file. Currently only mockups
+  // Then, provide the name of the mockup .shar file. Currently only mockups
   // defined in redfish_mockups are supported.For example:
-  //   mockup_sar = "indus_hmb_cn_mockup.sar"
-  explicit TestingMockupServer(absl::string_view mockup_sar);
-  TestingMockupServer(absl::string_view mockup_sar, absl::string_view uds_path);
+  //   mockup_sar = "indus_hmb_cn_mockup.shar"
+  explicit TestingMockupServer(absl::string_view mockup_shar);
+  TestingMockupServer(absl::string_view mockup_shar, absl::string_view uds_path);
   ~TestingMockupServer();
 
   // Returns a new RedfishInterface connected to the mockup server.

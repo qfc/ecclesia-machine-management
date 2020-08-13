@@ -11,6 +11,8 @@ exports_files(
 bzl_library(
     name = "embed",
     srcs = ["embed.bzl"],
+    visibility = ["//ecclesia:library_users"],
+    deps = [":file"],
 )
 
 bzl_library(
