@@ -1,0 +1,15 @@
+{
+    "@odata.context": "/redfish/v1/$metadata#SoftwareInventory.SoftwareInventory",
+    "@odata.id": "/redfish/v1/UpdateService/FirmwareInventory/cpld",
+    "@odata.type": "#SoftwareInventory.v1_1_0.SoftwareInventory",
+    "Description": "Compute Node CPLD FW",
+    "Id": "cpld",
+    "Name": "firmware-cpld-indus",
+    "RelatedItem": [
+        {
+            "@odata.id": "/redfish/v1/Systems/system"
+        }
+    ],
+    "Updateable": false,
+    "Version": "platforms_firmware_cpld_indus_20190222_v1.7.0.0.rc2"
+}

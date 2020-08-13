@@ -1,0 +1,894 @@
+{
+   "@odata.id": "/redfish/v1/Chassis/chassis/Assembly",
+   "@odata.type": "#Assembly.v1_2_0.Assembly",
+   "Assemblies": [
+      {
+         "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0",
+         "MemberId": 0,
+         "Name": "interlaken",
+         "Oem": {
+            "Google": {
+               "Components": [
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/0",
+                     "AssociatedWith": [
+                        {
+                           "@odata.id": "/redfish/v1/Chassis/chassis"
+                        }
+                     ],
+                     "MemberId": 0,
+                     "Name": "interlaken",
+                     "PhysicalContext": "SystemBoard"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/1",
+                     "MemberId": 1,
+                     "Name": "CPU0",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/2",
+                     "MemberId": 2,
+                     "Name": "CPU1",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/3",
+                     "MemberId": 3,
+                     "Name": "DIMM0",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/4",
+                     "MemberId": 4,
+                     "Name": "DIMM1",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/5",
+                     "MemberId": 5,
+                     "Name": "DIMM2",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/6",
+                     "MemberId": 6,
+                     "Name": "DIMM3",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/7",
+                     "MemberId": 7,
+                     "Name": "DIMM4",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/8",
+                     "MemberId": 8,
+                     "Name": "DIMM5",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/9",
+                     "MemberId": 9,
+                     "Name": "DIMM6",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/10",
+                     "MemberId": 10,
+                     "Name": "DIMM7",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/11",
+                     "MemberId": 11,
+                     "Name": "DIMM8",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/12",
+                     "MemberId": 12,
+                     "Name": "DIMM9",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/13",
+                     "MemberId": 13,
+                     "Name": "DIMM10",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/14",
+                     "MemberId": 14,
+                     "Name": "DIMM11",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/15",
+                     "MemberId": 15,
+                     "Name": "DIMM12",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/16",
+                     "MemberId": 16,
+                     "Name": "DIMM13",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/17",
+                     "MemberId": 17,
+                     "Name": "DIMM14",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/18",
+                     "MemberId": 18,
+                     "Name": "DIMM15",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/19",
+                     "MemberId": 19,
+                     "Name": "DIMM16",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/20",
+                     "MemberId": 20,
+                     "Name": "DIMM17",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/21",
+                     "MemberId": 21,
+                     "Name": "DIMM18",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/22",
+                     "MemberId": 22,
+                     "Name": "DIMM19",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/23",
+                     "MemberId": 23,
+                     "Name": "DIMM20",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/24",
+                     "MemberId": 24,
+                     "Name": "DIMM21",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/25",
+                     "MemberId": 25,
+                     "Name": "DIMM22",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/26",
+                     "MemberId": 26,
+                     "Name": "DIMM23",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/27",
+                     "MemberId": 27,
+                     "Name": "DIMM24",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/28",
+                     "MemberId": 28,
+                     "Name": "DIMM25",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/29",
+                     "MemberId": 29,
+                     "Name": "DIMM26",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/30",
+                     "MemberId": 30,
+                     "Name": "DIMM27",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/31",
+                     "MemberId": 31,
+                     "Name": "DIMM28",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/32",
+                     "MemberId": 32,
+                     "Name": "DIMM29",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/33",
+                     "MemberId": 33,
+                     "Name": "DIMM30",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/34",
+                     "MemberId": 34,
+                     "Name": "DIMM31",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/35",
+                     "MemberId": 35,
+                     "Name": "PE0",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/36",
+                     "MemberId": 36,
+                     "Name": "PE4",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/37",
+                     "MemberId": 37,
+                     "Name": "PE2",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/38",
+                     "MemberId": 38,
+                     "Name": "PE3",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/39",
+                     "MemberId": 39,
+                     "Name": "PE7",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/40",
+                     "MemberId": 40,
+                     "Name": "SLIMSAS_PCIE_FROM_CPU0",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/41",
+                     "MemberId": 41,
+                     "Name": "SLIMSAS_PCIE_TO_PE3",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/42",
+                     "MemberId": 42,
+                     "Name": "SLIMSAS_PCIE_FROM_CPU1",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/43",
+                     "MemberId": 43,
+                     "Name": "SLIMSAS_PCIE_TO_PE7",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/44",
+                     "MemberId": 44,
+                     "Name": "CPU0_ANCHORS",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/45",
+                     "MemberId": 45,
+                     "Name": "CPU1_ANCHORS",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/46",
+                     "MemberId": 46,
+                     "Name": "TRAY",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/47",
+                     "MemberId": 47,
+                     "Name": "48V_POWER_CONN",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/48",
+                     "MemberId": 48,
+                     "Name": "AGORA_GEN_Z_CONN",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/49",
+                     "MemberId": 49,
+                     "Name": "FAN0",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/50",
+                     "MemberId": 50,
+                     "Name": "FAN1",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/51",
+                     "MemberId": 51,
+                     "Name": "FAN2",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/52",
+                     "MemberId": 52,
+                     "Name": "FAN3",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/53",
+                     "MemberId": 53,
+                     "Name": "FAN4",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/54",
+                     "MemberId": 54,
+                     "Name": "FAN5",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/55",
+                     "MemberId": 55,
+                     "Name": "I2COOL0",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/56",
+                     "MemberId": 56,
+                     "Name": "I2COOL2",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/57",
+                     "MemberId": 57,
+                     "Name": "I2COOL1",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/58",
+                     "MemberId": 58,
+                     "Name": "I2COOL3",
+                     "PhysicalContext": "Connector"
+                  }
+               ]
+            }
+         }
+      },
+      {
+         "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/1",
+         "MemberId": 1,
+         "Name": "warthog",
+         "Oem": {
+            "Google": {
+               "AttachedTo": [
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/37"
+                  }
+               ],
+               "Components": [
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/1/Oem/Google/Components/0",
+                     "MemberId": 0,
+                     "Name": "warthog"
+                  }
+               ]
+            }
+         }
+      },
+      {
+         "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/2",
+         "MemberId": 2,
+         "Name": "warthog",
+         "Oem": {
+            "Google": {
+               "AttachedTo": [
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/38"
+                  }
+               ],
+               "Components": [
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/2/Oem/Google/Components/0",
+                     "MemberId": 0,
+                     "Name": "warthog"
+                  }
+               ]
+            }
+         }
+      },
+      {
+         "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/3",
+         "MemberId": 3,
+         "Name": "warthog",
+         "Oem": {
+            "Google": {
+               "AttachedTo": [
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/39"
+                  }
+               ],
+               "Components": [
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/3/Oem/Google/Components/0",
+                     "MemberId": 0,
+                     "Name": "warthog"
+                  }
+               ]
+            }
+         }
+      },
+      {
+         "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/4",
+         "MemberId": 4,
+         "Name": "slimsas_cable",
+         "Oem": {
+            "Google": {
+               "AttachedTo": [
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/40"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/41"
+                  }
+               ],
+               "Components": [
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/4/Oem/Google/Components/0",
+                     "MemberId": 0,
+                     "Name": "slimsas_cable"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/4/Oem/Google/Components/1",
+                     "MemberId": 1,
+                     "Name": "DOWNLINK",
+                     "PhysicalContext": "Connector"
+                  }
+               ]
+            }
+         }
+      },
+      {
+         "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/5",
+         "MemberId": 5,
+         "Name": "slimsas_cable",
+         "Oem": {
+            "Google": {
+               "AttachedTo": [
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/42"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/43"
+                  }
+               ],
+               "Components": [
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/5/Oem/Google/Components/0",
+                     "MemberId": 0,
+                     "Name": "slimsas_cable"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/5/Oem/Google/Components/1",
+                     "MemberId": 1,
+                     "Name": "DOWNLINK",
+                     "PhysicalContext": "Connector"
+                  }
+               ]
+            }
+         }
+      },
+      {
+         "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/6",
+         "MemberId": 6,
+         "Name": "cooler/haywards",
+         "Oem": {
+            "Google": {
+               "AttachedTo": [
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/44"
+                  }
+               ],
+               "Components": [
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/6/Oem/Google/Components/0",
+                     "MemberId": 0,
+                     "Name": "cooler/haywards"
+                  }
+               ]
+            }
+         }
+      },
+      {
+         "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/7",
+         "MemberId": 7,
+         "Name": "cooler/haywards",
+         "Oem": {
+            "Google": {
+               "AttachedTo": [
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/45"
+                  }
+               ],
+               "Components": [
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/7/Oem/Google/Components/0",
+                     "MemberId": 0,
+                     "Name": "cooler/haywards"
+                  }
+               ]
+            }
+         }
+      },
+      {
+         "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/8",
+         "MemberId": 8,
+         "Name": "tray/1board",
+         "Oem": {
+            "Google": {
+               "AttachedTo": [
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/46"
+                  }
+               ],
+               "Components": [
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/8/Oem/Google/Components/0",
+                     "MemberId": 0,
+                     "Name": "tray/1board"
+                  }
+               ]
+            }
+         }
+      },
+      {
+         "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/9",
+         "MemberId": 9,
+         "Name": "dc_rack_power_cable",
+         "Oem": {
+            "Google": {
+               "AttachedTo": [
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/47"
+                  }
+               ],
+               "Components": [
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/9/Oem/Google/Components/0",
+                     "MemberId": 0,
+                     "Name": "dc_rack_power_cable"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/9/Oem/Google/Components/1",
+                     "MemberId": 1,
+                     "Name": "DOWNLINK",
+                     "PhysicalContext": "Connector"
+                  }
+               ]
+            }
+         }
+      },
+      {
+         "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/10",
+         "MemberId": 10,
+         "Name": "agora",
+         "Oem": {
+            "Google": {
+               "AttachedTo": [
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/48"
+                  }
+               ],
+               "Components": [
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/10/Oem/Google/Components/0",
+                     "MemberId": 0,
+                     "Name": "agora"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/10/Oem/Google/Components/1",
+                     "MemberId": 1,
+                     "Name": "BIOS",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/10/Oem/Google/Components/2",
+                     "MemberId": 2,
+                     "Name": "2ND_BMC",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/10/Oem/Google/Components/3",
+                     "MemberId": 3,
+                     "Name": "BMC",
+                     "PhysicalContext": "Connector"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/10/Oem/Google/Components/4",
+                     "MemberId": 4,
+                     "Name": "NCSI",
+                     "PhysicalContext": "Connector"
+                  }
+               ]
+            }
+         }
+      },
+      {
+         "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/11",
+         "MemberId": 11,
+         "Name": "flash_chip/bios_backup",
+         "Oem": {
+            "Google": {
+               "AttachedTo": [
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/10/Oem/Google/Components/2"
+                  }
+               ],
+               "Components": [
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/11/Oem/Google/Components/0",
+                     "MemberId": 0,
+                     "Name": "flash_chip/bios_backup"
+                  }
+               ]
+            }
+         }
+      },
+      {
+         "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/12",
+         "MemberId": 12,
+         "Name": "hdmi_cable",
+         "Oem": {
+            "Google": {
+               "AttachedTo": [
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/10/Oem/Google/Components/4"
+                  }
+               ],
+               "Components": [
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/12/Oem/Google/Components/0",
+                     "MemberId": 0,
+                     "Name": "hdmi_cable"
+                  },
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/12/Oem/Google/Components/1",
+                     "MemberId": 1,
+                     "Name": "DOWNLINK",
+                     "PhysicalContext": "Connector"
+                  }
+               ]
+            }
+         }
+      },
+      {
+         "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/13",
+         "MemberId": 13,
+         "Name": "fan_60mm",
+         "Oem": {
+            "Google": {
+               "AttachedTo": [
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/49"
+                  }
+               ],
+               "Components": [
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/13/Oem/Google/Components/0",
+                     "MemberId": 0,
+                     "Name": "fan_60mm"
+                  }
+               ]
+            }
+         }
+      },
+      {
+         "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/14",
+         "MemberId": 14,
+         "Name": "fan_60mm",
+         "Oem": {
+            "Google": {
+               "AttachedTo": [
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/50"
+                  }
+               ],
+               "Components": [
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/14/Oem/Google/Components/0",
+                     "MemberId": 0,
+                     "Name": "fan_60mm"
+                  }
+               ]
+            }
+         }
+      },
+      {
+         "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/15",
+         "MemberId": 15,
+         "Name": "fan_60mm",
+         "Oem": {
+            "Google": {
+               "AttachedTo": [
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/51"
+                  }
+               ],
+               "Components": [
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/15/Oem/Google/Components/0",
+                     "MemberId": 0,
+                     "Name": "fan_60mm"
+                  }
+               ]
+            }
+         }
+      },
+      {
+         "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/16",
+         "MemberId": 16,
+         "Name": "fan_60mm",
+         "Oem": {
+            "Google": {
+               "AttachedTo": [
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/52"
+                  }
+               ],
+               "Components": [
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/16/Oem/Google/Components/0",
+                     "MemberId": 0,
+                     "Name": "fan_60mm"
+                  }
+               ]
+            }
+         }
+      },
+      {
+         "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/17",
+         "MemberId": 17,
+         "Name": "fan_60mm",
+         "Oem": {
+            "Google": {
+               "AttachedTo": [
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/53"
+                  }
+               ],
+               "Components": [
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/17/Oem/Google/Components/0",
+                     "MemberId": 0,
+                     "Name": "fan_60mm"
+                  }
+               ]
+            }
+         }
+      },
+      {
+         "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/18",
+         "MemberId": 18,
+         "Name": "fan_60mm",
+         "Oem": {
+            "Google": {
+               "AttachedTo": [
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/54"
+                  }
+               ],
+               "Components": [
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/18/Oem/Google/Components/0",
+                     "MemberId": 0,
+                     "Name": "fan_60mm"
+                  }
+               ]
+            }
+         }
+      },
+      {
+         "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/19",
+         "MemberId": 19,
+         "Name": "i2cool",
+         "Oem": {
+            "Google": {
+               "AttachedTo": [
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/55"
+                  }
+               ],
+               "Components": [
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/19/Oem/Google/Components/0",
+                     "MemberId": 0,
+                     "Name": "i2cool"
+                  }
+               ]
+            }
+         }
+      },
+      {
+         "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/20",
+         "MemberId": 20,
+         "Name": "i2cool",
+         "Oem": {
+            "Google": {
+               "AttachedTo": [
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/56"
+                  }
+               ],
+               "Components": [
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/20/Oem/Google/Components/0",
+                     "MemberId": 0,
+                     "Name": "i2cool"
+                  }
+               ]
+            }
+         }
+      },
+      {
+         "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/21",
+         "MemberId": 21,
+         "Name": "i2cool",
+         "Oem": {
+            "Google": {
+               "AttachedTo": [
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/57"
+                  }
+               ],
+               "Components": [
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/21/Oem/Google/Components/0",
+                     "MemberId": 0,
+                     "Name": "i2cool"
+                  }
+               ]
+            }
+         }
+      },
+      {
+         "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/22",
+         "MemberId": 22,
+         "Name": "i2cool",
+         "Oem": {
+            "Google": {
+               "AttachedTo": [
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/0/Oem/Google/Components/58"
+                  }
+               ],
+               "Components": [
+                  {
+                     "@odata.id": "/redfish/v1/Chassis/chassis/Assembly#/Assemblies/22/Oem/Google/Components/0",
+                     "MemberId": 0,
+                     "Name": "i2cool"
+                  }
+               ]
+            }
+         }
+      }
+   ],
+   "Id": "Assembly",
+   "Name": "interlaken"
+}

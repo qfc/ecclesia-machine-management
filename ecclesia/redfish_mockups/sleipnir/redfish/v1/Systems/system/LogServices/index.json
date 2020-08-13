@@ -1,0 +1,13 @@
+{
+    "@odata.context": "/redfish/v1/$metadata#LogServiceCollection.LogServiceCollection",
+    "@odata.id": "/redfish/v1/Systems/system/LogServices",
+    "@odata.type": "#LogServiceCollection.LogServiceCollection",
+    "Description": "Collection of LogServices for this Computer System",
+    "Members": [
+        {
+            "@odata.id": "/redfish/v1/Systems/system/LogServices/EventLog"
+        }
+    ],
+    "Members@odata.count": 1,
+    "Name": "System Log Services Collection"
+}

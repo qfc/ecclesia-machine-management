@@ -1,0 +1,82 @@
+{
+    "@odata.context": "/redfish/v1/$metadata#Manager.Manager",
+    "@odata.id": "/redfish/v1/Managers/bmc",
+    "@odata.type": "#Manager.v1_3_0.Manager",
+    "Actions": {
+        "#Manager.Reset": {
+            "ResetType@Redfish.AllowableValues": [
+                "GracefulRestart"
+            ],
+            "target": "/redfish/v1/Managers/bmc/Actions/Manager.Reset"
+        }
+    },
+    "DateTime": "1970-01-04T19:34:48+00:00",
+    "Description": "Baseboard Management Controller",
+    "EthernetInterfaces": {
+        "@odata.id": "/redfish/v1/Managers/bmc/EthernetInterfaces"
+    },
+    "FirmwareVersion": "gbmc-release-0.7.16.0",
+    "GraphicalConsole": {
+        "ConnectTypesSupported": [
+            "KVMIP"
+        ],
+        "MaxConcurrentSessions": 4,
+        "ServiceEnabled": true
+    },
+    "Id": "bmc",
+    "Links": {
+        "ManagerForChassis": [
+            {
+                "@odata.id": "/redfish/v1/Chassis/chassis"
+            }
+        ],
+        "ManagerForChassis@odata.count": 1,
+        "ManagerForServers": [
+            {
+                "@odata.id": "/redfish/v1/Systems/system"
+            }
+        ],
+        "ManagerForServers@odata.count": 1,
+        "ManagerInChassis": {
+            "@odata.id": "/redfish/v1/Chassis/chassis"
+        }
+    },
+    "LogServices": {
+        "@odata.id": "/redfish/v1/Managers/bmc/LogServices"
+    },
+    "ManagerType": "BMC",
+    "Model": "OpenBmc",
+    "Name": "OpenBmc Manager",
+    "NetworkProtocol": {
+        "@odata.id": "/redfish/v1/Managers/bmc/NetworkProtocol"
+    },
+    "Oem": {
+        "@odata.context": "/redfish/v1/$metadata#OemManager.Oem",
+        "@odata.id": "/redfish/v1/Managers/bmc#/Oem",
+        "@odata.type": "#OemManager.Oem",
+        "OpenBmc": {
+            "@odata.context": "/redfish/v1/$metadata#OemManager.OpenBmc",
+            "@odata.id": "/redfish/v1/Managers/bmc#/Oem/OpenBmc",
+            "@odata.type": "#OemManager.OpenBmc",
+            "Certificates": {
+                "@odata.id": "/redfish/v1/Managers/bmc/Truststore/Certificates"
+            }
+        }
+    },
+    "PowerState": "On",
+    "SerialConsole": {
+        "ConnectTypesSupported": [
+            "IPMI",
+            "SSH"
+        ],
+        "MaxConcurrentSessions": 15,
+        "ServiceEnabled": true
+    },
+    "ServiceEntryPointUUID": "9f8333e6-0c20-4086-bf69-4dea2bebaf17",
+    "Status": {
+        "Health": "OK",
+        "HealthRollup": "OK",
+        "State": "Enabled"
+    },
+    "UUID": ""
+}

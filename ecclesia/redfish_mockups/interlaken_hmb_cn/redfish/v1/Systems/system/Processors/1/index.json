@@ -1,0 +1,29 @@
+{
+    "@odata.context": "/redfish/v1/$metadata#Processor.Processor",
+    "@odata.id": "/redfish/v1/Systems/system/Processors/1",
+    "@odata.type": "#Processor.v1_6_0.Processor",
+    "Assembly": {
+        "@odata.id": "/redfish/v1/Systems/system/Processors/1/Assembly"
+    },
+    "Manufacturer": "Intel(R) Corporation",
+    "MaxSpeedMHz": 3700,
+    "Metrics": {
+        "@odata.id": "/redfish/v1/Systems/system/Processors/1/ProcessorMetrics"
+    },
+    "Name": "CPU1",
+    "PartNumber": "1066799",
+    "ProcessorId": {
+        "EffectiveFamily": 6,
+        "EffectiveModel": 125,
+        "Step": 4,
+        "VendorId": "Intel(R) Corporation"
+    },
+    "SerialNumber": "0x016b61948b270001",
+    "Socket": "CPU1",
+    "Status": {
+        "State": "Enabled"
+    },
+    "TotalCores": 14,
+    "TotalEnabledCores": 14,
+    "TotalThreads": 28
+}

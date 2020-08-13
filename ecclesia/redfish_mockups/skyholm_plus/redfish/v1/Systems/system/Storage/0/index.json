@@ -1,0 +1,31 @@
+{
+   "@odata.id" : "/redfish/v1/Systems/system/Storage/0",
+   "@odata.type" : "#Storage.v1_7_0.Storage",
+   "Drives" : [
+      {
+         "@odata.id" : "/redfish/v1/Systems/system/Storage/0/Drives/0"
+      },
+      {
+         "@odata.id" : "/redfish/v1/Systems/system/Storage/0/Drives/1"
+      },
+      {
+         "@odata.id" : "/redfish/v1/Systems/system/Storage/0/Drives/2"
+      },
+      {
+         "@odata.id" : "/redfish/v1/Systems/system/Storage/0/Drives/3"
+      },
+      {
+         "@odata.id" : "/redfish/v1/Systems/system/Storage/0/Drives/4"
+      },
+      {
+         "@odata.id" : "/redfish/v1/Systems/system/Storage/0/Drives/5"
+      },
+      {
+         "@odata.id" : "/redfish/v1/Systems/system/Storage/0/Drives/6"
+      },
+      {
+         "@odata.id" : "/redfish/v1/Systems/system/Storage/0/Drives/7"
+      }
+   ],
+   "Id" : "0"
+}

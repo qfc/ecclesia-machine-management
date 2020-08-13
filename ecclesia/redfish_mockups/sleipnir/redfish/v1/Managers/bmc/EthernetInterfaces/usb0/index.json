@@ -1,0 +1,52 @@
+{
+    "@odata.context": "/redfish/v1/$metadata#EthernetInterface.EthernetInterface",
+    "@odata.id": "/redfish/v1/Managers/bmc/EthernetInterfaces/usb0",
+    "@odata.type": "#EthernetInterface.v1_4_1.EthernetInterface",
+    "DHCPv4": {
+        "DHCPEnabled": false,
+        "UseDNSServers": true,
+        "UseDomainName": true,
+        "UseNTPServers": true
+    },
+    "DHCPv6": {
+        "OperatingMode": "Disabled",
+        "UseDNSServers": true,
+        "UseDomainName": true,
+        "UseNTPServers": true
+    },
+    "Description": "Management Network Interface",
+    "HostName": "sleipnir",
+    "IPv4Addresses": [
+        {
+            "Address": "169.254.95.118",
+            "AddressOrigin": "Static",
+            "Gateway": "0.0.0.0",
+            "SubnetMask": "255.255.0.0"
+        }
+    ],
+    "IPv4StaticAddresses": [
+        {
+            "Address": "169.254.95.118",
+            "AddressOrigin": "Static",
+            "Gateway": "0.0.0.0",
+            "SubnetMask": "255.255.0.0"
+        }
+    ],
+    "IPv6Addresses": [],
+    "IPv6DefaultGateway": "",
+    "IPv6StaticAddresses": [],
+    "Id": "usb0",
+    "InterfaceEnabled": true,
+    "LinkStatus": "NoLink",
+    "MACAddress": "a2:d5:9d:6c:6e:6a",
+    "Name": "Manager Ethernet Interface",
+    "SpeedMbps": 0,
+    "StaticNameServers": [],
+    "Status": {
+        "Health": "OK",
+        "State": "Disabled"
+    },
+    "VLANs": {
+        "@odata.id": "/redfish/v1/Managers/bmc/EthernetInterfaces/usb0/VLANs"
+    }
+}

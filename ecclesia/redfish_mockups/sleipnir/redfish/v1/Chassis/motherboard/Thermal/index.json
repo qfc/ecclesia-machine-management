@@ -1,0 +1,10 @@
+{
+    "@odata.context": "/redfish/v1/$metadata#Thermal.Thermal",
+    "@odata.id": "/redfish/v1/Chassis/motherboard/Thermal",
+    "@odata.type": "#Thermal.v1_4_0.Thermal",
+    "Fans": [],
+    "Id": "Thermal",
+    "Name": "Thermal",
+    "Redundancy": [],
+    "Temperatures": []
+}

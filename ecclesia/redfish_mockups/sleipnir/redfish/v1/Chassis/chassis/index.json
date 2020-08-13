@@ -1,0 +1,36 @@
+{
+    "@odata.context": "/redfish/v1/$metadata#Chassis.Chassis",
+    "@odata.id": "/redfish/v1/Chassis/chassis",
+    "@odata.type": "#Chassis.v1_10_0.Chassis",
+    "ChassisType": "RackMount",
+    "Id": "chassis",
+    "Links": {
+        "ComputerSystems": [
+            {
+                "@odata.id": "/redfish/v1/Systems/system"
+            }
+        ],
+        "ManagedBy": [
+            {
+                "@odata.id": "/redfish/v1/Managers/bmc"
+            }
+        ]
+    },
+    "Name": "chassis",
+    "PCIeDevices": {
+        "@odata.id": "/redfish/v1/Systems/system/PCIeDevices"
+    },
+    "Power": {
+        "@odata.id": "/redfish/v1/Chassis/chassis/Power"
+    },
+    "PowerState": "Off",
+    "Sensors": {
+        "@odata.id": "/redfish/v1/Chassis/chassis/Sensors"
+    },
+    "Status": {
+        "State": "StandbyOffline"
+    },
+    "Thermal": {
+        "@odata.id": "/redfish/v1/Chassis/chassis/Thermal"
+    }
+}

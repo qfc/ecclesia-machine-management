@@ -129,7 +129,7 @@ def shar_binary(
         srcs = [name + "__stub.cc"],
         deps = [
             ":" + name + "__shar_data",
-            "//absl/strings",
+            "@com_google_absl//absl/strings",
             "//ecclesia/lib/file:dir",
             "//ecclesia/lib/file:path",
             "//ecclesia/lib/logging",

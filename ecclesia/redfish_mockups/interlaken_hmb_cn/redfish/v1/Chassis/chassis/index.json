@@ -1,0 +1,22 @@
+{
+    "@odata.context": "/redfish/v1/$metadata#Chassis.Chassis",
+    "@odata.id": "/redfish/v1/Chassis/chassis",
+    "@odata.type": "#Chassis.v1_5_0.Chassis",
+    "Assembly": {
+        "@odata.id": "/redfish/v1/Chassis/chassis/Assembly"
+    },
+    "Id": "chassis",
+    "Links": {
+        "ComputerSystems": {
+            "@odata.id": "/redfish/v1/Systems/system"
+        }
+    },
+    "Thermal": {
+        "@odata.id": "/redfish/v1/Chassis/chassis/Thermal"
+    },
+    "Name": "Interlaken Chassis",
+    "Manufacturer": "Quanta",
+    "Model": "Interlaken",
+    "PartNumber": "1234567-89",
+    "SerialNumber": "MBBQTW194000000"
+}

@@ -25,12 +25,12 @@
 #include <string>
 #include <vector>
 
-#include "third_party/absl/strings/string_view.h"
-#include "third_party/ecclesia/lib/file/dir.h"
-#include "third_party/ecclesia/lib/file/path.h"
-#include "third_party/ecclesia/lib/logging/globals.h"
-#include "third_party/ecclesia/lib/logging/logging.h"
-#include "third_party/ecclesia/lib/logging/posix.h"
+#include "absl/strings/string_view.h"
+#include "ecclesia/lib/file/dir.h"
+#include "ecclesia/lib/file/path.h"
+#include "ecclesia/lib/logging/globals.h"
+#include "ecclesia/lib/logging/logging.h"
+#include "ecclesia/lib/logging/posix.h"
 
 // Include the header that defines kSharDataFiles.
 #include "$DATA_HEADER"

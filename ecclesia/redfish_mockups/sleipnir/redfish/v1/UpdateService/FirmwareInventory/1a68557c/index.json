@@ -1,0 +1,21 @@
+{
+    "@odata.context": "/redfish/v1/$metadata#SoftwareInventory.SoftwareInventory",
+    "@odata.id": "/redfish/v1/UpdateService/FirmwareInventory/1a68557c",
+    "@odata.type": "#SoftwareInventory.v1_1_0.SoftwareInventory",
+    "Description": "BMC image",
+    "Id": "1a68557c",
+    "Members@odata.count": 1,
+    "Name": "Software Inventory",
+    "RelatedItem": [
+        {
+            "@odata.id": "/redfish/v1/Managers/bmc"
+        }
+    ],
+    "Status": {
+        "Health": "OK",
+        "HealthRollup": "OK",
+        "State": "Enabled"
+    },
+    "Updateable": false,
+    "Version": "gbmc-release-0.7.16.0"
+}

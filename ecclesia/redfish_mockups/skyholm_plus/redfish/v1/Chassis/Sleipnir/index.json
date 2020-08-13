@@ -1,0 +1,19 @@
+{
+    "@odata.context": "/redfish/v1/$metadata#Chassis.Chassis",
+    "@odata.id": "/redfish/v1/Chassis/Sleipnir",
+    "@odata.type": "#Chassis.v1_5_0.Chassis",
+    "Assembly": {
+        "@odata.id": "/redfish/v1/Chassis/Sleipnir/Assembly"
+    },
+    "Id": "Sleipnir",
+    "Links": {
+        "ComputerSystems": {
+            "@odata.id": "/redfish/v1/Systems/system"
+        }
+    },
+    "Name": "Sleipnir Chassis",
+    "Manufacturer": "Quanta",
+    "Model": "Sleipnir",
+    "PartNumber": "1043652-02",
+    "SerialNumber": "MBBQTW194106556"
+}

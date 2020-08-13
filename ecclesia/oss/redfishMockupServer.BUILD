@@ -11,4 +11,5 @@ par_binary(
         "rfSsdpServer.py",
     ],
     python_version = "PY3",
+    visibility = ["//visibility:public"],
 )

@@ -1,0 +1,42 @@
+{
+    "@odata.context": "/redfish/v1/$metadata#Chassis.Chassis",
+    "@odata.id": "/redfish/v1/Chassis/bmc",
+    "@odata.type": "#Chassis.v1_10_0.Chassis",
+    "ChassisType": "RackMount",
+    "Id": "bmc",
+    "Links": {
+        "ComputerSystems": [
+            {
+                "@odata.id": "/redfish/v1/Systems/system"
+            }
+        ],
+        "ManagedBy": [
+            {
+                "@odata.id": "/redfish/v1/Managers/bmc"
+            }
+        ]
+    },
+    "Manufacturer": "Quanta",
+    "Model": "",
+    "Name": "bmc",
+    "PCIeDevices": {
+        "@odata.id": "/redfish/v1/Systems/system/PCIeDevices"
+    },
+    "PartNumber": "1048351-02",
+    "Power": {
+        "@odata.id": "/redfish/v1/Chassis/bmc/Power"
+    },
+    "PowerState": "Off",
+    "Sensors": {
+        "@odata.id": "/redfish/v1/Chassis/bmc/Sensors"
+    },
+    "SerialNumber": "SRCQTW192000190",
+    "Status": {
+        "Health": "OK",
+        "HealthRollup": "OK",
+        "State": "StandbyOffline"
+    },
+    "Thermal": {
+        "@odata.id": "/redfish/v1/Chassis/bmc/Thermal"
+    }
+}

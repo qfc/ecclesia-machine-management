@@ -1,0 +1,30 @@
+{
+   "@odata.id" : "/redfish/v1/Systems/system/EthernetInterfaces/0",
+   "@odata.type" : "#EthernetInterface.v1_5_0.EthernetInterface",
+   "AutoNeg" : false,
+   "FullDuplex" : false,
+   "Id" : "eth1",
+   "LinkStatus" : "LinkUp",
+   "MACAddress" : "94:eb:2c:1f:01:64",
+   "Assembly": {
+         "@odata.id": "/redfish/v1/Systems/system/EthernetInterfaces/0/Assembly"
+   },
+   "Oem" : {
+      "Google" : {
+         "Devpath" : "/phys/PE1:device:gq100:network",
+         "DriverName" : "",
+         "FirmwareVersionCurrent" : "105.21.257613392.20190711",
+         "FirmwareVersionEeprom" : "105.21.13.13-ii-dbg boot",
+         "FirmwareVersionHaven" : "0.0.20",
+         "FirmwareVersionHavenRo" : "0.1.600/9e376a7b",
+         "PcieAddress" : "0000:18:00.0",
+         "RdmaSupported" : false,
+         "ReceivedPackets" : 157685697,
+         "ReceivedPacketsCrcErrors" : 0,
+         "ReceivedPacketsDropped" : 18,
+         "ReceivedPacketsErrors" : 0,
+         "ShortName" : "eth1"
+      }
+   },
+   "SpeedMbps" : 100000
+}

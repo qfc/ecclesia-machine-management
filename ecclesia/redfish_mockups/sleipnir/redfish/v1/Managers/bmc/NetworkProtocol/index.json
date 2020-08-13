@@ -1,0 +1,34 @@
+{
+    "@odata.context": "/redfish/v1/$metadata#ManagerNetworkProtocol.ManagerNetworkProtocol",
+    "@odata.id": "/redfish/v1/Managers/bmc/NetworkProtocol",
+    "@odata.type": "#ManagerNetworkProtocol.v1_4_0.ManagerNetworkProtocol",
+    "Description": "Manager Network Service",
+    "FQDN": "sleipnir",
+    "HTTPS": {
+        "Certificates": {
+            "@odata.id": "/redfish/v1/Managers/bmc/NetworkProtocol/HTTPS/Certificates"
+        },
+        "Port": 80,
+        "ProtocolEnabled": true
+    },
+    "HostName": "sleipnir",
+    "IPMI": {
+        "Port": 623,
+        "ProtocolEnabled": true
+    },
+    "Id": "NetworkProtocol",
+    "NTP": {
+        "NTPServers": [],
+        "ProtocolEnabled": false
+    },
+    "Name": "Manager Network Protocol",
+    "SSH": {
+        "Port": 22,
+        "ProtocolEnabled": true
+    },
+    "Status": {
+        "Health": "OK",
+        "HealthRollup": "OK",
+        "State": "Enabled"
+    }
+}

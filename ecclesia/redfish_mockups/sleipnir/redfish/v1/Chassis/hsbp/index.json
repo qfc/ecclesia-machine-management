@@ -1,0 +1,42 @@
+{
+    "@odata.context": "/redfish/v1/$metadata#Chassis.Chassis",
+    "@odata.id": "/redfish/v1/Chassis/hsbp",
+    "@odata.type": "#Chassis.v1_10_0.Chassis",
+    "ChassisType": "RackMount",
+    "Id": "hsbp",
+    "Links": {
+        "ComputerSystems": [
+            {
+                "@odata.id": "/redfish/v1/Systems/system"
+            }
+        ],
+        "ManagedBy": [
+            {
+                "@odata.id": "/redfish/v1/Managers/bmc"
+            }
+        ]
+    },
+    "Manufacturer": "Quanta",
+    "Model": "",
+    "Name": "hsbp",
+    "PCIeDevices": {
+        "@odata.id": "/redfish/v1/Systems/system/PCIeDevices"
+    },
+    "PartNumber": "1048349-02",
+    "Power": {
+        "@odata.id": "/redfish/v1/Chassis/hsbp/Power"
+    },
+    "PowerState": "Off",
+    "Sensors": {
+        "@odata.id": "/redfish/v1/Chassis/hsbp/Sensors"
+    },
+    "SerialNumber": "SRAQTW192000023",
+    "Status": {
+        "Health": "OK",
+        "HealthRollup": "OK",
+        "State": "StandbyOffline"
+    },
+    "Thermal": {
+        "@odata.id": "/redfish/v1/Chassis/hsbp/Thermal"
+    }
+}

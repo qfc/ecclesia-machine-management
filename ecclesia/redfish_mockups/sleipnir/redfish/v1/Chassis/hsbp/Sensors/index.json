@@ -1,0 +1,9 @@
+{
+    "@odata.context": "/redfish/v1/$metadata#SensorCollection.SensorCollection",
+    "@odata.id": "/redfish/v1/Chassis/hsbp/Sensors",
+    "@odata.type": "#SensorCollection.SensorCollection",
+    "Description": "Collection of Sensors for this Chassis",
+    "Members": [],
+    "Members@odata.count": 0,
+    "Name": "Sensors"
+}

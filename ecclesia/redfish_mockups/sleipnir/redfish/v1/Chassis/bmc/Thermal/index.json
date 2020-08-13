@@ -1,0 +1,188 @@
+{
+    "@odata.context": "/redfish/v1/$metadata#Thermal.Thermal",
+    "@odata.id": "/redfish/v1/Chassis/bmc/Thermal",
+    "@odata.type": "#Thermal.v1_4_0.Thermal",
+    "Fans": [
+        {
+            "@odata.id": "/redfish/v1/Chassis/bmc/Thermal#/Fans/0",
+            "@odata.type": "#Thermal.v1_3_0.Fan",
+            "LowerThresholdCritical": 150,
+            "LowerThresholdNonCritical": 150,
+            "MaxReadingRange": 20145,
+            "MemberId": "Fan0_0_RPM",
+            "MinReadingRange": 0,
+            "Name": "Fan0 0 RPM",
+            "Reading": 4500,
+            "ReadingUnits": "RPM",
+            "Status": {
+                "Health": "OK",
+                "State": "Enabled"
+            },
+            "UpperThresholdCritical": 19250,
+            "UpperThresholdNonCritical": 19250
+        },
+        {
+            "@odata.id": "/redfish/v1/Chassis/bmc/Thermal#/Fans/1",
+            "@odata.type": "#Thermal.v1_3_0.Fan",
+            "LowerThresholdCritical": 150,
+            "LowerThresholdNonCritical": 150,
+            "MaxReadingRange": 20145,
+            "MemberId": "Fan0_1_RPM",
+            "MinReadingRange": 0,
+            "Name": "Fan0 1 RPM",
+            "Reading": 3985,
+            "ReadingUnits": "RPM",
+            "Status": {
+                "Health": "OK",
+                "State": "Enabled"
+            },
+            "UpperThresholdCritical": 17600,
+            "UpperThresholdNonCritical": 17600
+        },
+        {
+            "@odata.id": "/redfish/v1/Chassis/bmc/Thermal#/Fans/2",
+            "@odata.type": "#Thermal.v1_3_0.Fan",
+            "LowerThresholdCritical": 150,
+            "LowerThresholdNonCritical": 150,
+            "MaxReadingRange": 20145,
+            "MemberId": "Fan1_0_RPM",
+            "MinReadingRange": 0,
+            "Name": "Fan1 0 RPM",
+            "Reading": 4500,
+            "ReadingUnits": "RPM",
+            "Status": {
+                "Health": "OK",
+                "State": "Enabled"
+            },
+            "UpperThresholdCritical": 19250,
+            "UpperThresholdNonCritical": 19250
+        },
+        {
+            "@odata.id": "/redfish/v1/Chassis/bmc/Thermal#/Fans/3",
+            "@odata.type": "#Thermal.v1_3_0.Fan",
+            "LowerThresholdCritical": 150,
+            "LowerThresholdNonCritical": 150,
+            "MaxReadingRange": 20145,
+            "MemberId": "Fan1_1_RPM",
+            "MinReadingRange": 0,
+            "Name": "Fan1 1 RPM",
+            "Reading": 3959,
+            "ReadingUnits": "RPM",
+            "Status": {
+                "Health": "OK",
+                "State": "Enabled"
+            },
+            "UpperThresholdCritical": 17600,
+            "UpperThresholdNonCritical": 17600
+        },
+        {
+            "@odata.id": "/redfish/v1/Chassis/bmc/Thermal#/Fans/4",
+            "@odata.type": "#Thermal.v1_3_0.Fan",
+            "LowerThresholdCritical": 150,
+            "LowerThresholdNonCritical": 150,
+            "MaxReadingRange": 20145,
+            "MemberId": "Fan2_0_RPM",
+            "MinReadingRange": 0,
+            "Name": "Fan2 0 RPM",
+            "Reading": 4472,
+            "ReadingUnits": "RPM",
+            "Status": {
+                "Health": "OK",
+                "State": "Enabled"
+            },
+            "UpperThresholdCritical": 19250,
+            "UpperThresholdNonCritical": 19250
+        },
+        {
+            "@odata.id": "/redfish/v1/Chassis/bmc/Thermal#/Fans/5",
+            "@odata.type": "#Thermal.v1_3_0.Fan",
+            "LowerThresholdCritical": 150,
+            "LowerThresholdNonCritical": 150,
+            "MaxReadingRange": 20145,
+            "MemberId": "Fan2_1_RPM",
+            "MinReadingRange": 0,
+            "Name": "Fan2 1 RPM",
+            "Reading": 4024,
+            "ReadingUnits": "RPM",
+            "Status": {
+                "Health": "OK",
+                "State": "Enabled"
+            },
+            "UpperThresholdCritical": 17600,
+            "UpperThresholdNonCritical": 17600
+        }
+    ],
+    "Id": "Thermal",
+    "Name": "Thermal",
+    "Redundancy": [],
+    "Temperatures": [
+        {
+            "@odata.id": "/redfish/v1/Chassis/bmc/Thermal#/Temperatures/0",
+            "@odata.type": "#Thermal.v1_3_0.Temperature",
+            "LowerThresholdCritical": 0.0,
+            "LowerThresholdNonCritical": 5.0,
+            "MaxReadingRangeTemp": 0.127,
+            "MemberId": "KL0",
+            "MinReadingRangeTemp": -0.128,
+            "Name": "KL0",
+            "ReadingCelsius": 21.808,
+            "Status": {
+                "Health": "OK",
+                "State": "Enabled"
+            },
+            "UpperThresholdCritical": 40.0,
+            "UpperThresholdNonCritical": 38.0
+        },
+        {
+            "@odata.id": "/redfish/v1/Chassis/bmc/Thermal#/Temperatures/1",
+            "@odata.type": "#Thermal.v1_3_0.Temperature",
+            "LowerThresholdCritical": 0.0,
+            "LowerThresholdNonCritical": 5.0,
+            "MaxReadingRangeTemp": 0.127,
+            "MemberId": "KL1",
+            "MinReadingRangeTemp": -0.128,
+            "Name": "KL1",
+            "ReadingCelsius": 22.824,
+            "Status": {
+                "Health": "OK",
+                "State": "Enabled"
+            },
+            "UpperThresholdCritical": 56.0,
+            "UpperThresholdNonCritical": 53.0
+        },
+        {
+            "@odata.id": "/redfish/v1/Chassis/bmc/Thermal#/Temperatures/2",
+            "@odata.type": "#Thermal.v1_3_0.Temperature",
+            "LowerThresholdCritical": 0.0,
+            "LowerThresholdNonCritical": 5.0,
+            "MaxReadingRangeTemp": 0.127,
+            "MemberId": "KL2",
+            "MinReadingRangeTemp": -0.128,
+            "Name": "KL2",
+            "ReadingCelsius": 21.925,
+            "Status": {
+                "Health": "OK",
+                "State": "Enabled"
+            },
+            "UpperThresholdCritical": 61.0,
+            "UpperThresholdNonCritical": 58.0
+        },
+        {
+            "@odata.id": "/redfish/v1/Chassis/bmc/Thermal#/Temperatures/3",
+            "@odata.type": "#Thermal.v1_3_0.Temperature",
+            "LowerThresholdCritical": 0.0,
+            "LowerThresholdNonCritical": 5.0,
+            "MaxReadingRangeTemp": 0.127,
+            "MemberId": "KL3",
+            "MinReadingRangeTemp": -0.128,
+            "Name": "KL3",
+            "ReadingCelsius": 20.07,
+            "Status": {
+                "Health": "OK",
+                "State": "Enabled"
+            },
+            "UpperThresholdCritical": 44.0,
+            "UpperThresholdNonCritical": 42.0
+        }
+    ]
+}

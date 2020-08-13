@@ -1,0 +1,490 @@
+{
+    "@odata.id": "/redfish/v1/Chassis/chassis/Thermal",
+    "@odata.context": "/redfish/v1/$metadata#Thermal.Thermal",
+    "@odata.type": "#Thermal.v1_6_0.Thermal",
+    "Id": "Thermal",
+    "Name": "Thermal",
+    "Temperatures@odata.count": 32,
+    "Temperatures": [
+        {
+            "@odata.id": "/redfish/v1/Chassis/chassis/Thermal/#/Temperatures/0",
+            "@odata.type": "#Thermal.v1_6_0.Temperature",
+            "RelatedItem": [
+                {
+                    "@odata.id": "/redfish/v1/Systems/system/Memory/0"
+                }
+            ],
+            "Status": {
+                "State": "Enabled"
+            },
+            "Name": "dimm0",
+            "ReadingCelsius": 40,
+            "UpperThresholdCritical": 85
+        },
+        {
+            "@odata.id": "/redfish/v1/Chassis/chassis/Thermal/#/Temperatures/1",
+            "@odata.type": "#Thermal.v1_6_0.Temperature",
+            "RelatedItem": [
+                {
+                    "@odata.id": "/redfish/v1/Systems/system/Memory/1"
+                }
+            ],
+            "Status": {
+                "State": "Enabled"
+            },
+            "Name": "dimm1",
+            "ReadingCelsius": 40,
+            "UpperThresholdCritical": 85
+        },
+        {
+            "@odata.id": "/redfish/v1/Chassis/chassis/Thermal/#/Temperatures/2",
+            "@odata.type": "#Thermal.v1_6_0.Temperature",
+            "RelatedItem": [
+                {
+                    "@odata.id": "/redfish/v1/Systems/system/Memory/2"
+                }
+            ],
+            "Status": {
+                "State": "Enabled"
+            },
+            "Name": "dimm2",
+            "ReadingCelsius": 40,
+            "UpperThresholdCritical": 85
+        },
+        {
+            "@odata.id": "/redfish/v1/Chassis/chassis/Thermal/#/Temperatures/3",
+            "@odata.type": "#Thermal.v1_6_0.Temperature",
+            "RelatedItem": [
+                {
+                    "@odata.id": "/redfish/v1/Systems/system/Memory/3"
+                }
+            ],
+            "Status": {
+                "State": "Enabled"
+            },
+            "Name": "dimm3",
+            "ReadingCelsius": 40,
+            "UpperThresholdCritical": 85
+        },
+        {
+            "@odata.id": "/redfish/v1/Chassis/chassis/Thermal/#/Temperatures/4",
+            "@odata.type": "#Thermal.v1_6_0.Temperature",
+            "RelatedItem": [
+                {
+                    "@odata.id": "/redfish/v1/Systems/system/Memory/4"
+                }
+            ],
+            "Status": {
+                "State": "Enabled"
+            },
+            "Name": "dimm4",
+            "ReadingCelsius": 40,
+            "UpperThresholdCritical": 85
+        },
+        {
+            "@odata.id": "/redfish/v1/Chassis/chassis/Thermal/#/Temperatures/5",
+            "@odata.type": "#Thermal.v1_6_0.Temperature",
+            "RelatedItem": [
+                {
+                    "@odata.id": "/redfish/v1/Systems/system/Memory/5"
+                }
+            ],
+            "Status": {
+                "State": "Enabled"
+            },
+            "Name": "dimm5",
+            "ReadingCelsius": 40,
+            "UpperThresholdCritical": 85
+        },
+        {
+            "@odata.id": "/redfish/v1/Chassis/chassis/Thermal/#/Temperatures/6",
+            "@odata.type": "#Thermal.v1_6_0.Temperature",
+            "RelatedItem": [
+                {
+                    "@odata.id": "/redfish/v1/Systems/system/Memory/6"
+                }
+            ],
+            "Status": {
+                "State": "Enabled"
+            },
+            "Name": "dimm6",
+            "ReadingCelsius": 40,
+            "UpperThresholdCritical": 85
+        },
+        {
+            "@odata.id": "/redfish/v1/Chassis/chassis/Thermal/#/Temperatures/7",
+            "@odata.type": "#Thermal.v1_6_0.Temperature",
+            "RelatedItem": [
+                {
+                    "@odata.id": "/redfish/v1/Systems/system/Memory/7"
+                }
+            ],
+            "Status": {
+                "State": "Enabled"
+            },
+            "Name": "dimm7",
+            "ReadingCelsius": 40,
+            "UpperThresholdCritical": 85
+        },
+        {
+            "@odata.id": "/redfish/v1/Chassis/chassis/Thermal/#/Temperatures/8",
+            "@odata.type": "#Thermal.v1_6_0.Temperature",
+            "RelatedItem": [
+                {
+                    "@odata.id": "/redfish/v1/Systems/system/Memory/8"
+                }
+            ],
+            "Status": {
+                "State": "Enabled"
+            },
+            "Name": "dimm8",
+            "ReadingCelsius": 40,
+            "UpperThresholdCritical": 85
+        },
+        {
+            "@odata.id": "/redfish/v1/Chassis/chassis/Thermal/#/Temperatures/9",
+            "@odata.type": "#Thermal.v1_6_0.Temperature",
+            "RelatedItem": [
+                {
+                    "@odata.id": "/redfish/v1/Systems/system/Memory/9"
+                }
+            ],
+            "Status": {
+                "State": "Enabled"
+            },
+            "Name": "dimm9",
+            "ReadingCelsius": 40,
+            "UpperThresholdCritical": 85
+        },
+        {
+            "@odata.id": "/redfish/v1/Chassis/chassis/Thermal/#/Temperatures/10",
+            "@odata.type": "#Thermal.v1_6_0.Temperature",
+            "RelatedItem": [
+                {
+                    "@odata.id": "/redfish/v1/Systems/system/Memory/10"
+                }
+            ],
+            "Status": {
+                "State": "Enabled"
+            },
+            "Name": "dimm10",
+            "ReadingCelsius": 40,
+            "UpperThresholdCritical": 85
+        },
+        {
+            "@odata.id": "/redfish/v1/Chassis/chassis/Thermal/#/Temperatures/11",
+            "@odata.type": "#Thermal.v1_6_0.Temperature",
+            "RelatedItem": [
+                {
+                    "@odata.id": "/redfish/v1/Systems/system/Memory/11"
+                }
+            ],
+            "Status": {
+                "State": "Enabled"
+            },
+            "Name": "dimm11",
+            "ReadingCelsius": 40,
+            "UpperThresholdCritical": 85
+        },
+        {
+            "@odata.id": "/redfish/v1/Chassis/chassis/Thermal/#/Temperatures/12",
+            "@odata.type": "#Thermal.v1_6_0.Temperature",
+            "RelatedItem": [
+                {
+                    "@odata.id": "/redfish/v1/Systems/system/Memory/12"
+                }
+            ],
+            "Status": {
+                "State": "Enabled"
+            },
+            "Name": "dimm12",
+            "ReadingCelsius": 40,
+            "UpperThresholdCritical": 85
+        },
+        {
+            "@odata.id": "/redfish/v1/Chassis/chassis/Thermal/#/Temperatures/13",
+            "@odata.type": "#Thermal.v1_6_0.Temperature",
+            "RelatedItem": [
+                {
+                    "@odata.id": "/redfish/v1/Systems/system/Memory/13"
+                }
+            ],
+            "Status": {
+                "State": "Enabled"
+            },
+            "Name": "dimm13",
+            "ReadingCelsius": 40,
+            "UpperThresholdCritical": 85
+        },
+        {
+            "@odata.id": "/redfish/v1/Chassis/chassis/Thermal/#/Temperatures/14",
+            "@odata.type": "#Thermal.v1_6_0.Temperature",
+            "RelatedItem": [
+                {
+                    "@odata.id": "/redfish/v1/Systems/system/Memory/14"
+                }
+            ],
+            "Status": {
+                "State": "Enabled"
+            },
+            "Name": "dimm14",
+            "ReadingCelsius": 40,
+            "UpperThresholdCritical": 85
+        },
+        {
+            "@odata.id": "/redfish/v1/Chassis/chassis/Thermal/#/Temperatures/15",
+            "@odata.type": "#Thermal.v1_6_0.Temperature",
+            "RelatedItem": [
+                {
+                    "@odata.id": "/redfish/v1/Systems/system/Memory/15"
+                }
+            ],
+            "Status": {
+                "State": "Enabled"
+            },
+            "Name": "dimm15",
+            "ReadingCelsius": 40,
+            "UpperThresholdCritical": 85
+        },
+        {
+            "@odata.id": "/redfish/v1/Chassis/chassis/Thermal/#/Temperatures/16",
+            "@odata.type": "#Thermal.v1_6_0.Temperature",
+            "RelatedItem": [
+                {
+                    "@odata.id": "/redfish/v1/Systems/system/Memory/16"
+                }
+            ],
+            "Status": {
+                "State": "Enabled"
+            },
+            "Name": "dimm16",
+            "ReadingCelsius": 40,
+            "UpperThresholdCritical": 85
+        },
+        {
+            "@odata.id": "/redfish/v1/Chassis/chassis/Thermal/#/Temperatures/17",
+            "@odata.type": "#Thermal.v1_6_0.Temperature",
+            "RelatedItem": [
+                {
+                    "@odata.id": "/redfish/v1/Systems/system/Memory/17"
+                }
+            ],
+            "Status": {
+                "State": "Enabled"
+            },
+            "Name": "dimm17",
+            "ReadingCelsius": 40,
+            "UpperThresholdCritical": 85
+        },
+        {
+            "@odata.id": "/redfish/v1/Chassis/chassis/Thermal/#/Temperatures/18",
+            "@odata.type": "#Thermal.v1_6_0.Temperature",
+            "RelatedItem": [
+                {
+                    "@odata.id": "/redfish/v1/Systems/system/Memory/18"
+                }
+            ],
+            "Status": {
+                "State": "Enabled"
+            },
+            "Name": "dimm18",
+            "ReadingCelsius": 40,
+            "UpperThresholdCritical": 85
+        },
+        {
+            "@odata.id": "/redfish/v1/Chassis/chassis/Thermal/#/Temperatures/19",
+            "@odata.type": "#Thermal.v1_6_0.Temperature",
+            "RelatedItem": [
+                {
+                    "@odata.id": "/redfish/v1/Systems/system/Memory/19"
+                }
+            ],
+            "Status": {
+                "State": "Enabled"
+            },
+            "Name": "dimm19",
+            "ReadingCelsius": 40,
+            "UpperThresholdCritical": 85
+        },
+        {
+            "@odata.id": "/redfish/v1/Chassis/chassis/Thermal/#/Temperatures/20",
+            "@odata.type": "#Thermal.v1_6_0.Temperature",
+            "RelatedItem": [
+                {
+                    "@odata.id": "/redfish/v1/Systems/system/Memory/20"
+                }
+            ],
+            "Status": {
+                "State": "Enabled"
+            },
+            "Name": "dimm20",
+            "ReadingCelsius": 40,
+            "UpperThresholdCritical": 85
+        },
+        {
+            "@odata.id": "/redfish/v1/Chassis/chassis/Thermal/#/Temperatures/21",
+            "@odata.type": "#Thermal.v1_6_0.Temperature",
+            "RelatedItem": [
+                {
+                    "@odata.id": "/redfish/v1/Systems/system/Memory/21"
+                }
+            ],
+            "Status": {
+                "State": "Enabled"
+            },
+            "Name": "dimm21",
+            "ReadingCelsius": 40,
+            "UpperThresholdCritical": 85
+        },
+        {
+            "@odata.id": "/redfish/v1/Chassis/chassis/Thermal/#/Temperatures/22",
+            "@odata.type": "#Thermal.v1_6_0.Temperature",
+            "RelatedItem": [
+                {
+                    "@odata.id": "/redfish/v1/Systems/system/Memory/22"
+                }
+            ],
+            "Status": {
+                "State": "Enabled"
+            },
+            "Name": "dimm22",
+            "ReadingCelsius": 40,
+            "UpperThresholdCritical": 85
+        },
+        {
+            "@odata.id": "/redfish/v1/Chassis/chassis/Thermal/#/Temperatures/23",
+            "@odata.type": "#Thermal.v1_6_0.Temperature",
+            "RelatedItem": [
+                {
+                    "@odata.id": "/redfish/v1/Systems/system/Memory/23"
+                }
+            ],
+            "Status": {
+                "State": "Enabled"
+            },
+            "Name": "dimm23",
+            "ReadingCelsius": 40,
+            "UpperThresholdCritical": 85
+        },
+        {
+            "@odata.id": "/redfish/v1/Chassis/chassis/Thermal/#/Temperatures/24",
+            "@odata.type": "#Thermal.v1_6_0.Temperature",
+            "RelatedItem": [
+                {
+                    "@odata.id": "/redfish/v1/Systems/system/Memory/24"
+                }
+            ],
+            "Status": {
+                "State": "Enabled"
+            },
+            "Name": "dimm24",
+            "ReadingCelsius": 40,
+            "UpperThresholdCritical": 85
+        },
+        {
+            "@odata.id": "/redfish/v1/Chassis/chassis/Thermal/#/Temperatures/25",
+            "@odata.type": "#Thermal.v1_6_0.Temperature",
+            "RelatedItem": [
+                {
+                    "@odata.id": "/redfish/v1/Systems/system/Memory/25"
+                }
+            ],
+            "Status": {
+                "State": "Enabled"
+            },
+            "Name": "dimm25",
+            "ReadingCelsius": 40,
+            "UpperThresholdCritical": 85
+        },
+        {
+            "@odata.id": "/redfish/v1/Chassis/chassis/Thermal/#/Temperatures/26",
+            "@odata.type": "#Thermal.v1_6_0.Temperature",
+            "RelatedItem": [
+                {
+                    "@odata.id": "/redfish/v1/Systems/system/Memory/26"
+                }
+            ],
+            "Status": {
+                "State": "Enabled"
+            },
+            "Name": "dimm26",
+            "ReadingCelsius": 40,
+            "UpperThresholdCritical": 85
+        },
+        {
+            "@odata.id": "/redfish/v1/Chassis/chassis/Thermal/#/Temperatures/27",
+            "@odata.type": "#Thermal.v1_6_0.Temperature",
+            "RelatedItem": [
+                {
+                    "@odata.id": "/redfish/v1/Systems/system/Memory/27"
+                }
+            ],
+            "Status": {
+                "State": "Enabled"
+            },
+            "Name": "dimm27",
+            "ReadingCelsius": 40,
+            "UpperThresholdCritical": 85
+        },
+        {
+            "@odata.id": "/redfish/v1/Chassis/chassis/Thermal/#/Temperatures/28",
+            "@odata.type": "#Thermal.v1_6_0.Temperature",
+            "RelatedItem": [
+                {
+                    "@odata.id": "/redfish/v1/Systems/system/Memory/28"
+                }
+            ],
+            "Status": {
+                "State": "Enabled"
+            },
+            "Name": "dimm28",
+            "ReadingCelsius": 40,
+            "UpperThresholdCritical": 85
+        },
+        {
+            "@odata.id": "/redfish/v1/Chassis/chassis/Thermal/#/Temperatures/29",
+            "@odata.type": "#Thermal.v1_6_0.Temperature",
+            "RelatedItem": [
+                {
+                    "@odata.id": "/redfish/v1/Systems/system/Memory/29"
+                }
+            ],
+            "Status": {
+                "State": "Enabled"
+            },
+            "Name": "dimm29",
+            "ReadingCelsius": 40,
+            "UpperThresholdCritical": 85
+        },
+        {
+            "@odata.id": "/redfish/v1/Chassis/chassis/Thermal/#/Temperatures/30",
+            "@odata.type": "#Thermal.v1_6_0.Temperature",
+            "RelatedItem": [
+                {
+                    "@odata.id": "/redfish/v1/Systems/system/Memory/30"
+                }
+            ],
+            "Status": {
+                "State": "Enabled"
+            },
+            "Name": "dimm30",
+            "ReadingCelsius": 40,
+            "UpperThresholdCritical": 85
+        },
+        {
+            "@odata.id": "/redfish/v1/Chassis/chassis/Thermal/#/Temperatures/31",
+            "@odata.type": "#Thermal.v1_6_0.Temperature",
+            "RelatedItem": [
+                {
+                    "@odata.id": "/redfish/v1/Systems/system/Memory/31"
+                }
+            ],
+            "Status": {
+                "State": "Enabled"
+            },
+            "Name": "dimm31",
+            "ReadingCelsius": 40,
+            "UpperThresholdCritical": 85
+        }
+    ]
+}

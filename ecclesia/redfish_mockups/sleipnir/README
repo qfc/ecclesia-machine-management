@@ -1,0 +1,6 @@
+Redfish Service state stored in Redfish Mockup Format
+Program: redfishMockupCreate,  ver: 1.0.5
+Created: 2020-07-20 13:09:47
+rhost:  [fe80::a0d5:9dff:fe6c:6e6a%sleipnir0]
+Description: 
+Commandline: python3.4 /root/redfishMockupCreate.par -uroot -p0penBmc -r[fe80::a0d5:9dff:fe6c:6e6a%sleipnir0]
