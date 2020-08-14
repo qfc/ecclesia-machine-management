@@ -65,6 +65,7 @@ class JsonValue {
  public:
   explicit JsonValue(int val) : json_(json_integer(val)) {}
   explicit JsonValue(bool val) : json_(json_boolean(val)) {}
+  explicit JsonValue(const char *val) : json_(json_string(val)) {}
   explicit JsonValue(std::string val) : json_(json_string(val.data())) {}
   explicit JsonValue(double val) : json_(json_real(val)) {}
   JsonValue(const JsonValue &) = delete;

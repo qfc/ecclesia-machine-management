@@ -120,6 +120,7 @@ TEST(RawInterfaceTestWithMockup, PostUri) {
                                {"key2", 1.3},
                                {"key3", "test"},
                                {"key4", true},
+                               {"key5", std::string("value5")},
                            })
                  .AsObject();
   // After propagate status code to RedfishInvariant, add test to verify
@@ -137,9 +138,11 @@ TEST(RawInterfaceTestWithMockup, PostUri) {
 
   EXPECT_EQ(new_chassis->GetNodeValue<int32_t>("key1").value_or(0), 1);
   EXPECT_EQ(new_chassis->GetNodeValue<double>("key2").value_or(0.0), 1.3);
-  //EXPECT_EQ(new_chassis->GetNodeValue<std::string>("key3").value_or(""),
-  //          "test");
+  EXPECT_EQ(new_chassis->GetNodeValue<std::string>("key3").value_or(""),
+            "test");
   EXPECT_EQ(new_chassis->GetNodeValue<bool>("key4").value_or(false), true);
+  EXPECT_EQ(new_chassis->GetNodeValue<std::string>("key5").value_or(""),
+            "value5");
 }
 
 }  // namespace

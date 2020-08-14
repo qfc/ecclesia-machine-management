@@ -197,7 +197,8 @@ class RedfishObject {
 // RedfishInterface provides initial access points to the Redfish resource tree.
 class RedfishInterface {
  public:
-  using ValueVariant = absl::variant<int, bool, std::string, double>;
+  using ValueVariant =
+      absl::variant<int, bool, std::string, const char *, double>;
 
   virtual ~RedfishInterface() {}
 
