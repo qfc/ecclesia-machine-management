@@ -28,7 +28,7 @@ genrule(
         "mkdir -p $$TMP_DIR",
         "cp -R $$(pwd)/external/curl/* $$TMP_DIR",
         "cd $$TMP_DIR",
-        "./configure --prefix=$$INSTALL_DIR CFLAGS=-fPIC CXXFLAGS=-fPIC --enable-shared=no",
+        "./configure --prefix=$$INSTALL_DIR CFLAGS=-fPIC CXXFLAGS=-fPIC --without-ssl --without-librtmp --disable-ldap --disable-ldaps",
         "make install",
         "rm -rf $$TMP_DIR",
     ]),
@@ -41,4 +41,5 @@ cc_library(
     includes = ["libcurl/include"],
     linkstatic = 1,
     visibility = ["//visibility:public"],
+    deps = ["@zlib"],
 )

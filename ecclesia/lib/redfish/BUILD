@@ -44,6 +44,19 @@ cc_library(
     ],
 )
 
+cc_test(
+    name = "raw_test",
+    srcs = ["raw_test.cc"],
+    data = ["//ecclesia/redfish_mockups:indus_hmb_cn_mockup.shar"],
+    deps = [
+        ":interface",
+        ":raw",
+        ":test_mockup",
+        "@com_google_absl//absl/types:optional",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
 cc_library(
     name = "topology",
     srcs = ["topology.cc"],
@@ -57,6 +70,22 @@ cc_library(
         "@com_google_absl//absl/container:flat_hash_set",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/types:optional",
+    ],
+)
+
+cc_test(
+    name = "topology_test",
+    srcs = ["topology_test.cc"],
+    data = ["//ecclesia/redfish_mockups:indus_hmb_cn_mockup.shar"],
+    deps = [
+        ":test_mockup",
+        ":topology",
+        ":types",
+        "//ecclesia/lib/redfish/testing:json_mockup",
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:str_format",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
