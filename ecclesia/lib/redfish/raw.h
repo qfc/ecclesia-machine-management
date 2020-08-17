@@ -24,9 +24,21 @@
 
 namespace libredfish {
 
+// Redfish interface connection arguments
+struct RedfishInterfaceArgs {
+  std::string endpoint;
+  std::string username;
+  std::string password;
+};
+
 // Constructor method for creating a RawInterface.
 // Returns nullptr in case the interface failed to be constructed.
 std::unique_ptr<RedfishInterface> NewRawInterface(const std::string &endpoint);
+
+// Constructor method for creating a RawInterface with auth session.
+// Returns nullptr in case the interface failed to be constructed.
+std::unique_ptr<RedfishInterface> NewRawAuthInterface(
+    const RedfishInterfaceArgs &connectionArgs);
 
 }  // namespace libredfish
 

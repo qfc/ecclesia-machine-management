@@ -337,4 +337,21 @@ std::unique_ptr<RedfishInterface> NewRawInterface(const std::string &endpoint) {
   return absl::make_unique<RawIntf>(std::move(service));
 }
 
+// Constructor method for creating a RawInterface with auth session.
+std::unique_ptr<RedfishInterface> NewRawAuthInterface(
+    const RedfishInterfaceArgs &connectionArgs) {
+  enumeratorAuthentication auth;
+  auth.authType = REDFISH_AUTH_SESSION;
+
+  std::string username_buf = connectionArgs.username;
+  std::string password_buf = connectionArgs.password;
+  auth.authCodes.userPass.username = &username_buf[0];
+  auth.authCodes.userPass.password = &password_buf[0];
+
+  ServiceUniquePtr service(
+      createServiceEnumerator(connectionArgs.endpoint.c_str(), nullptr,
+          &auth, 0));
+  return absl::make_unique<RawIntf>(std::move(service));
+}
+
 }  // namespace libredfish
