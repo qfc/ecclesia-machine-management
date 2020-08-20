@@ -145,5 +145,41 @@ TEST(RawInterfaceTestWithMockup, PostUri) {
             "value5");
 }
 
+TEST(RawInterfaceTestWithMockup, PostUriWithStringPayload) {
+  TestingMockupServer mockup("indus_hmb_cn_mockup.shar");
+  auto raw_intf = mockup.RedfishClientInterface();
+  auto origin_collection = raw_intf->GetUri("/redfish/v1/Chassis").AsIterable();
+  ASSERT_TRUE(origin_collection);
+  auto origin_size = origin_collection->Size();
+
+  auto res = raw_intf
+                 ->PostUri("/redfish/v1/Chassis",
+                           "{"
+                               "\"key1\": 1,"
+                               "\"key2\": 1.3,"
+                               "\"key3\": \"test\","
+                               "\"key4\": true"
+                           "}")
+                 .AsObject();
+  // After propagate status code to RedfishInvariant, add test to verify
+  // status code for different type of resources. For example, for resource
+  // support Action, return 204, others return 404.
+  // For 204 response, there is no payload. So this will return empty
+  // RedfishInvariant. The following ASSERT will fail.
+  // ASSERT_TRUE(res);
+
+  auto new_collection = raw_intf->GetUri("/redfish/v1/Chassis").AsIterable();
+  ASSERT_TRUE(origin_collection);
+  auto new_size = new_collection->Size();
+  EXPECT_EQ(new_size - origin_size, 1);
+  auto new_chassis = new_collection->GetIndex(new_size - 1).AsObject();
+
+  EXPECT_EQ(new_chassis->GetNodeValue<int32_t>("key1").value_or(0), 1);
+  EXPECT_EQ(new_chassis->GetNodeValue<double>("key2").value_or(0.0), 1.3);
+  EXPECT_EQ(new_chassis->GetNodeValue<std::string>("key3").value_or(""),
+            "test");
+  EXPECT_EQ(new_chassis->GetNodeValue<bool>("key4").value_or(false), true);
+}
+
 }  // namespace
 }  // namespace libredfish

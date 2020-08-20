@@ -322,6 +322,24 @@ class RawIntf : public RedfishInterface {
             PayloadUniquePtr(createRedfishPayload(value, service_.get())))));
   }
 
+  RedfishVariant PostUri(
+      absl::string_view uri,
+      absl::string_view data) override {
+    if (!service_) {
+      return RedfishVariant();
+    }
+
+    json_t *value =
+        postUriFromService(service_.get(), uri.data(), data.begin(), 0, NULL);
+    if (!value) {
+      return RedfishVariant();
+    }
+
+    return RedfishVariant(
+        absl::make_unique<RawVariantImpl>(RawPayload::NewShared(
+            PayloadUniquePtr(createRedfishPayload(value, service_.get())))));
+  }
+
  private:
   ServiceUniquePtr service_;
 };

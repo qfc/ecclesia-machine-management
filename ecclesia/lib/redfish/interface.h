@@ -215,6 +215,11 @@ class RedfishInterface {
   virtual RedfishVariant PostUri(
       absl::string_view uri,
       absl::Span<const std::pair<std::string, ValueVariant>> kv_span) = 0;
+
+  // Post to the given URI and returns result.
+  virtual RedfishVariant PostUri(
+      absl::string_view uri,
+      absl::string_view data) = 0;
 };
 
 // Concrete implementation to provide a null placeholder interface which returns
@@ -231,6 +236,11 @@ class NullRedfish : public RedfishInterface {
   RedfishVariant PostUri(
       absl::string_view uri,
       absl::Span<const std::pair<std::string, ValueVariant>> kv_span) override {
+    return RedfishVariant();
+  }
+  RedfishVariant PostUri(
+      absl::string_view uri,
+      absl::string_view data) override {
     return RedfishVariant();
   }
 };
