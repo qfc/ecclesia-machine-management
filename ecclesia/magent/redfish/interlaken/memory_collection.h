@@ -14,41 +14,51 @@
  * limitations under the License.
  */
 
-#ifndef ECCLESIA_MAGENT_REDFISH_INDUS_FIRMWARE_INVENTORY_H_
-#define ECCLESIA_MAGENT_REDFISH_INDUS_FIRMWARE_INVENTORY_H_
+#ifndef ECCLESIA_MAGENT_REDFISH_INTERLAKEN_MEMORY_COLLECTION_H_
+#define ECCLESIA_MAGENT_REDFISH_INTERLAKEN_MEMORY_COLLECTION_H_
 
 #include <string>
 
+#include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "ecclesia/magent/redfish/core/json_helper.h"
 #include "ecclesia/magent/redfish/core/redfish_keywords.h"
 #include "ecclesia/magent/redfish/core/resource.h"
+#include "ecclesia/magent/sysmodel/x86/sysmodel.h"
 #include "json/value.h"
 #include "tensorflow_serving/util/net_http/server/public/server_request_interface.h"
 
 namespace ecclesia {
 
-class FirmwareInventoryCollection : public Resource {
+class MemoryCollection : public Resource {
  public:
-  FirmwareInventoryCollection() : Resource(kFirmwareInventoryCollectionUri) {}
+  explicit MemoryCollection(SystemModel *system_model)
+      : Resource(kMemoryCollectionUri), system_model_(system_model) {}
 
  private:
   void Get(ServerRequestInterface *req, const ParamsType &params) override {
     Json::Value json;
-    json[kOdataType] =
-        "#FirmwareInventoryCollection.FirmwareInventoryCollection";
-    json[kOdataId] = std::string(Uri());
-    json[kOdataContext] =
-        "/redfish/v1/"
-        "$metadata#FirmwareInventoryCollection.FirmwareInventoryCollection";
-    json[kName] = "Firmware Inventory Collection";
-    json[kMembersCount] = 1;
-    auto *json_members = GetJsonArray(&json, kMembers);
-    AppendCollectionMember(json_members, kFirmwareInventoryMagentUri);
+    AddStaticFields(&json);
+    int num_dimms = system_model_->NumDimms();
+    json[kMembersCount] = num_dimms;
+    auto *members = GetJsonArray(&json, kMembers);
+    for (int i = 0; i < num_dimms; i++) {
+      AppendCollectionMember(members, absl::StrCat(Uri(), "/", i));
+    }
     JSONResponseOK(json, req);
   }
+
+  void AddStaticFields(Json::Value *json) {
+    (*json)[kOdataType] = "#MemoryCollection.MemoryCollection";
+    (*json)[kOdataId] = std::string(Uri());
+    (*json)[kOdataContext] =
+        "/redfish/v1/$metadata#MemoryCollection.MemoryCollection";
+    (*json)[kName] = "Memory Module Collection";
+  }
+
+  SystemModel *const system_model_;
 };
 
 }  // namespace ecclesia
 
-#endif  // ECCLESIA_MAGENT_REDFISH_INDUS_FIRMWARE_INVENTORY_H_
+#endif  // ECCLESIA_MAGENT_REDFISH_INTERLAKEN_MEMORY_COLLECTION_H_

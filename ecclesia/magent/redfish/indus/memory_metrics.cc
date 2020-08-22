@@ -26,8 +26,8 @@
 #include "absl/types/optional.h"
 #include "absl/types/variant.h"
 #include "ecclesia/lib/mcedecoder/cpu_topology.h"
-#include "ecclesia/magent/lib/event_logger/indus_cpu_topology.h"
-#include "ecclesia/magent/lib/event_logger/indus_system_event_visitors.h"
+#include "ecclesia/magent/lib/event_logger/indus/system_event_visitors.h"
+#include "ecclesia/magent/lib/event_logger/intel_cpu_topology.h"
 #include "ecclesia/magent/lib/event_logger/system_event_visitors.h"
 #include "ecclesia/magent/redfish/core/json_helper.h"
 #include "ecclesia/magent/redfish/core/redfish_keywords.h"
@@ -52,7 +52,7 @@ const absl::flat_hash_map<int, DimmErrorCount> &GetMemoryErrors(
 
   std::unique_ptr<DimmErrorCountingVisitor> visitor =
       CreateIndusDimmErrorCountingVisitor(
-          last_event_timestamp, absl::make_unique<IndusCpuTopology>());
+          last_event_timestamp, absl::make_unique<IntelCpuTopology>());
 
   system_model->VisitSystemEvents(visitor.get());
   // update the last event time stamp

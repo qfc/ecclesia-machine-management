@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "ecclesia/magent/redfish/indus/processor_metrics.h"
+#include "ecclesia/magent/redfish/interlaken/processor_metrics.h"
 
 #include <memory>
 #include <string>
@@ -26,8 +26,8 @@
 #include "absl/types/optional.h"
 #include "absl/types/variant.h"
 #include "ecclesia/lib/mcedecoder/cpu_topology.h"
-#include "ecclesia/magent/lib/event_logger/indus/system_event_visitors.h"
 #include "ecclesia/magent/lib/event_logger/intel_cpu_topology.h"
+#include "ecclesia/magent/lib/event_logger/interlaken/system_event_visitors.h"
 #include "ecclesia/magent/lib/event_logger/system_event_visitors.h"
 #include "ecclesia/magent/redfish/core/json_helper.h"
 #include "ecclesia/magent/redfish/core/redfish_keywords.h"
@@ -41,7 +41,7 @@ namespace ecclesia {
 
 namespace {
 
-// Get the lastest cpu error counts. The function caches the last known
+// Get the latest cpu error counts. The function caches the last known
 // event time stamp and the error counts. On every call it accumulates the error
 // counts since the last time.
 const absl::flat_hash_map<int, CpuErrorCount> &GetCpuErrors(
@@ -51,8 +51,8 @@ const absl::flat_hash_map<int, CpuErrorCount> &GetCpuErrors(
       *(new absl::flat_hash_map<int, CpuErrorCount>());
 
   std::unique_ptr<CpuErrorCountingVisitor> visitor =
-      CreateIndusCpuErrorCountingVisitor(last_event_timestamp,
-                                         absl::make_unique<IntelCpuTopology>());
+      CreateInterlakenCpuErrorCountingVisitor(
+          last_event_timestamp, absl::make_unique<IntelCpuTopology>());
 
   system_model->VisitSystemEvents(visitor.get());
   // update the last event time stamp

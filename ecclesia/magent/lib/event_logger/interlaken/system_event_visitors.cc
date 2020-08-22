@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-#include "ecclesia/magent/lib/event_logger/indus_system_event_visitors.h"
+#include "ecclesia/magent/lib/event_logger/interlaken/system_event_visitors.h"
 
 #include <memory>
 #include <utility>
 
 #include "absl/time/time.h"
 #include "ecclesia/lib/mcedecoder/cpu_topology.h"
-#include "ecclesia/lib/mcedecoder/dimm_translator.h"
+#include "ecclesia/lib/mcedecoder/interlaken/dimm_translator.h"
 #include "ecclesia/lib/mcedecoder/mce_decode.h"
 #include "ecclesia/magent/lib/event_logger/system_event_visitors.h"
 
@@ -29,31 +29,33 @@ namespace ecclesia {
 
 namespace {
 
-std::unique_ptr<mcedecoder::MceDecoder> CreateIndusMceDecoder(
+std::unique_ptr<mcedecoder::MceDecoder> CreateInterlakenMceDecoder(
     std::unique_ptr<mcedecoder::CpuTopologyInterface> cpu_topology) {
   mcedecoder::CpuVendor vendor = mcedecoder::CpuVendor::kIntel;
   mcedecoder::CpuIdentifier identifier = mcedecoder::CpuIdentifier::kSkylake;
   return absl::make_unique<mcedecoder::MceDecoder>(
       vendor, identifier, std::move(cpu_topology),
-      absl::make_unique<mcedecoder::IndusDimmTranslator>());
+      absl::make_unique<mcedecoder::InterlakenDimmTranslator>());
 }
 
 }  // namespace
 
-std::unique_ptr<CpuErrorCountingVisitor> CreateIndusCpuErrorCountingVisitor(
+std::unique_ptr<CpuErrorCountingVisitor>
+CreateInterlakenCpuErrorCountingVisitor(
     absl::Time lower_bound,
     std::unique_ptr<mcedecoder::CpuTopologyInterface> cpu_topology) {
-  auto mce_decoder = CreateIndusMceDecoder(std::move(cpu_topology));
+  auto mce_decoder = CreateInterlakenMceDecoder(std::move(cpu_topology));
   auto mce_adapter =
       absl::make_unique<MceDecoderAdapter>(std::move(mce_decoder));
   return absl::make_unique<CpuErrorCountingVisitor>(lower_bound,
                                                     std::move(mce_adapter));
 }
 
-std::unique_ptr<DimmErrorCountingVisitor> CreateIndusDimmErrorCountingVisitor(
+std::unique_ptr<DimmErrorCountingVisitor>
+CreateInterlakenDimmErrorCountingVisitor(
     absl::Time lower_bound,
     std::unique_ptr<mcedecoder::CpuTopologyInterface> cpu_topology) {
-  auto mce_decoder = CreateIndusMceDecoder(std::move(cpu_topology));
+  auto mce_decoder = CreateInterlakenMceDecoder(std::move(cpu_topology));
   auto mce_adapter =
       absl::make_unique<MceDecoderAdapter>(std::move(mce_decoder));
   return absl::make_unique<DimmErrorCountingVisitor>(lower_bound,

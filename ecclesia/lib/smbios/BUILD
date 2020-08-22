@@ -14,6 +14,19 @@ emboss_cc_library(
 )
 
 cc_library(
+    name = "platform_translator",
+    hdrs = [
+        "platform_translator.h",
+    ],
+    visibility = [
+        "//ecclesia:library_users",
+    ],
+    deps = [
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
     name = "reader",
     srcs = [
         "processor_information.cc",
@@ -34,6 +47,8 @@ cc_library(
     deps = [
         ":entry_point_emb",
         ":structures_emb",
+        "//ecclesia/lib/smbios/indus:indus_platform_translator",
+        "//ecclesia/lib/smbios/interlaken:interlaken_platform_translator",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/types:optional",

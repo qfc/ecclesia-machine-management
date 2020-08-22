@@ -49,7 +49,7 @@ cc_library(
         "//ecclesia/lib/io:msr",
         "//ecclesia/lib/smbios:reader",
         "//ecclesia/lib/smbios:structures_emb",
-        "//ecclesia/magent/lib/event_logger:indus_cpu_topology",
+        "//ecclesia/magent/lib/event_logger:intel_cpu_topology",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/strings:str_format",
@@ -83,7 +83,7 @@ cc_library(
     visibility = ["//ecclesia:magent_library_users"],
     deps = [
         "//ecclesia/lib/io:msr",
-        "//ecclesia/magent/lib/event_logger:indus_cpu_topology",
+        "//ecclesia/magent/lib/event_logger:intel_cpu_topology",
         "//ecclesia/magent/lib/io:pci",
         "//ecclesia/magent/lib/io:pci_location",
         "//ecclesia/magent/lib/io:pci_sys",

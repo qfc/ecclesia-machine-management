@@ -21,9 +21,14 @@
 #include <memory>
 #include <utility>
 
+#include "absl/flags/flag.h"
 #include "ecclesia/magent/lib/thread_pool/thread_pool.h"
 #include "tensorflow_serving/util/net_http/server/public/httpserver.h"
 #include "tensorflow_serving/util/net_http/server/public/httpserver_interface.h"
+
+ABSL_FLAG(int, port, 3995, "Port number for the magent to listen on");
+ABSL_FLAG(std::string, assemblies_dir, "/etc/google/magent",
+          "Path to a directory containing JSON Assemblies");
 
 namespace ecclesia {
 

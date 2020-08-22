@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "ecclesia/magent/redfish/indus/processor_metrics.h"
+#include "ecclesia/magent/redfish/interlaken/memory_metrics.h"
 
 #include <memory>
 #include <string>
@@ -26,8 +26,8 @@
 #include "absl/types/optional.h"
 #include "absl/types/variant.h"
 #include "ecclesia/lib/mcedecoder/cpu_topology.h"
-#include "ecclesia/magent/lib/event_logger/indus/system_event_visitors.h"
 #include "ecclesia/magent/lib/event_logger/intel_cpu_topology.h"
+#include "ecclesia/magent/lib/event_logger/interlaken/system_event_visitors.h"
 #include "ecclesia/magent/lib/event_logger/system_event_visitors.h"
 #include "ecclesia/magent/redfish/core/json_helper.h"
 #include "ecclesia/magent/redfish/core/redfish_keywords.h"
@@ -41,18 +41,18 @@ namespace ecclesia {
 
 namespace {
 
-// Get the lastest cpu error counts. The function caches the last known
+// Get the latest memory error counts. The function caches the last known
 // event time stamp and the error counts. On every call it accumulates the error
 // counts since the last time.
-const absl::flat_hash_map<int, CpuErrorCount> &GetCpuErrors(
+const absl::flat_hash_map<int, DimmErrorCount> &GetMemoryErrors(
     SystemModel *system_model) {
   static absl::Time last_event_timestamp = absl::UnixEpoch();
   static auto &result_error_counts =
-      *(new absl::flat_hash_map<int, CpuErrorCount>());
+      *(new absl::flat_hash_map<int, DimmErrorCount>());
 
-  std::unique_ptr<CpuErrorCountingVisitor> visitor =
-      CreateIndusCpuErrorCountingVisitor(last_event_timestamp,
-                                         absl::make_unique<IntelCpuTopology>());
+  std::unique_ptr<DimmErrorCountingVisitor> visitor =
+      CreateInterlakenDimmErrorCountingVisitor(
+          last_event_timestamp, absl::make_unique<IntelCpuTopology>());
 
   system_model->VisitSystemEvents(visitor.get());
   // update the last event time stamp
@@ -62,13 +62,13 @@ const absl::flat_hash_map<int, CpuErrorCount> &GetCpuErrors(
 
   // The visitor scans for records that were not processed since the last time.
   // So accumulate the error counts into the result
-  auto error_counts = visitor->GetCpuErrorCounts();
+  auto error_counts = visitor->GetDimmErrorCounts();
 
-  for (auto &[cpu_num, error_count] : error_counts) {
-    if (result_error_counts.contains(cpu_num)) {
-      result_error_counts[cpu_num] += error_count;
+  for (auto &[dimm_num, error_count] : error_counts) {
+    if (result_error_counts.contains(dimm_num)) {
+      result_error_counts[dimm_num] += error_count;
     } else {
-      result_error_counts[cpu_num] = error_count;
+      result_error_counts[dimm_num] = error_count;
     }
   }
 
@@ -77,17 +77,16 @@ const absl::flat_hash_map<int, CpuErrorCount> &GetCpuErrors(
 
 }  // namespace
 
-void ProcessorMetrics::Get(ServerRequestInterface *req,
-                           const ParamsType &params) {
-  // Expect to be passed in the cpu index
-  if (!ValidateResourceIndex(params, system_model_->NumCpus())) {
+void MemoryMetrics::Get(ServerRequestInterface *req, const ParamsType &params) {
+  // Expect to be passed in the dimm index
+  if (!ValidateResourceIndex(params, system_model_->NumDimms())) {
     req->ReplyWithStatus(HTTPStatusCode::NOT_FOUND);
     return;
   }
 
-  int cpu_num = std::get<int>(params[0]);
-  const absl::flat_hash_map<int, CpuErrorCount> &cpu_errors =
-      GetCpuErrors(system_model_);
+  int dimm_num = std::get<int>(params[0]);
+  const absl::flat_hash_map<int, DimmErrorCount> &mem_errors =
+      GetMemoryErrors(system_model_);
 
   // Fill in the json response
   Json::Value json;
@@ -97,25 +96,18 @@ void ProcessorMetrics::Get(ServerRequestInterface *req,
   // Error counts are added as an Oem field
   auto *oem = GetJsonObject(&json, kOem);
   auto *google = GetJsonObject(oem, kGoogle);
-  auto *cpu_error_counts = GetJsonObject(google, kProcessorErrorCounts);
+  auto *memory_error_counts = GetJsonObject(google, kMemoryErrorCounts);
 
-  if (cpu_errors.contains(cpu_num)) {
-    (*cpu_error_counts)[kCorrectable] = cpu_errors.at(cpu_num).correctable;
-    (*cpu_error_counts)[kUncorrectable] = cpu_errors.at(cpu_num).uncorrectable;
+  if (mem_errors.contains(dimm_num)) {
+    (*memory_error_counts)[kCorrectable] = mem_errors.at(dimm_num).correctable;
+    (*memory_error_counts)[kUncorrectable] =
+        mem_errors.at(dimm_num).uncorrectable;
   } else {
-    (*cpu_error_counts)[kCorrectable] = 0;
-    (*cpu_error_counts)[kUncorrectable] = 0;
-  }
-
-  // Get CPU thermal margin.
-  auto sensor = system_model_->GetCpuMarginSensor(cpu_num);
-  if (sensor) {
-    auto value = sensor->Read();
-    if (value) {
-      json[kThrottlingCelsius] = *value;
-    }
+    (*memory_error_counts)[kCorrectable] = 0;
+    (*memory_error_counts)[kUncorrectable] = 0;
   }
 
   JSONResponseOK(json, req);
 }
+
 }  // namespace ecclesia

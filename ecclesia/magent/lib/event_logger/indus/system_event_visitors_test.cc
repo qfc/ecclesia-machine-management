@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "ecclesia/magent/lib/event_logger/indus_system_event_visitors.h"
+#include "ecclesia/magent/lib/event_logger/indus/system_event_visitors.h"
 
 #include <memory>
 #include <utility>

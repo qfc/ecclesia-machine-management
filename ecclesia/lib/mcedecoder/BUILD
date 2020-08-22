@@ -6,6 +6,7 @@ licenses(["notice"])
 package_group(
     name = "mcedecoder_users",
     packages = [
+        "//ecclesia/lib/...",
         "//ecclesia/magent/...",
         "//platforms/baremetal/healthagent/...",
     ],
@@ -18,10 +19,25 @@ cc_library(
 )
 
 cc_library(
-    name = "dimm_translator",
-    srcs = ["dimm_translator.cc"],
+    name = "dimm_translator_interface",
     hdrs = ["dimm_translator.h"],
     visibility = [":mcedecoder_users"],
+)
+
+cc_library(
+    name = "indus_dimm_translator",
+    visibility = [":mcedecoder_users"],
+    deps = [
+        "//ecclesia/lib/mcedecoder/indus:indus_dimm_translator",
+    ],
+)
+
+cc_library(
+    name = "interlaken_dimm_translator",
+    visibility = [":mcedecoder_users"],
+    deps = [
+        "//ecclesia/lib/mcedecoder/interlaken:interlaken_dimm_translator",
+    ],
 )
 
 cc_library(
@@ -43,7 +59,7 @@ cc_library(
     deps = [
         ":bit_operator",
         ":cpu_topology",
-        ":dimm_translator",
+        ":dimm_translator_interface",
         ":mce_messages",
         ":skylake_mce_decode",
     ],
@@ -55,7 +71,7 @@ cc_library(
     hdrs = ["skylake_mce_decode.h"],
     deps = [
         ":bit_operator",
-        ":dimm_translator",
+        ":dimm_translator_interface",
         ":mce_messages",
     ],
 )
@@ -88,20 +104,6 @@ cc_test(
     srcs = ["bit_operator_test.cc"],
     deps = [
         ":bit_operator",
-        "@com_google_googletest//:gtest_main",
-    ],
-)
-
-cc_test(
-    name = "mce_decode_test",
-    srcs = ["mce_decode_test.cc"],
-    deps = [
-        ":cpu_topology",
-        ":cpu_topology_mock",
-        ":dimm_translator",
-        ":mce_decode",
-        ":mce_messages",
-        "@com_google_absl//absl/memory",
         "@com_google_googletest//:gtest_main",
     ],
 )

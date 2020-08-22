@@ -31,7 +31,7 @@
 #include "ecclesia/lib/smbios/processor_information.h"
 #include "ecclesia/lib/smbios/reader.h"
 #include "ecclesia/lib/smbios/structures.emb.h"
-#include "ecclesia/magent/lib/event_logger/indus_cpu_topology.h"
+#include "ecclesia/magent/lib/event_logger/intel_cpu_topology.h"
 #include "runtime/cpp/emboss_prelude.h"
 #include "re2/re2.h"
 
@@ -44,7 +44,7 @@ static const LazyRE2 kCpuRegex = {"^CPU\\d+"};
 static const int kIntelPPINCapabilityBit = 23;
 
 bool GetCpuSerialNumberFromMsr(int socket_id, uint64_t *serial) {
-  IndusCpuTopology top;
+  IntelCpuTopology top;
   std::vector<int> lpus = top.GetLpusForSocketId(socket_id);
   if (lpus.empty()) {
     return false;

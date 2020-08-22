@@ -14,41 +14,38 @@
  * limitations under the License.
  */
 
-#ifndef ECCLESIA_MAGENT_REDFISH_INDUS_SOFTWARE_H_
-#define ECCLESIA_MAGENT_REDFISH_INDUS_SOFTWARE_H_
+#ifndef ECCLESIA_MAGENT_REDFISH_INTERLAKEN_MEMORY_METRICS_H_
+#define ECCLESIA_MAGENT_REDFISH_INTERLAKEN_MEMORY_METRICS_H_
 
-#include <string>
-
-#include "absl/strings/string_view.h"
-#include "ecclesia/lib/version/version.h"
-#include "ecclesia/magent/redfish/core/json_helper.h"
+#include "ecclesia/magent/redfish/core/index_resource.h"
 #include "ecclesia/magent/redfish/core/redfish_keywords.h"
 #include "ecclesia/magent/redfish/core/resource.h"
+#include "ecclesia/magent/sysmodel/x86/sysmodel.h"
 #include "json/value.h"
 #include "tensorflow_serving/util/net_http/server/public/server_request_interface.h"
 
 namespace ecclesia {
 
-class SoftwareInventory : public Resource {
+class MemoryMetrics : public IndexResource {
  public:
-  SoftwareInventory() : Resource(kSoftwareInventoryMagentUri) {}
+  explicit MemoryMetrics(SystemModel *system_model)
+      : IndexResource(kMemoryMetricsUriPattern), system_model_(system_model) {}
 
+ protected:
  private:
-  void Get(ServerRequestInterface *req, const ParamsType &params) override {
-    Json::Value json;
-    json[kOdataType] = "#SoftwareInventory.v1_3_0.SoftwareInventory";
-    json[kOdataId] = std::string(Uri());
-    json[kOdataContext] =
-        "/redfish/v1/"
-        "$metadata#SoftwareInventory.SoftwareInventory";
-    json[kId] = "Software Inventory";
-    json[kName] = "magent_indus";
-    json[kVersion] = std::string(GetBuildVersion());
+  void Get(ServerRequestInterface *req, const ParamsType &params) override;
 
-    JSONResponseOK(json, req);
+  void AddStaticFields(Json::Value *json) {
+    (*json)[kOdataType] = "#MemoryMetrics.v1_2_0.MemoryMetrics";
+    (*json)[kOdataContext] =
+        "/redfish/v1/$metadata#MemoryMetrics.MemoryMetrics";
+    (*json)[kName] = "Memory Metrics";
+    (*json)[kId] = "Metrics";
   }
+
+  SystemModel *const system_model_;
 };
 
 }  // namespace ecclesia
 
-#endif  // ECCLESIA_MAGENT_REDFISH_INDUS_SOFTWARE_H_
+#endif  // ECCLESIA_MAGENT_REDFISH_INTERLAKEN_MEMORY_METRICS_H_

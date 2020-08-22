@@ -178,10 +178,10 @@ inline constexpr char kSoftwareInventoryCollectionUri[] =
     "/redfish/v1/UpdateService/SoftwareInventory";
 inline constexpr char kFirmwareInventoryCollectionUri[] =
     "/redfish/v1/UpdateService/FirmwareInventory";
-inline constexpr char kSoftwareInventoryMagentIndusUri[] =
-    "/redfish/v1/UpdateService/SoftwareInventory/magent_indus";
-inline constexpr char kFirmwareInventoryMagentIndusUri[] =
-    "/redfish/v1/UpdateService/FirmwareInventory/magent_indus";
+inline constexpr char kSoftwareInventoryMagentUri[] =
+    "/redfish/v1/UpdateService/SoftwareInventory/magent";
+inline constexpr char kFirmwareInventoryMagentUri[] =
+    "/redfish/v1/UpdateService/FirmwareInventory/magent";
 
 }  // namespace ecclesia
 

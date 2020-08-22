@@ -44,7 +44,7 @@ class SoftwareInventoryCollection : public Resource {
     json[kName] = "Software Inventory Collection";
     json[kMembersCount] = 1;
     auto *json_members = GetJsonArray(&json, kMembers);
-    AppendCollectionMember(json_members, kSoftwareInventoryMagentIndusUri);
+    AppendCollectionMember(json_members, kSoftwareInventoryMagentUri);
     JSONResponseOK(json, req);
   }
 };

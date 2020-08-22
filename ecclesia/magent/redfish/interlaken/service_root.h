@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ECCLESIA_MAGENT_REDFISH_INDUS_FIRMWARE_INVENTORY_H_
-#define ECCLESIA_MAGENT_REDFISH_INDUS_FIRMWARE_INVENTORY_H_
+#ifndef ECCLESIA_MAGENT_REDFISH_INTERLAKEN_SERVICE_ROOT_H_
+#define ECCLESIA_MAGENT_REDFISH_INTERLAKEN_SERVICE_ROOT_H_
 
 #include <string>
 
@@ -28,27 +28,25 @@
 
 namespace ecclesia {
 
-class FirmwareInventoryCollection : public Resource {
+class ServiceRoot : public Resource {
  public:
-  FirmwareInventoryCollection() : Resource(kFirmwareInventoryCollectionUri) {}
+  ServiceRoot() : Resource(kServiceRootUri) {}
 
  private:
   void Get(ServerRequestInterface *req, const ParamsType &params) override {
     Json::Value json;
-    json[kOdataType] =
-        "#FirmwareInventoryCollection.FirmwareInventoryCollection";
+    json[kOdataType] = "#ServiceRoot.v1_5_0.ServiceRoot";
     json[kOdataId] = std::string(Uri());
-    json[kOdataContext] =
-        "/redfish/v1/"
-        "$metadata#FirmwareInventoryCollection.FirmwareInventoryCollection";
-    json[kName] = "Firmware Inventory Collection";
-    json[kMembersCount] = 1;
-    auto *json_members = GetJsonArray(&json, kMembers);
-    AppendCollectionMember(json_members, kFirmwareInventoryMagentUri);
+    json[kOdataContext] = "/redfish/v1/$metadata#ServiceRoot.ServiceRoot";
+    json[kId] = "RootService";
+    json[kName] = "Root Service";
+    json["RedfishVersion"] = "1.6.1";
+    (*GetJsonObject(&json, kSystems))[kOdataId] = kComputerSystemCollectionUri;
+    (*GetJsonObject(&json, kChassis))[kOdataId] = kChassisCollectionUri;
     JSONResponseOK(json, req);
   }
 };
 
 }  // namespace ecclesia
 
-#endif  // ECCLESIA_MAGENT_REDFISH_INDUS_FIRMWARE_INVENTORY_H_
+#endif  // ECCLESIA_MAGENT_REDFISH_INTERLAKEN_SERVICE_ROOT_H_

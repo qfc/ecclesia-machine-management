@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "ecclesia/magent/lib/event_logger/indus_cpu_topology.h"
+#include "ecclesia/magent/lib/event_logger/intel_cpu_topology.h"
 
 #include <iostream>
 #include <string>
@@ -29,25 +29,24 @@
 namespace ecclesia {
 
 namespace {
-const IndusCpuTopology::Options &GetDefaultOptions() {
-  static const IndusCpuTopology::Options *const options =
-      new IndusCpuTopology::Options();
+const IntelCpuTopology::Options &GetDefaultOptions() {
+  static const IntelCpuTopology::Options *const options =
+      new IntelCpuTopology::Options();
   return *options;
 }
 
 }  // namespace
 
-IndusCpuTopology::IndusCpuTopology()
+IntelCpuTopology::IntelCpuTopology()
     : apifs_(GetDefaultOptions().apifs_path),
       lpu_to_package_id_(GetCpuTopology()) {}
 
-IndusCpuTopology::IndusCpuTopology(const Options &options)
-    : apifs_(options.apifs_path),
-      lpu_to_package_id_(GetCpuTopology()) {}
+IntelCpuTopology::IntelCpuTopology(const Options &options)
+    : apifs_(options.apifs_path), lpu_to_package_id_(GetCpuTopology()) {}
 
 // Since CPU topology is static, we will read it when the object being
 // constructed, cache it in vector lpu_to_package_id_.
-std::vector<int> IndusCpuTopology::GetCpuTopology() {
+std::vector<int> IntelCpuTopology::GetCpuTopology() {
   std::string online;
   std::vector<int> ret;
 
@@ -84,7 +83,7 @@ std::vector<int> IndusCpuTopology::GetCpuTopology() {
   return ret;
 }
 
-int IndusCpuTopology::GetSocketIdForLpu(int lpu) const {
+int IntelCpuTopology::GetSocketIdForLpu(int lpu) const {
   if (lpu >= (lpu_to_package_id_).size()) {
     std::cerr << "LPU index out of range.";
     return -1;
@@ -92,7 +91,7 @@ int IndusCpuTopology::GetSocketIdForLpu(int lpu) const {
   return lpu_to_package_id_[lpu];
 }
 
-std::vector<int> IndusCpuTopology::GetLpusForSocketId(int socket_id) const {
+std::vector<int> IntelCpuTopology::GetLpusForSocketId(int socket_id) const {
   std::vector<int> lpus;
   for (int i = 0; i < lpu_to_package_id_.size(); i++) {
     if (lpu_to_package_id_[i] == socket_id) {

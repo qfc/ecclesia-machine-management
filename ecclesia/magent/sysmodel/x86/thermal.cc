@@ -28,7 +28,7 @@
 #include "absl/types/span.h"
 #include "ecclesia/lib/io/constants.h"
 #include "ecclesia/lib/io/msr.h"
-#include "ecclesia/magent/lib/event_logger/indus_cpu_topology.h"
+#include "ecclesia/magent/lib/event_logger/intel_cpu_topology.h"
 #include "ecclesia/magent/lib/io/pci.h"
 #include "ecclesia/magent/lib/io/pci_sys.h"
 #include "ecclesia/magent/sysmodel/thermal.h"
@@ -65,7 +65,7 @@ CpuMarginSensor::CpuMarginSensor(const CpuMarginSensorParams& params)
     : ThermalSensor(params.name, 0),
       lpu_path_(absl::nullopt) {
   // Determine the LPU index to use.
-  IndusCpuTopology top;
+  IntelCpuTopology top;
   std::vector<int> lpus = top.GetLpusForSocketId(params.cpu_index);
   if (!lpus.empty()) {
     lpu_path_ = absl::StrCat("/dev/cpu/", lpus[0], "/msr");

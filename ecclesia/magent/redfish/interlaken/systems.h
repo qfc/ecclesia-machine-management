@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ECCLESIA_MAGENT_REDFISH_INDUS_FIRMWARE_INVENTORY_H_
-#define ECCLESIA_MAGENT_REDFISH_INDUS_FIRMWARE_INVENTORY_H_
+#ifndef ECCLESIA_MAGENT_REDFISH_INTERLAKEN_SYSTEMS_H_
+#define ECCLESIA_MAGENT_REDFISH_INTERLAKEN_SYSTEMS_H_
 
 #include <string>
 
@@ -28,27 +28,26 @@
 
 namespace ecclesia {
 
-class FirmwareInventoryCollection : public Resource {
+class ComputerSystemCollection : public Resource {
  public:
-  FirmwareInventoryCollection() : Resource(kFirmwareInventoryCollectionUri) {}
+  ComputerSystemCollection() : Resource(kComputerSystemCollectionUri) {}
 
  private:
   void Get(ServerRequestInterface *req, const ParamsType &params) override {
     Json::Value json;
-    json[kOdataType] =
-        "#FirmwareInventoryCollection.FirmwareInventoryCollection";
+    json[kOdataType] = "#ComputerSystemCollection.ComputerSystemCollection";
     json[kOdataId] = std::string(Uri());
     json[kOdataContext] =
         "/redfish/v1/"
-        "$metadata#FirmwareInventoryCollection.FirmwareInventoryCollection";
-    json[kName] = "Firmware Inventory Collection";
+        "$metadata#ComputerSystemCollection.ComputerSystemCollection";
+    json[kName] = "Computer System Collection";
     json[kMembersCount] = 1;
     auto *json_members = GetJsonArray(&json, kMembers);
-    AppendCollectionMember(json_members, kFirmwareInventoryMagentUri);
+    AppendCollectionMember(json_members, kComputerSystemUri);
     JSONResponseOK(json, req);
   }
 };
 
 }  // namespace ecclesia
 
-#endif  // ECCLESIA_MAGENT_REDFISH_INDUS_FIRMWARE_INVENTORY_H_
+#endif  // ECCLESIA_MAGENT_REDFISH_INTERLAKEN_SYSTEMS_H_

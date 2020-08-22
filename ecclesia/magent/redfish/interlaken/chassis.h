@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ECCLESIA_MAGENT_REDFISH_INDUS_FIRMWARE_INVENTORY_H_
-#define ECCLESIA_MAGENT_REDFISH_INDUS_FIRMWARE_INVENTORY_H_
+#ifndef ECCLESIA_MAGENT_REDFISH_INTERLAKEN_CHASSIS_H_
+#define ECCLESIA_MAGENT_REDFISH_INTERLAKEN_CHASSIS_H_
 
 #include <string>
 
@@ -23,32 +23,42 @@
 #include "ecclesia/magent/redfish/core/json_helper.h"
 #include "ecclesia/magent/redfish/core/redfish_keywords.h"
 #include "ecclesia/magent/redfish/core/resource.h"
+#include "ecclesia/magent/sysmodel/x86/sysmodel.h"
 #include "json/value.h"
 #include "tensorflow_serving/util/net_http/server/public/server_request_interface.h"
 
 namespace ecclesia {
 
-class FirmwareInventoryCollection : public Resource {
+class ChassisCollection : public Resource {
  public:
-  FirmwareInventoryCollection() : Resource(kFirmwareInventoryCollectionUri) {}
+  ChassisCollection() : Resource(kChassisCollectionUri) {}
 
  private:
   void Get(ServerRequestInterface *req, const ParamsType &params) override {
     Json::Value json;
-    json[kOdataType] =
-        "#FirmwareInventoryCollection.FirmwareInventoryCollection";
+    json[kOdataType] = "#ChassisCollection.ChassisCollection";
     json[kOdataId] = std::string(Uri());
     json[kOdataContext] =
         "/redfish/v1/"
-        "$metadata#FirmwareInventoryCollection.FirmwareInventoryCollection";
-    json[kName] = "Firmware Inventory Collection";
+        "$metadata#ChassisCollection.ChassisCollection";
+    json[kName] = "Interlaken";
     json[kMembersCount] = 1;
     auto *json_members = GetJsonArray(&json, kMembers);
-    AppendCollectionMember(json_members, kFirmwareInventoryMagentUri);
+    AppendCollectionMember(json_members, kChassisUri);
     JSONResponseOK(json, req);
   }
 };
 
-}  // namespace ecclesia
+class Chassis : public Resource {
+ public:
+  Chassis(SystemModel *system_model)
+      : Resource(kChassisUri), system_model_(system_model) {}
 
-#endif  // ECCLESIA_MAGENT_REDFISH_INDUS_FIRMWARE_INVENTORY_H_
+ private:
+  void Get(ServerRequestInterface *req, const ParamsType &params) override;
+
+  SystemModel *const system_model_;
+};
+
+}  // namespace ecclesia
+#endif  // ECCLESIA_MAGENT_REDFISH_INTERLAKEN_CHASSIS_H_

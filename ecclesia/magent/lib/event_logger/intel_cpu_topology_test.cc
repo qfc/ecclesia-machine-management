@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "ecclesia/magent/lib/event_logger/indus_cpu_topology.h"
+#include "ecclesia/magent/lib/event_logger/intel_cpu_topology.h"
 
 #include <vector>
 
@@ -29,9 +29,9 @@ namespace {
 
 using testing::ElementsAre;
 
-class IndusCpuTopologyTest : public ::testing::Test {
+class IntelCpuTopologyTest : public ::testing::Test {
  protected:
-  IndusCpuTopologyTest()
+  IntelCpuTopologyTest()
       : fs_(GetTestTempdirPath()),
         apifs_(GetTestTempdirPath("sys/devices/system/cpu")) {
     // Create directories.
@@ -67,83 +67,83 @@ class IndusCpuTopologyTest : public ::testing::Test {
   ApifsDirectory apifs_;
 };
 
-TEST(IndusCpuTopologyConstructionTest, Ctor) {
-  IndusCpuTopology top;
+TEST(IntelCpuTopologyConstructionTest, Ctor) {
+  IntelCpuTopology top;
   std::vector<int> lpus = top.GetLpusForSocketId(0);
   EXPECT_FALSE(lpus.empty());
 }
 
-TEST_F(IndusCpuTopologyTest, TestParse) {
+TEST_F(IntelCpuTopologyTest, TestParse) {
   fs_.CreateFile("/sys/devices/system/cpu/online", "aaa");
   fs_.CreateFile("/sys/devices/system/cpu/int", "1234");
   fs_.CreateFile("/sys/devices/system/cpu/double", "1.2345");
   fs_.CreateFile("/sys/devices/system/cpu/float", "1.23");
   fs_.CreateFile("/sys/devices/system/cpu/bool", "true");
-  IndusCpuTopology indus_top(
+  IntelCpuTopology intel_top(
       {.apifs_path = GetTestTempdirPath("sys/devices/system/cpu")});
 
   int int_val;
-  EXPECT_FALSE(indus_top.ReadApifsFile<int>("file_none_exist", &int_val).ok());
+  EXPECT_FALSE(intel_top.ReadApifsFile<int>("file_none_exist", &int_val).ok());
 
-  EXPECT_FALSE(indus_top.ReadApifsFile<int>("online", &int_val).ok());
-  EXPECT_TRUE(indus_top.ReadApifsFile<int>("int", &int_val).ok());
+  EXPECT_FALSE(intel_top.ReadApifsFile<int>("online", &int_val).ok());
+  EXPECT_TRUE(intel_top.ReadApifsFile<int>("int", &int_val).ok());
   EXPECT_EQ(1234, int_val);
 
   float float_val;
-  ASSERT_TRUE(indus_top.ReadApifsFile<float>("float", &float_val).ok());
+  ASSERT_TRUE(intel_top.ReadApifsFile<float>("float", &float_val).ok());
   EXPECT_FLOAT_EQ(1.23, float_val);
 
   double double_val;
-  ASSERT_TRUE(indus_top.ReadApifsFile<double>("double", &double_val).ok());
+  ASSERT_TRUE(intel_top.ReadApifsFile<double>("double", &double_val).ok());
   EXPECT_DOUBLE_EQ(1.2345, double_val);
 
   bool bool_val;
-  EXPECT_TRUE(indus_top.ReadApifsFile<bool>("bool", &bool_val).ok());
+  EXPECT_TRUE(intel_top.ReadApifsFile<bool>("bool", &bool_val).ok());
 }
 
-TEST_F(IndusCpuTopologyTest, TestCPURangeOnlineFail) {
-  IndusCpuTopology indus_top(
+TEST_F(IntelCpuTopologyTest, TestCPURangeOnlineFail) {
+  IntelCpuTopology intel_top(
       {.apifs_path = GetTestTempdirPath("sys/devices/system/cpu")});
 
-  EXPECT_EQ(-1, indus_top.GetSocketIdForLpu(0));
+  EXPECT_EQ(-1, intel_top.GetSocketIdForLpu(0));
 }
 
-TEST_F(IndusCpuTopologyTest, TestCPURangeFromFail) {
+TEST_F(IntelCpuTopologyTest, TestCPURangeFromFail) {
   fs_.CreateFile("/sys/devices/system/cpu/online", "a-7");
-  IndusCpuTopology indus_top(
+  IntelCpuTopology intel_top(
       {.apifs_path = GetTestTempdirPath("sys/devices/system/cpu")});
 
-  EXPECT_EQ(-1, indus_top.GetSocketIdForLpu(0));
+  EXPECT_EQ(-1, intel_top.GetSocketIdForLpu(0));
 }
 
-TEST_F(IndusCpuTopologyTest, TestCPURangeToFail) {
+TEST_F(IntelCpuTopologyTest, TestCPURangeToFail) {
   fs_.CreateFile("/sys/devices/system/cpu/online", "0-a");
-  IndusCpuTopology indus_top(
+  IntelCpuTopology intel_top(
       {.apifs_path = GetTestTempdirPath("sys/devices/system/cpu")});
 
-  EXPECT_EQ(-1, indus_top.GetSocketIdForLpu(0));
+  EXPECT_EQ(-1, intel_top.GetSocketIdForLpu(0));
 }
 
-TEST_F(IndusCpuTopologyTest, TestGetSocketIdForLpu) {
+TEST_F(IntelCpuTopologyTest, TestGetSocketIdForLpu) {
   fs_.CreateFile("/sys/devices/system/cpu/online", "0-7");
 
-  IndusCpuTopology indus_top(
+  IntelCpuTopology intel_top(
       {.apifs_path = GetTestTempdirPath("sys/devices/system/cpu")});
 
   for (int i = 0; i < 8; i++) {
-    EXPECT_EQ(i / 4, indus_top.GetSocketIdForLpu(i));
+    EXPECT_EQ(i / 4, intel_top.GetSocketIdForLpu(i));
   }
 }
 
-TEST_F(IndusCpuTopologyTest, TestGetLpusForSocketId) {
+TEST_F(IntelCpuTopologyTest, TestGetLpusForSocketId) {
   fs_.CreateFile("/sys/devices/system/cpu/online", "0-7");
 
-  IndusCpuTopology indus_top(
+  IntelCpuTopology intel_top(
       {.apifs_path = GetTestTempdirPath("sys/devices/system/cpu")});
 
-  std::vector<int> lpus = indus_top.GetLpusForSocketId(0);
+  std::vector<int> lpus = intel_top.GetLpusForSocketId(0);
   EXPECT_THAT(lpus, ElementsAre(0, 1, 2, 3));
-  lpus = indus_top.GetLpusForSocketId(1);
+  lpus = intel_top.GetLpusForSocketId(1);
   EXPECT_THAT(lpus, ElementsAre(4, 5, 6, 7));
 }
 

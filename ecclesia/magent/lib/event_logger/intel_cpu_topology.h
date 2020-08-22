@@ -33,7 +33,7 @@
 
 namespace ecclesia {
 
-class IndusCpuTopology : public mcedecoder::CpuTopologyInterface {
+class IntelCpuTopology : public mcedecoder::CpuTopologyInterface {
  public:
   // Used to initialize ApifsDirectory object.
   // Defines the filesystem path where CPU attributes will be exported.
@@ -42,9 +42,9 @@ class IndusCpuTopology : public mcedecoder::CpuTopologyInterface {
     std::string apifs_path = "/sys/devices/system/cpu/";
   };
 
-  IndusCpuTopology();
+  IntelCpuTopology();
 
-  explicit IndusCpuTopology(const Options &options);
+  explicit IntelCpuTopology(const Options &options);
 
   // Return physical package id based on lpu.
   int GetSocketIdForLpu(int lpu) const override;

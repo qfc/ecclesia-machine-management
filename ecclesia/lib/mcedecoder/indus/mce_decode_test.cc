@@ -25,7 +25,7 @@
 #include "absl/memory/memory.h"
 #include "ecclesia/lib/mcedecoder/cpu_topology.h"
 #include "ecclesia/lib/mcedecoder/cpu_topology_mock.h"
-#include "ecclesia/lib/mcedecoder/dimm_translator.h"
+#include "ecclesia/lib/mcedecoder/indus/dimm_translator.h"
 #include "ecclesia/lib/mcedecoder/mce_messages.h"
 
 namespace mcedecoder {

@@ -1,7 +1,7 @@
 licenses(["notice"])
 
 cc_library(
-    name = "indus",
+    name = "interlaken",
     srcs = [
         "chassis.cc",
         "memory_metrics.cc",
@@ -32,7 +32,7 @@ cc_library(
         "//ecclesia/lib/version",
         "//ecclesia/magent/lib/event_logger:intel_cpu_topology",
         "//ecclesia/magent/lib/event_logger:system_event_visitors",
-        "//ecclesia/magent/lib/event_logger/indus:indus_system_event_visitors",
+        "//ecclesia/magent/lib/event_logger/interlaken:interlaken_system_event_visitors",
         "//ecclesia/magent/redfish/core:redfish_core",
         "//ecclesia/magent/sysmodel/x86:cpu",
         "//ecclesia/magent/sysmodel/x86:dimm",
@@ -45,6 +45,29 @@ cc_library(
         "@com_google_absl//absl/time",
         "@com_google_absl//absl/types:optional",
         "@com_google_absl//absl/types:variant",
+        "@com_google_tensorflow_serving//tensorflow_serving/util/net_http/server/public:http_server_api",
+        "@com_jsoncpp//:json",
+    ],
+)
+
+cc_test(
+    name = "service_root_test",
+    srcs = ["service_root_test.cc"],
+    data = [
+        ":test_data/service_root.json",
+    ],
+    deps = [
+        ":interlaken",
+        "//ecclesia/lib/file:test_filesystem",
+        "//ecclesia/lib/network:testing",
+        "//ecclesia/lib/redfish:interface",
+        "//ecclesia/lib/redfish:raw",
+        "//ecclesia/magent/lib/thread_pool",
+        "//ecclesia/magent/redfish/core:redfish_core",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
+        "@com_google_tensorflow_serving//tensorflow_serving/util/net_http/server/public:http_server",
         "@com_google_tensorflow_serving//tensorflow_serving/util/net_http/server/public:http_server_api",
         "@com_jsoncpp//:json",
     ],
