@@ -1,19 +1,19 @@
 {
-   "@odata.id" : "/redfish/v1/Systems/system/Storage/0",
+   "@odata.id" : "/redfish/v1/Systems/system/Storage/4",
    "@odata.type" : "#Storage.v1_7_0.Storage",
    "Drives" : [
       {
-         "@odata.id" : "/redfish/v1/Systems/system/Storage/0/Drives/0"
+         "@odata.id" : "/redfish/v1/Systems/system/Storage/4/Drives/4"
       }
    ],
-   "Id" : "0",
+   "Id" : "4",
    "StorageControllers" : [
       {
-         "@odata.id" : "/redfish/v1/Systems/Indus/Storage/0#/StorageControllers/0",
+         "@odata.id" : "/redfish/v1/Systems/system/Storage/4#/StorageControllers/0",
          "Links" : {
             "PCIeFunctions" : [
                {
-                  "@odata.id" : "/redfish/v1/Systems/Indus/PCIeDevices/0000:af:00/PCIeFunctions/0"
+                  "@odata.id" : "/redfish/v1/Systems/system/PCIeDevices/0000:db:00/PCIeFunctions/0"
                }
             ]
          },

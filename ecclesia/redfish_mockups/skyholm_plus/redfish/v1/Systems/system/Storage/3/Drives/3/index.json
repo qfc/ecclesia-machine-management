@@ -1,0 +1,28 @@
+{
+    "@odata.context": "/redfish/v1/$metadata#Drive.Drive",
+    "@odata.id": "/redfish/v1/Systems/system/Storage/3/Drives/3",
+    "@odata.type": "#Drive.v1_9_0.Drive",
+    "Name": "SSD3",
+    "CapacityBytes": 500000000000,
+    "MediaType": "SSD",
+    "Manufacturer": "AnotherContoso",
+    "SerialNumber": "54321",
+    "PartNumber": "C456-1111",
+    "BlockSizeBytes": 1024,
+    "Assembly": {
+          "@odata.id": "/redfish/v1/Systems/system/Storage/3/Drives/3/Assembly"
+    },
+    "Id" : "3",
+    "Oem" : {
+       "Google" : {
+          "AvailableSparePercent" : 100,
+          "AvailableSparePercentThreshold" : 10,
+          "CompositeTemperatureKelvins" : 321,
+          "CriticalTemperatureTimeMinute" : 0,
+          "CriticalWarning" : 0,
+          "DiskDeviceClass" : "",
+          "PcieAddress" : "0000:b2:00.0",
+          "PercentageUsed" : 1
+       }
+    }
+}

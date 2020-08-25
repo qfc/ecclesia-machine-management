@@ -1,0 +1,28 @@
+{
+    "@odata.context": "/redfish/v1/$metadata#Drive.Drive",
+    "@odata.id": "/redfish/v1/Systems/system/Storage/2/Drives/2",
+    "@odata.type": "#Drive.v1_9_0.Drive",
+    "Name": "SSD2",
+    "CapacityBytes": 500000000000,
+    "MediaType": "SSD",
+    "Manufacturer": "AnotherContoso",
+    "SerialNumber": "54321",
+    "PartNumber": "C456-1111",
+    "BlockSizeBytes": 1024,
+    "Assembly": {
+          "@odata.id": "/redfish/v1/Systems/system/Storage/2/Drives/2/Assembly"
+    },
+    "Id" : "2",
+    "Oem" : {
+       "Google" : {
+          "AvailableSparePercent" : 99,
+          "AvailableSparePercentThreshold" : 10,
+          "CompositeTemperatureKelvins" : 321,
+          "CriticalTemperatureTimeMinute" : 0,
+          "CriticalWarning" : 0,
+          "DiskDeviceClass" : "",
+          "PcieAddress" : "0000:b1:00.0",
+          "PercentageUsed" : 1
+       }
+    }
+}

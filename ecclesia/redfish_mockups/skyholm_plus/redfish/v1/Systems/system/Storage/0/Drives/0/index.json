@@ -2,7 +2,7 @@
     "@odata.context": "/redfish/v1/$metadata#Drive.Drive",
     "@odata.id": "/redfish/v1/Systems/system/Storage/0/Drives/0",
     "@odata.type": "#Drive.v1_9_0.Drive",
-    "Name": "Drive0",
+    "Name": "SSD0",
     "CapacityBytes": 300000000000,
     "MediaType": "SSD",
     "Manufacturer": "Contoso",
@@ -11,5 +11,18 @@
     "BlockSizeBytes": 512,
     "Assembly": {
           "@odata.id": "/redfish/v1/Systems/system/Storage/0/Drives/0/Assembly"
-    }
+    },
+    "ID" : "0",
+    "Oem" : {
+      "Google" : {
+         "AvailableSparePercent" : 100,
+         "AvailableSparePercentThreshold" : 10,
+         "CompositeTemperatureKelvins" : 318,
+         "CriticalTemperatureTimeMinute" : 0,
+         "CriticalWarning" : 0,
+         "DiskDeviceClass" : "",
+         "PcieAddress" : "0000:af:00.0",
+         "PercentageUsed" : 0
+      }
+   }
 }
