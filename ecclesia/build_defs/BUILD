@@ -27,6 +27,11 @@ bzl_library(
 )
 
 bzl_library(
+    name = "oss",
+    srcs = ["oss.bzl"],
+)
+
+bzl_library(
     name = "query",
     srcs = ["query.bzl"],
 )

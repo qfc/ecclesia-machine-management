@@ -1,3 +1,5 @@
+load("//ecclesia/build_defs:oss.bzl", "ecclesia_oss_static_linked_cc_binary")
+
 licenses(["notice"])
 
 config_setting(
@@ -18,9 +20,14 @@ cc_proto_library(
     deps = [":magent_config_proto"],
 )
 
-cc_binary(
+ecclesia_oss_static_linked_cc_binary(
     name = "magent_indus_oss",
     srcs = ["main_indus.cc"],
+    features = ["fully_static_link"],
+    linkopts = [
+        "-static-libgcc -l:libm.a",
+        "-static-libstdc++ -l:libstdc++.a",
+    ],
     visibility = [
         "//ecclesia:magent_library_users",
     ],
@@ -52,9 +59,14 @@ cc_binary(
     ],
 )
 
-cc_binary(
+ecclesia_oss_static_linked_cc_binary(
     name = "magent_interlaken_oss",
     srcs = ["main_interlaken.cc"],
+    features = ["fully_static_link"],
+    linkopts = [
+        "-static-libgcc -l:libm.a",
+        "-static-libstdc++ -l:libstdc++.a",
+    ],
     visibility = [
         "//ecclesia:magent_library_users",
     ],
