@@ -127,6 +127,7 @@ inline constexpr char kMemberId[] = "MemberId";
 inline constexpr char kVersion[] = "Version";
 inline constexpr char kSoftwareInventory[] = "SoftwareInventory";
 inline constexpr char kFirmwareInventory[] = "FirmwareInventory";
+inline constexpr char kChassisType[] = "ChassisType";
 
 // Assembly keywords
 inline constexpr char kAssemblies[] = "Assemblies";
@@ -143,6 +144,7 @@ inline constexpr char kServiceRootUri[] = "/redfish/v1";
 inline constexpr char kComputerSystemCollectionUri[] = "/redfish/v1/Systems";
 inline constexpr char kComputerSystemUri[] = "/redfish/v1/Systems/system";
 inline constexpr char kChassisCollectionUri[] = "/redfish/v1/Chassis";
+inline constexpr char kChassisUriPattern[] = "/redfish/v1/Chassis/(\\w+)";
 inline constexpr char kChassisUri[] = "/redfish/v1/Chassis/chassis";
 inline constexpr char kMemoryCollectionUri[] =
     "/redfish/v1/Systems/system/Memory";

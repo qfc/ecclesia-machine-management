@@ -19,10 +19,13 @@
 
 #include <string>
 
+#include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
+#include "ecclesia/magent/redfish/core/index_resource.h"
 #include "ecclesia/magent/redfish/core/json_helper.h"
 #include "ecclesia/magent/redfish/core/redfish_keywords.h"
 #include "ecclesia/magent/redfish/core/resource.h"
+#include "ecclesia/magent/sysmodel/x86/chassis.h"
 #include "ecclesia/magent/sysmodel/x86/sysmodel.h"
 #include "json/value.h"
 #include "tensorflow_serving/util/net_http/server/public/server_request_interface.h"
@@ -31,7 +34,8 @@ namespace ecclesia {
 
 class ChassisCollection : public Resource {
  public:
-  ChassisCollection() : Resource(kChassisCollectionUri) {}
+  ChassisCollection(SystemModel *system_model)
+      : Resource(kChassisCollectionUri), system_model_(system_model) {}
 
  private:
   void Get(ServerRequestInterface *req, const ParamsType &params) override {
@@ -41,18 +45,31 @@ class ChassisCollection : public Resource {
     json[kOdataContext] =
         "/redfish/v1/"
         "$metadata#ChassisCollection.ChassisCollection";
-    json[kName] = "Indus";
-    json[kMembersCount] = 1;
+    json[kName] = "Chassis Collection";
+    json[kMembersCount] = system_model_->GetAllChassis().size();
     auto *json_members = GetJsonArray(&json, kMembers);
-    AppendCollectionMember(json_members, kChassisUri);
+    for (const auto &chassis_id : system_model_->GetAllChassis()) {
+      // We leave the Indus chassis URL the hardcoded string for now.
+      if (chassis_id == ChassisId::kIndus) {
+        AppendCollectionMember(json_members, kChassisUri);
+      } else {
+        AppendCollectionMember(
+            json_members,
+            absl::StrCat(kChassisCollectionUri, "/",
+                         ChassisIdToString(chassis_id)));
+      }
+    }
     JSONResponseOK(json, req);
   }
+
+  SystemModel *const system_model_;
 };
 
-class Chassis : public Resource {
+class Chassis : public IndexResource {
  public:
   Chassis(SystemModel *system_model)
-      : Resource(kChassisUri), system_model_(system_model) {}
+      : IndexResource(kChassisUriPattern, IndexType::kString),
+        system_model_(system_model) {}
 
  private:
   void Get(ServerRequestInterface *req, const ParamsType &params) override;

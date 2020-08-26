@@ -55,7 +55,8 @@ class IndusRedfishService {
     resources_.push_back(CreateResource<ServiceRoot>(server));
     resources_.push_back(CreateResource<ComputerSystemCollection>(server));
     resources_.push_back(CreateResource<ComputerSystem>(server));
-    resources_.push_back(CreateResource<ChassisCollection>(server));
+    resources_.push_back(
+        CreateResource<ChassisCollection>(server, system_model));
     resources_.push_back(CreateResource<Chassis>(server, system_model));
     resources_.push_back(
         CreateResource<MemoryCollection>(server, system_model));

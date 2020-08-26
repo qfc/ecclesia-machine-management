@@ -30,17 +30,31 @@
 namespace ecclesia {
 // When a redfish resource is a part of a collection, and the uri contains an
 // index to the resource, prefer to derive from this class.
-// Example: Memory resource
+// Unlike the generic resoruce, the URI of this IndexResoruce is normally a
+// regex pattern, e.g., "/redfish/v1/Systems/system/Memory/(\\d+)"
 class IndexResource : public Resource {
  public:
-  // The uri for the resource will be a regex pattern
-  // For example: "/redfish/v1/Systems/system/Memory/(\\d+)"
+  // There is no restriction on how to index the collection members. But the
+  // index is generally either integer type, e.g.,
+  // "/redfish/v1/Systems/system/Memory/0" or string type, e.g.,
+  // "/redfish/v1/Chassis/Sleipnir", where the "0" is considered int index type
+  // and "Sleipnir" is string index type.
+  enum class IndexType { kInt, kString };
+
+  // This constructor assumes int type index. The uri for the resource will be a
+  // regex pattern e.g., "/redfish/v1/Systems/system/Memory/(\\d+)"
   explicit IndexResource(const std::string &uri_pattern)
-      : Resource(uri_pattern) {}
+      : IndexResource(uri_pattern, IndexType::kInt) {}
+
+  // This constructor takes in a specific index type. The uri for the resource
+  // will be a regex pattern with generic index type. For example:
+  // "/redfish/v1/Chassis//(\\w+)" for string-type index.
+  IndexResource(const std::string &uri_pattern, IndexType index_type)
+      : Resource(uri_pattern), index_type_(index_type) {}
 
   virtual ~IndexResource() {}
 
-  virtual void RegisterRequestHandler(HTTPServerInterface *server) override {
+  void RegisterRequestHandler(HTTPServerInterface *server) override {
     server->RegisterRequestDispatcher(
         [this](ServerRequestInterface *http_request)
             -> tensorflow::serving::net_http::RequestHandler {
@@ -69,14 +83,32 @@ class IndexResource : public Resource {
   }
 
  private:
-  virtual void RequestHandler(ServerRequestInterface *req) override {
-    // Get the resource index from the request uri
+  void RequestHandler(ServerRequestInterface *req) override {
+    // The URI of this IndexResoruce is normally a regex pattern. Here we get
+    // the aresource index from the request URI. The extracted index will be
+    // passed as parameter into the corresponding resource handler.
     RE2 regex(this->Uri());
-    int index;
-    if (!RE2::FullMatch(req->uri_path(), regex, &index)) {
-      req->ReplyWithStatus(HTTPStatusCode::NOT_FOUND);
-      return;
+
+    if (index_type_ == IndexType::kInt) {
+      int int_index;
+      if (!RE2::FullMatch(req->uri_path(), regex, &int_index)) {
+        req->ReplyWithStatus(HTTPStatusCode::NOT_FOUND);
+        return;
+      }
+      HandleRequestWithIndex(req, int_index);
+    } else if (index_type_ == IndexType::kString) {
+      std::string str_index;
+      if (index_type_ == IndexType::kString &&
+          !RE2::FullMatch(req->uri_path(), regex, &str_index)) {
+        req->ReplyWithStatus(HTTPStatusCode::NOT_FOUND);
+        return;
+      }
+      HandleRequestWithIndex(req, str_index);
     }
+  }
+
+  void HandleRequestWithIndex(ServerRequestInterface *req,
+                              const absl::variant<int, std::string> &index) {
     // Pass along the index to the Get() / Post() handlers
     if (req->http_method() == "GET") {
       Get(req, {index});
@@ -86,6 +118,8 @@ class IndexResource : public Resource {
       req->ReplyWithStatus(HTTPStatusCode::METHOD_NA);
     }
   }
+
+  const IndexType index_type_;
 };
 
 }  // namespace ecclesia

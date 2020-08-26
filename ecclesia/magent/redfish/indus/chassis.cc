@@ -25,6 +25,7 @@
 #include "ecclesia/magent/redfish/core/json_helper.h"
 #include "ecclesia/magent/redfish/core/redfish_keywords.h"
 #include "ecclesia/magent/redfish/core/resource.h"
+#include "ecclesia/magent/sysmodel/x86/chassis.h"
 #include "ecclesia/magent/sysmodel/x86/fru.h"
 #include "ecclesia/magent/sysmodel/x86/sysmodel.h"
 #include "json/value.h"
@@ -33,33 +34,61 @@
 namespace ecclesia {
 namespace {
 
-SysmodelFru GetFruInfo(SystemModel *system_model) {
-  SysmodelFruReader *mobo_fru_reader =
-      system_model->GetFruReader("motherboard");
-  if (!mobo_fru_reader) return SysmodelFru({});
-  absl::optional<SysmodelFru> fru = mobo_fru_reader->Read();
-  if (!fru.has_value()) return SysmodelFru({});
+absl::optional<SysmodelFru> GetFruInfo(SystemModel *system_model,
+                                       absl::string_view fru_name) {
+  SysmodelFruReader *fru_reader = system_model->GetFruReader(fru_name);
+  if (!fru_reader) return absl::nullopt;
+  absl::optional<SysmodelFru> fru = fru_reader->Read();
+  if (!fru.has_value()) return absl::nullopt;
   return std::move(*fru);
 }
 
 }  // namespace
 
 void Chassis::Get(ServerRequestInterface *req, const ParamsType &params) {
+  if (params.size() != 1 || !absl::holds_alternative<std::string>(params[0])) {
+    return;
+  }
+  auto chassis_req_name = std::get<std::string>(params[0]);
+  std::string chassis_name = chassis_req_name;
+  // The conversion below is to seamlessly support the existing name "chassis".
+  // This should be cleaned up.
+  if (chassis_req_name == "chassis") {
+    chassis_name = "Indus";
+  }
+  absl::optional<ChassisId> found_chassis =
+      system_model_->GetChassisByName(chassis_name);
+  if (!found_chassis.has_value()) {
+    req->ReplyWithStatus(HTTPStatusCode::NOT_FOUND);
+    return;
+  }
+  const ChassisId &chassis_id = found_chassis.value();
   Json::Value json;
   json[kOdataType] = "#Chassis.v1_5_0.Chassis";
-  json[kOdataId] = std::string(Uri());
+  json[kOdataId] = std::string(req->uri_path());
   json[kOdataContext] = "/redfish/v1/$metadata#Chassis.Chassis";
+  json[kChassisType] = GetChassisTypeAsString(chassis_id);
 
   json[kName] = "Indus Chassis";
   json[kId] = "chassis";
 
-  SysmodelFru fru = GetFruInfo(system_model_);
-  json[kPartNumber] = std::string(fru.GetPartNumber());
-  json[kSerialNumber] = std::string(fru.GetSerialNumber());
-  json[kManufacturer] = std::string(fru.GetManufacturer());
+  std::string fru_name;
+  if (chassis_id == ChassisId::kIndus) {
+    fru_name = "motherboard";
+  } else {
+    fru_name = ChassisIdToString(chassis_id);
+  }
+
+  auto found_fru = GetFruInfo(system_model_, fru_name);
+  if (found_fru.has_value()) {
+    const SysmodelFru &fru = found_fru.value();
+    json[kPartNumber] = std::string(fru.GetPartNumber());
+    json[kSerialNumber] = std::string(fru.GetSerialNumber());
+    json[kManufacturer] = std::string(fru.GetManufacturer());
+  }
 
   auto *assembly = GetJsonObject(&json, "Assembly");
-  (*assembly)[kOdataId] = absl::StrCat(Uri(), "/Assembly");
+  (*assembly)[kOdataId] = absl::StrCat(req->uri_path(), "/Assembly");
 
   auto *links = GetJsonObject(&json, "Links");
   auto *computer_systems = GetJsonObject(links, "ComputerSystems");

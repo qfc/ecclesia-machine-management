@@ -6,6 +6,7 @@ cc_library(
     hdrs = ["sysmodel.h"],
     visibility = ["//ecclesia:magent_library_users"],
     deps = [
+        ":chassis",
         ":cpu",
         ":dimm",
         ":sysmodel_fru",
@@ -94,4 +95,11 @@ cc_library(
         "@com_google_absl//absl/types:optional",
         "@com_google_absl//absl/types:span",
     ],
+)
+
+cc_library(
+    name = "chassis",
+    srcs = ["chassis.cc"],
+    hdrs = ["chassis.h"],
+    visibility = ["//ecclesia:magent_library_users"],
 )

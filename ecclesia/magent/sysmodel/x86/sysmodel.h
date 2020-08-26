@@ -34,6 +34,7 @@
 #include "ecclesia/magent/lib/eeprom/smbus_eeprom.h"
 #include "ecclesia/magent/lib/event_logger/event_logger.h"
 #include "ecclesia/magent/lib/event_reader/mced_reader.h"
+#include "ecclesia/magent/sysmodel/x86/chassis.h"
 #include "ecclesia/magent/sysmodel/x86/cpu.h"
 #include "ecclesia/magent/sysmodel/x86/dimm.h"
 #include "ecclesia/magent/sysmodel/x86/fru.h"
@@ -85,6 +86,10 @@ class SystemModel {
   }
   SysmodelFruReader *GetFruReader(absl::string_view fru_name) const;
 
+  std::vector<ChassisId> GetAllChassis() const;
+  absl::optional<ChassisId> GetChassisByName(
+      absl::string_view chassis_name) const;
+
   // The event logger logs all of the system events with respect to cpu and dimm
   // errors. This method provides a mechanism to process the events for error
   // reporting.
@@ -119,6 +124,9 @@ class SystemModel {
   mutable absl::Mutex cpu_margin_sensors_lock_;
   std::vector<CpuMarginSensor> cpu_margin_sensors_
       ABSL_GUARDED_BY(cpu_margin_sensors_lock_);
+
+  mutable absl::Mutex chassis_lock_;
+  std::vector<ChassisId> chassis_ ABSL_GUARDED_BY(chassis_lock_);
 
   std::unique_ptr<SystemEventLogger> event_logger_;
 

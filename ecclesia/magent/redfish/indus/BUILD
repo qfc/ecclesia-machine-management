@@ -34,6 +34,7 @@ cc_library(
         "//ecclesia/magent/lib/event_logger:system_event_visitors",
         "//ecclesia/magent/lib/event_logger/indus:indus_system_event_visitors",
         "//ecclesia/magent/redfish/core:redfish_core",
+        "//ecclesia/magent/sysmodel/x86:chassis",
         "//ecclesia/magent/sysmodel/x86:cpu",
         "//ecclesia/magent/sysmodel/x86:dimm",
         "//ecclesia/magent/sysmodel/x86:sysmodel_fru",

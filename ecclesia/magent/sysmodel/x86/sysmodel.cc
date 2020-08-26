@@ -32,6 +32,7 @@
 #include "ecclesia/magent/lib/event_reader/elog_reader.h"
 #include "ecclesia/magent/lib/event_reader/event_reader.h"
 #include "ecclesia/magent/lib/event_reader/mced_reader.h"
+#include "ecclesia/magent/sysmodel/x86/chassis.h"
 #include "ecclesia/magent/sysmodel/x86/cpu.h"
 #include "ecclesia/magent/sysmodel/x86/dimm.h"
 #include "ecclesia/magent/sysmodel/x86/fru.h"
@@ -107,6 +108,21 @@ SysmodelFruReader *SystemModel::GetFruReader(absl::string_view fru_name) const {
   return nullptr;
 }
 
+std::vector<ChassisId> SystemModel::GetAllChassis() const {
+  absl::ReaderMutexLock ml(&chassis_lock_);
+  return chassis_;
+}
+absl::optional<ChassisId> SystemModel::GetChassisByName(
+    absl::string_view chassis_name) const {
+  absl::ReaderMutexLock ml(&chassis_lock_);
+  for (const auto & chassis_id : chassis_) {
+    if (chassis_name == ChassisIdToString(chassis_id)) {
+      return chassis_id;
+    }
+  }
+  return absl::nullopt;
+}
+
 SystemModel::SystemModel(SysmodelParams params)
     : smbios_reader_(absl::make_unique<SmbiosReader>(
           params.smbios_entry_point_path, params.smbios_tables_path)),
@@ -142,6 +158,12 @@ SystemModel::SystemModel(SysmodelParams params)
   {
     absl::WriterMutexLock ml(&cpu_margin_sensors_lock_);
     cpu_margin_sensors_ = std::move(cpu_margin_sensors);
+  }
+
+  auto chassis = CreateChassis();
+  {
+    absl::WriterMutexLock ml(&chassis_lock_);
+    chassis_ = std::move(chassis);
   }
 
   // Create event readers to feed into the event logger
