@@ -1,6 +1,6 @@
 {
     "@odata.context": "/redfish/v1/$metadata#Drive.Drive",
-    "@odata.id": "/redfish/v1/Systems/system/Storage/4/Drives/4",
+    "@odata.id": "/redfish/v1/Systems/system/Storage/7/Drives/0",
     "@odata.type": "#Drive.v1_9_0.Drive",
     "Name": "SSD7",
     "CapacityBytes": 500000000000,
@@ -10,9 +10,9 @@
     "PartNumber": "C456-1111",
     "BlockSizeBytes": 1024,
     "Assembly": {
-          "@odata.id": "/redfish/v1/Systems/system/Storage/4/Drives/4/Assembly"
+          "@odata.id": "/redfish/v1/Systems/system/Storage/7/Drives/0/Assembly"
     },
-    "Id" : "4",
+    "Id" : "7",
     "Oem" : {
        "Google" : {
           "AvailableSparePercent" : 100,
@@ -21,7 +21,7 @@
           "CriticalTemperatureTimeMinute" : 0,
           "CriticalWarning" : 0,
           "DiskDeviceClass" : "",
-          "PcieAddress" : "0000:db:00.0",
+          "PcieAddress" : "0000:d8:00.0",
           "PercentageUsed" : 1
        }
     }

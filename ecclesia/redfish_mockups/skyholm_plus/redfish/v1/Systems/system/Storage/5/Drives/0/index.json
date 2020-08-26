@@ -1,6 +1,6 @@
 {
     "@odata.context": "/redfish/v1/$metadata#Drive.Drive",
-    "@odata.id": "/redfish/v1/Systems/system/Storage/5/Drives/5",
+    "@odata.id": "/redfish/v1/Systems/system/Storage/5/Drives/0",
     "@odata.type": "#Drive.v1_9_0.Drive",
     "Name": "SSD5",
     "CapacityBytes": 500000000000,
@@ -10,7 +10,7 @@
     "PartNumber": "C456-1111",
     "BlockSizeBytes": 1024,
     "Assembly": {
-          "@odata.id": "/redfish/v1/Systems/system/Storage/5/Drives/5/Assembly"
+          "@odata.id": "/redfish/v1/Systems/system/Storage/5/Drives/0/Assembly"
     },
     "Id" : "5",
     "Oem" : {

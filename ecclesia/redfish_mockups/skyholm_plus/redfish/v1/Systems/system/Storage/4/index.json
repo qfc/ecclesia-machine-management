@@ -3,7 +3,7 @@
    "@odata.type" : "#Storage.v1_7_0.Storage",
    "Drives" : [
       {
-         "@odata.id" : "/redfish/v1/Systems/system/Storage/4/Drives/4"
+         "@odata.id" : "/redfish/v1/Systems/system/Storage/4/Drives/0"
       }
    ],
    "Id" : "4",
