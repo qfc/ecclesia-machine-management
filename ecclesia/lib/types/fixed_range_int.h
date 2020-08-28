@@ -44,6 +44,9 @@
 //   * TryMake(), a static factory function that constructs an instance of your
 //     type from run-time values. It can fail if the values are out of range and
 //     so it returns an optional which will be nullopt in that case.
+//   * Clamp(), a static factory function that constructs a instance of your
+//     type from frompile-time values. It would clamp the values if the values
+//     are out of range.
 //   * value(), an accessor that returns the stored value
 //   * Copy, Copy-Assign, Move, and Move-Assign operators
 //   * Relational operators, that match relations on the underlying value.
@@ -92,6 +95,19 @@ class FixedRangeInteger {
     } else {
       return absl::nullopt;
     }
+  }
+
+  // Run-time factory function. Returns kMaxValue if value is greater than
+  // kMaxValue, returns kMinValue if value is less than kMinValue, otherwise
+  // returns the value.
+  static T Clamp(IntType value) {
+    if (value > kMaxValue) {
+      return T(BaseType(kMaxValue));
+    }
+    if (value < kMinValue) {
+      return T(BaseType(kMinValue));
+    }
+    return T(BaseType(value));
   }
 
   // Value accessor.

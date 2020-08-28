@@ -42,6 +42,12 @@ TEST(FixedRangeIntegerTest, RangeCheck) {
   EXPECT_EQ(MyIntClass::TryMake(43), absl::nullopt);
 }
 
+TEST(FixedRangeIntegerTest, Clamp) {
+  EXPECT_EQ(MyIntClass::Clamp(2).value(), 3);
+  EXPECT_EQ(MyIntClass::Clamp(43).value(), 42);
+  EXPECT_EQ(MyIntClass::Clamp(20).value(), 20);
+}
+
 TEST(FixedRangeIntegerTest, CopyAndMove) {
   MyIntClass base = MyIntClass::Make<17>();
   EXPECT_EQ(base.value(), 17);
