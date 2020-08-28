@@ -60,6 +60,9 @@ absl::flat_hash_map<std::string, Json::Value> GetAssemblies(
   absl::flat_hash_map<std::string, Json::Value> assemblies;
   for (auto &p : std::filesystem::directory_iterator(std::string(dir_path))) {
     std::string file_path = std::string(p.path());
+    // Assemblies. Instead of blindly loading all the *.json files, it's
+    // desirable to detect the present assemblies in the system and then load
+    // the corresponding JSON file.
     if (absl::EndsWith(file_path, ".json")) {
       Json::Value root = ReadJsonFile(file_path);
       if (root[kOdataId].isString()) {
