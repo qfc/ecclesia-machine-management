@@ -140,7 +140,7 @@ inline constexpr char kAttachedTo[] = "AttachedTo";
 inline constexpr char kDevpath[] = "Devpath";
 
 // Redfish resource URIs
-inline constexpr char kServiceRootUri[] = "/redfish/v1";
+inline constexpr char kServiceRootUri[] = "/redfish/v1/";
 inline constexpr char kComputerSystemCollectionUri[] = "/redfish/v1/Systems";
 inline constexpr char kComputerSystemUri[] = "/redfish/v1/Systems/system";
 inline constexpr char kChassisCollectionUri[] = "/redfish/v1/Chassis";

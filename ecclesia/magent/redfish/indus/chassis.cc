@@ -90,10 +90,13 @@ void Chassis::Get(ServerRequestInterface *req, const ParamsType &params) {
   auto *assembly = GetJsonObject(&json, "Assembly");
   (*assembly)[kOdataId] = absl::StrCat(req->uri_path(), "/Assembly");
 
-  auto *links = GetJsonObject(&json, "Links");
-  auto *computer_systems = GetJsonObject(links, "ComputerSystems");
-  (*computer_systems)[kOdataId] = kComputerSystemUri;
-  auto *thermal = GetJsonObject(&json, "Thermal");
+  auto *links = GetJsonObject(&json, kLinks);
+  auto *computer_systems = GetJsonArray(links, kComputerSystems);
+  Json::Value linked_computer_systems;
+  linked_computer_systems[kOdataId] = kComputerSystemUri;
+  computer_systems->append(linked_computer_systems);
+
+  auto *thermal = GetJsonObject(&json, kThermal);
   (*thermal)[kOdataId] = kThermalUri;
 
   JSONResponseOK(json, req);

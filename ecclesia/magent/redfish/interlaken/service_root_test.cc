@@ -111,7 +111,28 @@ TEST_F(ServiceRootTest, QueryServiceRoot) {
       libredfish::NewRawInterface(absl::StrCat("localhost:", port_));
 
   // Perform an http get request on the service root resource.
-  libredfish::RedfishVariant response = redfish_intf->GetUri("/redfish/v1");
+  libredfish::RedfishVariant response = redfish_intf->GetUri(kServiceRootUri);
+
+  // Parse the raw contents and compare it to the expected service root.
+  Json::Reader reader;
+  Json::Value actual;
+  ASSERT_TRUE(reader.parse(response.DebugString(), actual));
+  EXPECT_EQ(expected, actual);
+}
+
+TEST_F(ServiceRootTest, QueryServiceRootRedirect) {
+  // Read the expected json object
+  Json::Value expected;
+  ReadJsonFromFile(GetTestDataDependencyPath(kFileName), &expected);
+
+  ASSERT_TRUE(server_->StartAcceptingRequests());
+  auto redfish_intf =
+      libredfish::NewRawInterface(absl::StrCat("localhost:", port_));
+
+  // Perform an http get request on the service root resource without the
+  // trailing forward slash and expect a redirect
+  libredfish::RedfishVariant response =
+      redfish_intf->GetUri(absl::StripSuffix(kServiceRootUri, "/"));
 
   // Parse the raw contents and compare it to the expected service root.
   Json::Reader reader;

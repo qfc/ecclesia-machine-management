@@ -11,6 +11,7 @@ cc_library(
         "json_helper.h",
         "redfish_keywords.h",
         "resource.h",
+        "service_root_resource.h",
     ],
     visibility = ["//ecclesia:magent_library_users"],
     deps = [

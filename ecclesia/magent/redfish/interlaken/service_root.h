@@ -22,15 +22,15 @@
 #include "absl/strings/string_view.h"
 #include "ecclesia/magent/redfish/core/json_helper.h"
 #include "ecclesia/magent/redfish/core/redfish_keywords.h"
-#include "ecclesia/magent/redfish/core/resource.h"
+#include "ecclesia/magent/redfish/core/service_root_resource.h"
 #include "json/value.h"
 #include "tensorflow_serving/util/net_http/server/public/server_request_interface.h"
 
 namespace ecclesia {
 
-class ServiceRoot : public Resource {
+class ServiceRoot : public ServiceRootResource {
  public:
-  ServiceRoot() : Resource(kServiceRootUri) {}
+  ServiceRoot() : ServiceRootResource(kServiceRootUri) {}
 
  private:
   void Get(ServerRequestInterface *req, const ParamsType &params) override {
