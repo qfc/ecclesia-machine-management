@@ -95,6 +95,33 @@ cc_test(
 )
 
 cc_library(
+    name = "mmap",
+    srcs = ["mmap.cc"],
+    hdrs = ["mmap.h"],
+    deps = [
+        "//ecclesia/lib/cleanup",
+        "//ecclesia/lib/logging",
+        "//ecclesia/lib/logging:posix",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/types:optional",
+        "@com_google_absl//absl/types:span",
+    ],
+)
+
+cc_test(
+    name = "mmap_test",
+    srcs = ["mmap_test.cc"],
+    deps = [
+        ":mmap",
+        ":test_filesystem",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/types:optional",
+        "@com_google_absl//absl/types:span",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
     name = "path",
     srcs = ["path.cc"],
     hdrs = ["path.h"],
