@@ -196,7 +196,7 @@ int main(int argc, char **argv) {
   std::vector<ecclesia::SmbusEeprom2ByteAddr::Option> eeprom_options;
   std::vector<ecclesia::SysmodelFruReaderFactory> fru_factories;
   fru_factories.push_back(ecclesia::SysmodelFruReaderFactory(
-      "motherboard", [&]() -> std::unique_ptr<ecclesia::SysmodelFruReader> {
+      "motherboard", [&]() -> std::unique_ptr<ecclesia::SysmodelFruReaderIntf> {
         return absl::make_unique<ecclesia::SmbusEeprom2ByteAddrFruReader>(
             ecclesia::SmbusEeprom2ByteAddr::Option{
                 .name = "motherboard",

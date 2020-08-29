@@ -68,6 +68,7 @@ cc_library(
     deps = [
         "//ecclesia/magent/lib/eeprom",
         "//ecclesia/magent/lib/fru:ipmi_fru",
+        "//ecclesia/magent/lib/ipmi",
         "@com_google_absl//absl/container:flat_hash_map",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",

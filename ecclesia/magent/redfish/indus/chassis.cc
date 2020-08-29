@@ -36,7 +36,7 @@ namespace {
 
 absl::optional<SysmodelFru> GetFruInfo(SystemModel *system_model,
                                        absl::string_view fru_name) {
-  SysmodelFruReader *fru_reader = system_model->GetFruReader(fru_name);
+  SysmodelFruReaderIntf *fru_reader = system_model->GetFruReader(fru_name);
   if (!fru_reader) return absl::nullopt;
   absl::optional<SysmodelFru> fru = fru_reader->Read();
   if (!fru.has_value()) return absl::nullopt;

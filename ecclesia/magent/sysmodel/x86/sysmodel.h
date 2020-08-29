@@ -84,7 +84,7 @@ class SystemModel {
       iterator(f.first, f.second);
     }
   }
-  SysmodelFruReader *GetFruReader(absl::string_view fru_name) const;
+  SysmodelFruReaderIntf *GetFruReader(absl::string_view fru_name) const;
 
   std::vector<ChassisId> GetAllChassis() const;
   absl::optional<ChassisId> GetChassisByName(
@@ -114,7 +114,7 @@ class SystemModel {
   std::vector<Cpu> cpus_ ABSL_GUARDED_BY(cpus_lock_);
 
   mutable absl::Mutex fru_readers_lock_;
-  absl::flat_hash_map<std::string, std::unique_ptr<SysmodelFruReader>>
+  absl::flat_hash_map<std::string, std::unique_ptr<SysmodelFruReaderIntf>>
       fru_readers_ ABSL_GUARDED_BY(fru_readers_lock_);
 
   mutable absl::Mutex dimm_thermal_sensors_lock_;

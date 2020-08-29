@@ -185,9 +185,10 @@ absl::optional<SysmodelFru> FileSysmodelFruReader::Read() {
   return cached_fru_;
 }
 
-absl::flat_hash_map<std::string, std::unique_ptr<SysmodelFruReader>> CreateFrus(
-    absl::Span<const SysmodelFruReaderFactory> fru_factories) {
-  absl::flat_hash_map<std::string, std::unique_ptr<SysmodelFruReader>> frus_map;
+absl::flat_hash_map<std::string, std::unique_ptr<SysmodelFruReaderIntf>>
+CreateFruReaders(absl::Span<const SysmodelFruReaderFactory> fru_factories) {
+  absl::flat_hash_map<std::string, std::unique_ptr<SysmodelFruReaderIntf>>
+      frus_map;
 
   for (const SysmodelFruReaderFactory &factory : fru_factories) {
     frus_map.emplace(factory.Name(), factory.Construct());

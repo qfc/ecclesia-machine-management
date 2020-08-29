@@ -26,6 +26,7 @@
 #include "absl/types/optional.h"
 #include "absl/types/span.h"
 #include "ecclesia/magent/lib/eeprom/smbus_eeprom.h"
+#include "ecclesia/magent/lib/ipmi/ipmi.h"
 
 namespace ecclesia {
 
@@ -44,8 +45,8 @@ class SysmodelFru {
   // Make sure that copy construction is relatively light weight.
   // In cases where it is not feasible to copy construct data members,it may
   // make sense to wrap the data member in a shared_ptr.
-  SysmodelFru(const SysmodelFru &dimm) = default;
-  SysmodelFru &operator=(const SysmodelFru &dimm) = default;
+  SysmodelFru(const SysmodelFru &sysmodel_fru) = default;
+  SysmodelFru &operator=(const SysmodelFru &sysmodel_fru) = default;
 
   absl::string_view GetManufacturer() const;
   absl::string_view GetSerialNumber() const;
@@ -55,27 +56,19 @@ class SysmodelFru {
   FruInfo fru_info_;
 };
 
-// SysmodelFruReader provides an interface for reading FRUs.
-class SysmodelFruReader {
+// An interface class for reading System Model FRUs.
+class SysmodelFruReaderIntf {
  public:
-  SysmodelFruReader() {}
-  virtual ~SysmodelFruReader() {}
+  virtual ~SysmodelFruReaderIntf() {}
 
-  // Returns the FRU contents if available.
+  // Returns a SysmodelFru instance if available.
   virtual absl::optional<SysmodelFru> Read() = 0;
-
-  // Since we're holding caches, we should not allow copies.
-  SysmodelFruReader(const SysmodelFruReader &dimm) = delete;
-  SysmodelFruReader &operator=(const SysmodelFruReader &dimm) = delete;
-
- private:
-  SmbusEeprom2ByteAddr::Option option_;
 };
 
 // FileSysmodelFruReader provides a caching interface for reading FRUs from a
 // file. If it is successful in reading the FRU, it will return a copy of that
 // successful read for the rest of its lifetime.
-class FileSysmodelFruReader : public SysmodelFruReader {
+class FileSysmodelFruReader : public SysmodelFruReaderIntf {
  public:
   FileSysmodelFruReader(std::string filepath)
       : filepath_(std::move(filepath)) {}
@@ -88,10 +81,25 @@ class FileSysmodelFruReader : public SysmodelFruReader {
   absl::optional<SysmodelFru> cached_fru_;
 };
 
+// This class provides a caching interface for reading a FRU via the IPMI
+// interface.
+class IpmiSysmodelFruReader : public SysmodelFruReaderIntf {
+ public:
+  explicit IpmiSysmodelFruReader(IpmiInterface *ipmi_intf)
+      : ipmi_intf_(ipmi_intf) {}
+
+  absl::optional<SysmodelFru> Read() override { return absl::nullopt; }
+
+ private:
+  IpmiInterface *ipmi_intf_;
+  // Stores the cached FRU that was read.
+  absl::optional<SysmodelFru> cached_fru_;
+};
+
 // SmbusEeprom2ByteAddrFruReader provides a caching interface for reading FRUs
 // from an SMBUS eeprom. If it is successful in reading the FRU, it will return
 // a copy of that successful read for the rest of its lifetime.
-class SmbusEeprom2ByteAddrFruReader : public SysmodelFruReader {
+class SmbusEeprom2ByteAddrFruReader : public SysmodelFruReaderIntf {
  public:
   SmbusEeprom2ByteAddrFruReader(SmbusEeprom2ByteAddr::Option option)
       : option_(std::move(option)) {}
@@ -107,25 +115,32 @@ class SmbusEeprom2ByteAddrFruReader : public SysmodelFruReader {
   absl::optional<SysmodelFru> cached_fru_;
 };
 
-// SysmodelFruReaderFactory wraps a lambda for constructing a SysmodelFruReader.
+// SysmodelFruReaderFactory wraps a lambda for constructing a SysmodelFruReader
+// instance.
 class SysmodelFruReaderFactory {
  public:
-  using FactoryFunction = std::function<std::unique_ptr<SysmodelFruReader>()>;
+  using FactoryFunction =
+      std::function<std::unique_ptr<SysmodelFruReaderIntf>()>;
   SysmodelFruReaderFactory(std::string name, FactoryFunction factory)
       : name_(std::move(name)), factory_(std::move(factory)) {}
 
-  // Returns the name of the associated SysmodelFruReader.
+  // Returns the name of the associated SysmodelFruReaderIntf.
   absl::string_view Name() const { return name_; }
-  // Invokes the FactoryFunction to construct a SysmodelFruReader instance.
-  std::unique_ptr<SysmodelFruReader> Construct() const { return factory_(); }
+  // Invokes the FactoryFunction to construct a SysmodelFruReaderIntf instance.
+  std::unique_ptr<SysmodelFruReaderIntf> Construct() const {
+    return factory_();
+  }
 
  private:
   std::string name_;
   FactoryFunction factory_;
 };
 
-absl::flat_hash_map<std::string, std::unique_ptr<SysmodelFruReader>> CreateFrus(
-    absl::Span<const SysmodelFruReaderFactory> fru_factories);
+// This method generates a map of FruReader names to FruReader instances. The
+// FruReader name is the same as that of the FruReader factory. Thus the factory
+// names must be unique.
+absl::flat_hash_map<std::string, std::unique_ptr<SysmodelFruReaderIntf>>
+CreateFruReaders(absl::Span<const SysmodelFruReaderFactory> fru_factories);
 
 }  // namespace ecclesia
 

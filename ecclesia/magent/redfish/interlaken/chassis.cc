@@ -34,7 +34,7 @@ namespace ecclesia {
 namespace {
 
 SysmodelFru GetFruInfo(SystemModel *system_model) {
-  SysmodelFruReader *mobo_fru_reader =
+  SysmodelFruReaderIntf *mobo_fru_reader =
       system_model->GetFruReader("motherboard");
   if (!mobo_fru_reader) return SysmodelFru({});
   absl::optional<SysmodelFru> fru = mobo_fru_reader->Read();

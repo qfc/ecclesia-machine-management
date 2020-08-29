@@ -98,7 +98,8 @@ std::size_t SystemModel::NumFruReaders() const {
   return fru_readers_.size();
 }
 
-SysmodelFruReader *SystemModel::GetFruReader(absl::string_view fru_name) const {
+SysmodelFruReaderIntf *SystemModel::GetFruReader(
+    absl::string_view fru_name) const {
   absl::ReaderMutexLock ml(&fru_readers_lock_);
   auto fru = fru_readers_.find(fru_name);
   if (fru != fru_readers_.end()) {
@@ -115,7 +116,7 @@ std::vector<ChassisId> SystemModel::GetAllChassis() const {
 absl::optional<ChassisId> SystemModel::GetChassisByName(
     absl::string_view chassis_name) const {
   absl::ReaderMutexLock ml(&chassis_lock_);
-  for (const auto & chassis_id : chassis_) {
+  for (const auto &chassis_id : chassis_) {
     if (chassis_name == ChassisIdToString(chassis_id)) {
       return chassis_id;
     }
@@ -142,7 +143,7 @@ SystemModel::SystemModel(SysmodelParams params)
     cpus_ = std::move(cpus);
   }
 
-  auto fru_readers = CreateFrus(params.fru_factories);
+  auto fru_readers = CreateFruReaders(params.fru_factories);
   {
     absl::WriterMutexLock ml(&fru_readers_lock_);
     fru_readers_ = std::move(fru_readers);
