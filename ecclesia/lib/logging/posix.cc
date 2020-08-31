@@ -30,7 +30,7 @@ namespace ecclesia {
 
 std::string PosixErrorMessage(int errno_value) {
   auto ec = std::make_error_code(static_cast<std::errc>(errno_value));
-  return absl::StrFormat("POSIX error %d [%s]", errno_value, ec.message());
+  return absl::StrFormat(" POSIX error %d [%s]", errno_value, ec.message());
 }
 
 PosixLogMessageStream::PosixLogMessageStream(int captured_errno,

@@ -25,17 +25,34 @@
 
 #include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
-#include "absl/types/span.h"
 #include "ecclesia/lib/cleanup/cleanup.h"
 #include "ecclesia/lib/logging/globals.h"
 #include "ecclesia/lib/logging/posix.h"
 
 namespace ecclesia {
 
-absl::optional<MappedMemory> MappedMemory::MappedMemory::OpenReadOnly(
-    const std::string &path, size_t offset, size_t size) {
+absl::optional<MappedMemory> MappedMemory::Create(const std::string &path,
+                                                  size_t offset, size_t size,
+                                                  Type type) {
+  // Parameters for the open() and mmap() calls.
+  int open_flags, mmap_prot, mmap_flags;
+  bool writable;
+  switch (type) {
+    case Type::kReadOnly:
+      open_flags = O_RDONLY;
+      mmap_prot = PROT_READ;
+      mmap_flags = MAP_PRIVATE;
+      writable = false;
+      break;
+    case Type::kReadWrite:
+      open_flags = O_RDWR;
+      mmap_prot = PROT_READ | PROT_WRITE;
+      mmap_flags = MAP_SHARED;
+      writable = true;
+      break;
+  }
   // Open the file for reading.
-  const int fd = open(path.c_str(), O_RDONLY);
+  const int fd = open(path.c_str(), open_flags);
   if (fd == -1) {
     return absl::nullopt;
   }
@@ -46,13 +63,12 @@ absl::optional<MappedMemory> MappedMemory::MappedMemory::OpenReadOnly(
   size_t user_offset = offset - true_offset;
   size_t true_size = size + user_offset;
   // Create the memory mapping.
-  void *addr =
-      mmap(nullptr, true_size, PROT_READ, MAP_PRIVATE, fd, true_offset);
+  void *addr = mmap(nullptr, true_size, mmap_prot, mmap_flags, fd, true_offset);
   if (addr == MAP_FAILED) {
     return absl::nullopt;
   }
   // We have a good mapping. Note that we no longer need to keep the fd open.
-  return MappedMemory({addr, true_size, user_offset, size, false});
+  return MappedMemory({addr, true_size, user_offset, size, writable});
 }
 
 MappedMemory::~MappedMemory() {
@@ -68,22 +84,6 @@ absl::string_view MappedMemory::MemoryAsStringView() const {
   return absl::string_view(
       static_cast<char *>(mapping_.addr) + mapping_.user_offset,
       mapping_.user_size);
-}
-
-absl::Span<const char> MappedMemory::MemoryAsReadOnlySpan() const {
-  return absl::MakeConstSpan(
-      static_cast<char *>(mapping_.addr) + mapping_.user_offset,
-      mapping_.user_size);
-}
-
-absl::Span<char> MappedMemory::MemoryAsReadWriteSpan() const {
-  if (mapping_.writable) {
-    return absl::MakeSpan(
-        static_cast<char *>(mapping_.addr) + mapping_.user_offset,
-        mapping_.user_size);
-  } else {
-    return absl::Span<char>();
-  }
 }
 
 MappedMemory::MappedMemory(MmapInfo mapping) : mapping_(mapping) {}

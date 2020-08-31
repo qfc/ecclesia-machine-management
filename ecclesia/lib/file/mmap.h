@@ -21,6 +21,7 @@
 #define ECCLESIA_LIB_FILE_MMAP_H_
 
 #include <cstddef>
+#include <cstdint>
 #include <string>
 
 #include "absl/strings/string_view.h"
@@ -30,12 +31,28 @@
 namespace ecclesia {
 
 class MappedMemory {
+ private:
+  // Helper used by the span functions to verify that their type parameter is
+  // one of the supported character/byte types.
+  template <typename T>
+  static inline constexpr bool IsAllowedSpanType =
+      std::is_same_v<T, char> || std::is_same_v<T, unsigned char> ||
+      std::is_same_v<T, uint8_t> || std::is_same_v<T, std::byte>;
+
  public:
   // Given a filename, attempt to open it and create a memory mapping of a range
   // of the file. The exposed byte range will be [offset, offset+size). Returns
   // a null object if opening the file or creating the mapping fails.
-  static absl::optional<MappedMemory> OpenReadOnly(const std::string &path,
-                                                   size_t offset, size_t size);
+  //
+  // There are two options, a read-only mapping and a read-write one. The
+  // read-only version will create a private mapping and only the accessors
+  // which provide const buffers will return usable values. The read-write
+  // version will create a shared mapping and support the full set of accessors.
+  // There is no mechanism to create a private mapping which is writable.
+  enum class Type { kReadOnly, kReadWrite };
+  static absl::optional<MappedMemory> Create(const std::string &path,
+                                             size_t offset, size_t size,
+                                             Type type);
 
   // This object cannot be shared so copying is not allowed. It can be moved
   // with ownership of the underlying mapping moving along with the file.
@@ -61,8 +78,29 @@ class MappedMemory {
   // Exposed the mapped memory as a span. You can request either a read-only
   // span or a read-write span, but if the underlying mapping is not writable
   // then the read-write span will be empty.
-  absl::Span<const char> MemoryAsReadOnlySpan() const;
-  absl::Span<char> MemoryAsReadWriteSpan() const;
+  //
+  // Note that these functions do not allow you to specify the span as wrapping
+  // non-byte types. If you need to transform the buffer into a larger structure
+  // then either use the ecclesia/lib/codec/endian.h (for integer access) or an
+  // emboss view (for more complex types).
+  template <typename CharType = char>
+  absl::Span<const CharType> MemoryAsReadOnlySpan() const {
+    static_assert(IsAllowedSpanType<CharType>);
+    return absl::MakeConstSpan(
+        static_cast<CharType *>(mapping_.addr) + mapping_.user_offset,
+        mapping_.user_size);
+  }
+  template <typename CharType = char>
+  absl::Span<CharType> MemoryAsReadWriteSpan() const {
+    static_assert(IsAllowedSpanType<CharType>);
+    if (mapping_.writable) {
+      return absl::MakeSpan(
+          static_cast<CharType *>(mapping_.addr) + mapping_.user_offset,
+          mapping_.user_size);
+    } else {
+      return absl::Span<CharType>();
+    }
+  }
 
  private:
   // Construct a mapping object. This constructor is only used by the factory

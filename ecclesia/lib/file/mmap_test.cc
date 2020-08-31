@@ -16,6 +16,7 @@
 
 #include "ecclesia/lib/file/mmap.h"
 
+#include <cstdint>
 #include <string>
 #include <utility>
 
@@ -42,8 +43,8 @@ class MappedMemoryTest : public ::testing::Test {
 
 TEST_F(MappedMemoryTest, ReadOnlyWorksOnSimpleFile) {
   fs_.CreateFile("/a.txt", "0123456789\n");
-  auto maybe_mmap =
-      MappedMemory::OpenReadOnly(fs_.GetTruePath("/a.txt"), 0, 11);
+  auto maybe_mmap = MappedMemory::Create(fs_.GetTruePath("/a.txt"), 0, 11,
+                                         MappedMemory::Type::kReadOnly);
   ASSERT_TRUE(maybe_mmap.has_value());
 
   MappedMemory mmap = std::move(*maybe_mmap);
@@ -53,19 +54,26 @@ TEST_F(MappedMemoryTest, ReadOnlyWorksOnSimpleFile) {
   EXPECT_THAT(mmap.MemoryAsStringView(),
               ElementsAreArray(mmap.MemoryAsReadOnlySpan()));
 
+  // This should also work even if an unsigned type is used in the span.
+  EXPECT_THAT(mmap.MemoryAsStringView(),
+              ElementsAreArray(mmap.MemoryAsReadOnlySpan<unsigned char>()));
+  EXPECT_THAT(mmap.MemoryAsStringView(),
+              ElementsAreArray(mmap.MemoryAsReadOnlySpan<uint8_t>()));
+
   // The writable span should be empty.
   EXPECT_THAT(mmap.MemoryAsReadWriteSpan(), IsEmpty());
 }
 
 TEST_F(MappedMemoryTest, ReadOnlyFailsOnMissingFile) {
-  EXPECT_THAT(MappedMemory::OpenReadOnly(fs_.GetTruePath("/b.txt"), 0, 11),
+  EXPECT_THAT(MappedMemory::Create(fs_.GetTruePath("/b.txt"), 0, 11,
+                                   MappedMemory::Type::kReadOnly),
               Eq(absl::nullopt));
 }
 
 TEST_F(MappedMemoryTest, ReadOnlyWorksOnSmallerFile) {
   fs_.CreateFile("/c.txt", "0123456789\n");
-  auto maybe_mmap =
-      MappedMemory::OpenReadOnly(fs_.GetTruePath("/c.txt"), 0, 64);
+  auto maybe_mmap = MappedMemory::Create(fs_.GetTruePath("/c.txt"), 0, 64,
+                                         MappedMemory::Type::kReadOnly);
   ASSERT_TRUE(maybe_mmap.has_value());
 
   MappedMemory mmap = std::move(*maybe_mmap);
@@ -77,11 +85,130 @@ TEST_F(MappedMemoryTest, ReadOnlyWorksOnSmallerFile) {
 
 TEST_F(MappedMemoryTest, ReadOnlyWorksWithOffset) {
   fs_.CreateFile("/d.txt", "0123456789\n");
-  auto maybe_mmap = MappedMemory::OpenReadOnly(fs_.GetTruePath("/d.txt"), 5, 6);
+  auto maybe_mmap = MappedMemory::Create(fs_.GetTruePath("/d.txt"), 5, 6,
+                                         MappedMemory::Type::kReadOnly);
   ASSERT_TRUE(maybe_mmap.has_value());
 
   MappedMemory mmap = std::move(*maybe_mmap);
   EXPECT_EQ(mmap.MemoryAsStringView(), "56789\n");
+}
+
+TEST_F(MappedMemoryTest, ReadWriteWorksOnSimpleFile) {
+  fs_.CreateFile("/e.txt", "0123456789\n");
+  auto maybe_mmap = MappedMemory::Create(fs_.GetTruePath("/e.txt"), 0, 11,
+                                         MappedMemory::Type::kReadWrite);
+  ASSERT_TRUE(maybe_mmap.has_value());
+
+  MappedMemory mmap = std::move(*maybe_mmap);
+  EXPECT_EQ(mmap.MemoryAsStringView(), "0123456789\n");
+
+  // The span should be the same as the string view.
+  EXPECT_THAT(mmap.MemoryAsStringView(),
+              ElementsAreArray(mmap.MemoryAsReadOnlySpan()));
+
+  // This should also work even if an unsigned type is used in the span.
+  EXPECT_THAT(mmap.MemoryAsStringView(),
+              ElementsAreArray(mmap.MemoryAsReadOnlySpan<unsigned char>()));
+  EXPECT_THAT(mmap.MemoryAsStringView(),
+              ElementsAreArray(mmap.MemoryAsReadOnlySpan<uint8_t>()));
+
+  // The writable span should also match the string view.
+  EXPECT_THAT(mmap.MemoryAsStringView(),
+              ElementsAreArray(mmap.MemoryAsReadWriteSpan()));
+  EXPECT_THAT(mmap.MemoryAsStringView(),
+              ElementsAreArray(mmap.MemoryAsReadWriteSpan<unsigned char>()));
+  EXPECT_THAT(mmap.MemoryAsStringView(),
+              ElementsAreArray(mmap.MemoryAsReadWriteSpan<uint8_t>()));
+}
+
+TEST_F(MappedMemoryTest, ReadWriteFailsOnMissingFile) {
+  EXPECT_THAT(MappedMemory::Create(fs_.GetTruePath("/f.txt"), 0, 11,
+                                   MappedMemory::Type::kReadWrite),
+              Eq(absl::nullopt));
+}
+
+TEST_F(MappedMemoryTest, ReadWriteWorksOnSmallerFile) {
+  fs_.CreateFile("/g.txt", "0123456789\n");
+  auto maybe_mmap = MappedMemory::Create(fs_.GetTruePath("/g.txt"), 0, 64,
+                                         MappedMemory::Type::kReadWrite);
+  ASSERT_TRUE(maybe_mmap.has_value());
+
+  MappedMemory mmap = std::move(*maybe_mmap);
+  EXPECT_EQ(mmap.MemoryAsStringView().size(), 64);
+  EXPECT_EQ(mmap.MemoryAsStringView().substr(0, 11), "0123456789\n");
+  EXPECT_EQ(mmap.MemoryAsStringView().substr(11, 64 - 11),
+            std::string(64 - 11, '\0'));
+}
+
+TEST_F(MappedMemoryTest, ReadWriteWorksWithOffset) {
+  fs_.CreateFile("/h.txt", "0123456789\n");
+  auto maybe_mmap = MappedMemory::Create(fs_.GetTruePath("/h.txt"), 5, 6,
+                                         MappedMemory::Type::kReadWrite);
+  ASSERT_TRUE(maybe_mmap.has_value());
+
+  MappedMemory mmap = std::move(*maybe_mmap);
+  EXPECT_EQ(mmap.MemoryAsStringView(), "56789\n");
+}
+
+TEST_F(MappedMemoryTest, ReadWriteChangesAreSaved) {
+  fs_.CreateFile("/i.txt", "0123456789\n");
+
+  // Create a read-write mapping and use it to modify the file.
+  {
+    auto maybe_mmap = MappedMemory::Create(fs_.GetTruePath("/i.txt"), 0, 11,
+                                           MappedMemory::Type::kReadWrite);
+    ASSERT_TRUE(maybe_mmap.has_value());
+
+    MappedMemory mmap = std::move(*maybe_mmap);
+    EXPECT_EQ(mmap.MemoryAsStringView(), "0123456789\n");
+    absl::Span<char> mmap_span = mmap.MemoryAsReadWriteSpan();
+    mmap_span[0] = 'a';
+    mmap_span[4] = 'b';
+    mmap_span[9] = 'c';
+    EXPECT_EQ(mmap.MemoryAsStringView(), "a123b5678c\n");
+  }
+
+  // Now create a read-only mapping, reading the file should give back the
+  // changed values from modifying the read-write.
+  {
+    auto maybe_mmap = MappedMemory::Create(fs_.GetTruePath("/i.txt"), 0, 11,
+                                           MappedMemory::Type::kReadOnly);
+    ASSERT_TRUE(maybe_mmap.has_value());
+
+    MappedMemory mmap = std::move(*maybe_mmap);
+    EXPECT_EQ(mmap.MemoryAsStringView(), "a123b5678c\n");
+  }
+}
+
+TEST_F(MappedMemoryTest, ReadWriteChangesExtendFile) {
+  fs_.CreateFile("/i.txt", "0123456789\n");
+
+  // Create a read-write mapping and use it to extend the file.
+  {
+    auto maybe_mmap = MappedMemory::Create(fs_.GetTruePath("/i.txt"), 0, 14,
+                                           MappedMemory::Type::kReadWrite);
+    ASSERT_TRUE(maybe_mmap.has_value());
+
+    MappedMemory mmap = std::move(*maybe_mmap);
+    EXPECT_EQ(mmap.MemoryAsStringView().substr(0, 11), "0123456789\n");
+    EXPECT_EQ(mmap.MemoryAsStringView().substr(11, 3), std::string(3, '\0'));
+    absl::Span<char> mmap_span = mmap.MemoryAsReadWriteSpan();
+    mmap_span[11] = 'a';
+    mmap_span[12] = 'b';
+    mmap_span[13] = 'c';
+    EXPECT_EQ(mmap.MemoryAsStringView(), "0123456789\nabc");
+  }
+
+  // Now create a read-only mapping, reading the file should give back the
+  // changed values from modifying the read-write.
+  {
+    auto maybe_mmap = MappedMemory::Create(fs_.GetTruePath("/i.txt"), 0, 14,
+                                           MappedMemory::Type::kReadOnly);
+    ASSERT_TRUE(maybe_mmap.has_value());
+
+    MappedMemory mmap = std::move(*maybe_mmap);
+    EXPECT_EQ(mmap.MemoryAsStringView(), "0123456789\nabc");
+  }
 }
 
 }  // namespace
