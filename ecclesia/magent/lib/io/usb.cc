@@ -22,10 +22,12 @@
 #include "ecclesia/lib/logging/logging.h"
 
 namespace ecclesia {
-UsbPortSequence::UsbPortSequence(const std::vector<UsbPort> &ports) {
+
+UsbPortSequence::UsbPortSequence(absl::Span<const UsbPort> ports) {
   if (ports.size() > kDeviceChainMaxLength) {
     WarningLog() << "Usb ports excceed max length";
   }
+
   ports_.clear();
   std::copy(ports.begin(),
             ports.begin() +
@@ -34,7 +36,7 @@ UsbPortSequence::UsbPortSequence(const std::vector<UsbPort> &ports) {
 }
 
 absl::optional<UsbPortSequence> UsbPortSequence::TryMake(
-    const std::vector<int> &ports) {
+    absl::Span<const int> ports) {
   if (ports.size() > kDeviceChainMaxLength) {
     WarningLog() << "Usb ports excceed max length";
     return absl::nullopt;
@@ -53,4 +55,26 @@ absl::optional<UsbPortSequence> UsbPortSequence::TryMake(
 }
 
 int UsbPortSequence::size() const { return ports_.size(); }
+
+absl::optional<UsbPortSequence> UsbPortSequence::Downstream(
+    UsbPort port) const {
+  if (size() == kDeviceChainMaxLength) {
+    return absl::nullopt;
+  }
+
+  // The downstream sequence is this sequence with the port number appended.
+  UsbPortSequence child(*this);
+  child.ports_.push_back(port);
+  return child;
+}
+
+bool operator==(const UsbPortSequence &lhs, const UsbPortSequence &rhs) {
+  return std::equal(lhs.ports_.begin(), lhs.ports_.begin() + lhs.size(),
+                    rhs.ports_.begin());
+}
+
+bool operator!=(const UsbPortSequence &lhs, const UsbPortSequence &rhs) {
+  return !(lhs == rhs);
+}
+
 }  // namespace ecclesia

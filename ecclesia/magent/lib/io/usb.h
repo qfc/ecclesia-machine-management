@@ -24,6 +24,7 @@
 #include <vector>
 
 #include "absl/status/status.h"
+#include "absl/types/span.h"
 #include "ecclesia/lib/types/fixed_range_int.h"
 
 namespace ecclesia {
@@ -46,17 +47,22 @@ class UsbPortSequence {
  public:
   // The maximum length of a chain of USB devices (through hubs).
   static constexpr int kDeviceChainMaxLength = 6;
-  static absl::optional<UsbPortSequence> TryMake(const std::vector<int> &ports);
+  static absl::optional<UsbPortSequence> TryMake(absl::Span<const int> ports);
 
   int size() const;
 
   UsbPortSequence(const UsbPortSequence &other) = default;
   UsbPortSequence &operator=(const UsbPortSequence &other) = default;
 
-  UsbPortSequence Downstream(UsbPort port) const;
+  absl::optional<UsbPortSequence> Downstream(UsbPort port) const;
+
+  friend bool operator==(const UsbPortSequence &lhs,
+                         const UsbPortSequence &rhs);
+  friend bool operator!=(const UsbPortSequence &lhs,
+                         const UsbPortSequence &rhs);
 
  private:
-  UsbPortSequence(const std::vector<UsbPort> &ports);
+  UsbPortSequence(absl::Span<const UsbPort> ports);
   std::vector<UsbPort> ports_;
 };
 
