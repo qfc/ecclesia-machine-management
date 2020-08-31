@@ -152,3 +152,47 @@ cc_test(
         "@com_google_googletest//:gtest_main",
     ],
 )
+
+cc_library(
+    name = "usb",
+    srcs = [
+        "usb.cc",
+    ],
+    hdrs = [
+        "usb.h",
+    ],
+    visibility = ["//ecclesia:magent_library_users"],
+    deps = [
+        "//ecclesia/lib/logging",
+        "//ecclesia/lib/types:fixed_range_int",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/types:optional",
+    ],
+)
+
+cc_library(
+    name = "usb_sysfs",
+    srcs = [
+        "usb_sysfs.cc",
+    ],
+    hdrs = [
+        "usb_sysfs.h",
+    ],
+    visibility = ["//ecclesia:magent_library_users"],
+    deps = [
+        ":usb",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "usb_test",
+    size = "small",
+    srcs = ["usb_test.cc"],
+    deps = [
+        ":usb",
+        "@com_google_absl//absl/status",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
