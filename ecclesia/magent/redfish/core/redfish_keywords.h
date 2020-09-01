@@ -110,6 +110,7 @@ inline constexpr char kUpperThresholdCritical[] = "UpperThresholdCritical";
 inline constexpr char kUpperThresholdFatal[] = "UpperThresholdFatal";
 inline constexpr char kPhysicalContext[] = "PhysicalContext";
 inline constexpr char kTemperatures[] = "Temperatures";
+inline constexpr char kTemperaturesCount[] = "Temperatures@odata.count";
 inline constexpr char kEthernetIntf[] = "EthernetInterfaces";
 inline constexpr char kRdmaSupported[] = "RdmaSupported";
 inline constexpr char kMACAddress[] = "MACAddress";

@@ -44,7 +44,7 @@ class Thermal : public Resource {
     Json::Value json;
     AddStaticFields(&json);
     int num_sensors = system_model_->NumDimmThermalSensors();
-    json[kMembersCount] = num_sensors;
+    json[kTemperaturesCount] = num_sensors;
     auto *members = GetJsonArray(&json, kTemperatures);
 
     // CPU thermal is not listed here, because (at least some Intel) CPU only
