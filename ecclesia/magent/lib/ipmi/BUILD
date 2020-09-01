@@ -50,3 +50,14 @@ cc_library(
         "@ipmitool//:ipmi",
     ],
 )
+
+cc_library(
+    name = "ipmi_mock",
+    testonly = True,
+    hdrs = ["ipmi_mock.h"],
+    visibility = ["//ecclesia/magent/sysmodel/x86:__pkg__"],
+    deps = [
+        ":ipmi",
+        "@com_google_googletest//:gtest_main",
+    ],
+)

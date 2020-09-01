@@ -250,6 +250,7 @@ class IpmitoolImpl : public IpmiInterface {
           static_cast<uint8_t>((entity.logical << 7) | entity.instance)};
       fru.entity = fru_entity;
       fru.name = ReadFruName(fru_pair.second.get());
+      fru.fru_id = fru_pair.second->device_id;
       frus.push_back(fru);
     }
     return frus;
@@ -448,6 +449,7 @@ class IpmitoolImpl : public IpmiInterface {
     return absl::OkStatus();
   }
 
+  // A helper function to print the Board info given a FRU ID and its name.
   void printBoardInfo(uint16_t fru_id, uint8_t fru_id_string[16]) {
     std::vector<uint8_t> data(72);
     absl::Status status = ReadFru(fru_id, 0, absl::MakeSpan(data));

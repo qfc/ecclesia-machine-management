@@ -186,7 +186,7 @@ constexpr ecclesia::CpuMarginSensorParams cpu_margin_sensor_info[]{{"cpu0", 0},
 
 }  // namespace
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
   absl::ParseCommandLine(argc, argv);
 
   if (absl::GetFlag(FLAGS_assemblies_dir).empty()) {
@@ -228,6 +228,17 @@ int main(int argc, char **argv) {
         }));
   }
 
+  ecclesia::Ipmitool ipmi(ecclesia::GetIpmiCredentialFromPb(kMagentConfigPath));
+  auto ipmi_frus = ipmi.GetAllFrus();
+  // Add IPMI FRUs if there is any.
+  for (const auto& fru : ipmi_frus) {
+    fru_factories.push_back(ecclesia::SysmodelFruReaderFactory(
+        fru.name, [&]() -> std::unique_ptr<ecclesia::SysmodelFruReaderIntf> {
+          return absl::make_unique<ecclesia::IpmiSysmodelFruReader>(&ipmi,
+                                                                    fru.fru_id);
+        }));
+  }
+
   ecclesia::SysmodelParams params = {
       .field_translator =
           absl::make_unique<ecclesia::IndusSmbiosFieldTranslator>(),
@@ -242,9 +253,6 @@ int main(int argc, char **argv) {
 
   std::unique_ptr<ecclesia::SystemModel> system_model =
       absl::make_unique<ecclesia::SystemModel>(std::move(params));
-
-  ecclesia::Ipmitool ipmi(ecclesia::GetIpmiCredentialFromPb(kMagentConfigPath));
-  auto frus = ipmi.GetAllFrus();
 
   auto server = ecclesia::CreateServer(absl::GetFlag(FLAGS_port));
   ecclesia::IndusRedfishService redfish_service(

@@ -104,3 +104,14 @@ cc_library(
     hdrs = ["chassis.h"],
     visibility = ["//ecclesia:magent_library_users"],
 )
+
+cc_test(
+    name = "sysmodel_fru_test",
+    size = "small",
+    srcs = ["fru_test.cc"],
+    deps = [
+        ":sysmodel_fru",
+        "//ecclesia/magent/lib/ipmi:ipmi_mock",
+        "@com_google_googletest//:gtest_main",
+    ],
+)

@@ -55,6 +55,8 @@ class IpmiInterface {
     uint16_t record_id;
     EntityIdentifier entity;
     std::string name;
+    // This fru_id can be used as identification in ReadFru method.
+    uint16_t fru_id;
   };
 
   IpmiInterface() {}

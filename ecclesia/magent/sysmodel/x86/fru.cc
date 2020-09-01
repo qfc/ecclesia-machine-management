@@ -33,6 +33,7 @@
 #include "absl/types/span.h"
 #include "ecclesia/magent/lib/eeprom/smbus_eeprom.h"
 #include "ecclesia/magent/lib/fru/fru.h"
+#include "ecclesia/magent/lib/ipmi/ipmi.h"
 
 namespace ecclesia {
 
@@ -145,6 +146,29 @@ absl::string_view SysmodelFru::GetSerialNumber() const {
 }
 absl::string_view SysmodelFru::GetPartNumber() const {
   return fru_info_.part_number;
+}
+
+absl::optional<SysmodelFru> IpmiSysmodelFruReader::Read() {
+  if (cached_fru_.has_value()) return cached_fru_;
+
+  // 8 bytes header followed by 64 bytes boardinfo.
+  std::vector<uint8_t> data(72);
+  absl::Status status = ipmi_intf_->ReadFru(fru_id_, 0, absl::MakeSpan(data));
+  if (!status.ok()) {
+    return absl::nullopt;
+  }
+  VectorFruImageSource fru_image(absl::MakeSpan(data));
+  BoardInfoArea bia;
+  if (bia.FillFromImage(fru_image, 8) == 0) {
+    return absl::nullopt;
+  }
+  FruInfo fru_info;
+  fru_info.manufacturer = bia.manufacturer().GetDataAsString();
+  fru_info.product_name = bia.product_name().GetDataAsString();
+  fru_info.part_number = bia.part_number().GetDataAsString();
+  fru_info.serial_number = bia.serial_number().GetDataAsString();
+  cached_fru_.emplace(fru_info);
+  return cached_fru_;
 }
 
 absl::optional<SysmodelFru> SmbusEeprom2ByteAddrFruReader::Read() {

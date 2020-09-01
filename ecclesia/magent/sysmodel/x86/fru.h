@@ -85,13 +85,16 @@ class FileSysmodelFruReader : public SysmodelFruReaderIntf {
 // interface.
 class IpmiSysmodelFruReader : public SysmodelFruReaderIntf {
  public:
-  explicit IpmiSysmodelFruReader(IpmiInterface *ipmi_intf)
-      : ipmi_intf_(ipmi_intf) {}
+  // An IPMI FRU can be uniquely identified by its fru_id and read from the IPMI
+  // interface.
+  explicit IpmiSysmodelFruReader(IpmiInterface *ipmi_intf, uint16_t fru_id)
+      : ipmi_intf_(ipmi_intf), fru_id_(fru_id) {}
 
-  absl::optional<SysmodelFru> Read() override { return absl::nullopt; }
+  absl::optional<SysmodelFru> Read() override;
 
  private:
-  IpmiInterface *ipmi_intf_;
+  IpmiInterface *const ipmi_intf_;
+  const uint16_t fru_id_;
   // Stores the cached FRU that was read.
   absl::optional<SysmodelFru> cached_fru_;
 };
