@@ -157,11 +157,12 @@ void Sysmodel::QueryAllResourceInternal(
     if (std::unique_ptr<RedfishObject> chassis_obj = chassis.AsObject()) {
       if (std::unique_ptr<RedfishObject> thermal_obj =
          chassis_obj->GetNode(kRfPropertyThermal).AsObject()) {
-        auto temp_itr = thermal_obj->GetNode(kRfPropertyTemperatures)
-                        .AsIterable();
-        for (auto temp : *temp_itr) {
-          if (std::unique_ptr<RedfishObject> temp_obj = temp.AsObject()) {
-            result_callback(std::move(temp_obj));
+        if (auto temp_itr =
+                thermal_obj->GetNode(kRfPropertyTemperatures).AsIterable()) {
+          for (auto temp : *temp_itr) {
+            if (std::unique_ptr<RedfishObject> temp_obj = temp.AsObject()) {
+              result_callback(std::move(temp_obj));
+            }
           }
         }
       }
