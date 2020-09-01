@@ -42,6 +42,7 @@
 #include "absl/strings/str_format.h"
 #include "absl/types/span.h"
 #include "ecclesia/lib/codec/text.h"
+#include "ecclesia/lib/logging/logging.h"
 #include "ecclesia/magent/lib/fru/common_header.emb.h"
 #include "runtime/cpp/emboss_prelude.h"
 
@@ -157,8 +158,8 @@ static bool ReadFieldsFromFruAreaImage(const FruImageSource &image,
     fields->push_back(f);
     // Verify that the offset of the next field lies within the area.
     if (current_offset >= offset_limit) {
-      std::cerr << "Missing FRU area stop field before offset " << std::hex
-                << std::showbase << current_offset;
+      ErrorLog() << "Missing FRU area stop field before offset " << std::hex
+                 << std::showbase << current_offset;
       break;
     }
     // Get the start byte of the next field.
@@ -178,8 +179,8 @@ static bool FruChecksumFromImage(const FruImageSource &image, size_t offset,
     return false;
   }
   if (buf.size() != len) {
-    std::cerr << "Failed to read Fru, buf size: " << buf.size()
-              << " len: " << len << ". Aborting...\n";
+    ErrorLog() << "Failed to read Fru, buf size: " << buf.size()
+               << " len: " << len << ". Aborting...";
     abort();
   }
 
@@ -203,8 +204,8 @@ static bool FruChecksumFromByteArray(const std::vector<unsigned char> &image,
                                      size_t offset, size_t len,
                                      uint8_t *out_checksum) {
   if (offset + len > image.size()) {
-    std::cerr << "Got offset " << offset << " and  len " << len
-              << " which is greater than image size " << image.size();
+    ErrorLog() << "Got offset " << offset << " and  len " << len
+               << " which is greater than image size " << image.size();
     return false;
   }
   uint8_t sum = 0;
@@ -224,7 +225,7 @@ std::string FruField::GetDataAsString() const {
     case kTypeBcdPlus: {  // BCD plus decoding.
       auto status = ParseBcdPlus(data_, &value);
       if (!status.ok()) {
-        std::cerr << status.message();
+        ErrorLog() << status.message();
         return "";
       }
       return value;
@@ -232,7 +233,7 @@ std::string FruField::GetDataAsString() const {
     case kType6BitAscii: {  // 6-bits ASCII packed decoding
       auto status = ParseSixBitAscii(data_, &value);
       if (!status.ok()) {
-        std::cerr << status.message();
+        ErrorLog() << status.message();
         return "";
       }
       return value;
@@ -466,16 +467,16 @@ bool Fru::ValidateFruCommonHeader(std::vector<uint8_t> &common_header_bytes) {
   auto common_header = MakeCommonHeaderView(&common_header_bytes);
   uint8_t format_version = common_header.format_version().Read();
   if (format_version != kFormatVersion) {
-    std::cerr << "FRU common header has unsupported format version ("
-              << format_version << ")";
+    ErrorLog() << "FRU common header has unsupported format version ("
+               << format_version << ")";
     return false;
   }
 
   uint8_t common_header_checksum = FruChecksumFromBytes(
       common_header_bytes.data(), 0, CommonHeader::IntrinsicSizeInBytes());
   if (common_header_checksum != 0) {
-    std::cerr << "FRU common header has invalid checksum (should be 0, is "
-              << absl::implicit_cast<uint32_t>(common_header_checksum) << ")";
+    ErrorLog() << "FRU common header has invalid checksum (should be 0, is "
+               << absl::implicit_cast<uint32_t>(common_header_checksum) << ")";
     return false;
   }
 
@@ -487,7 +488,7 @@ size_t ChassisInfoArea::FillFromImage(const FruImageSource &fru_image,
   // Sanity check on given vector: we need at least two bytes at this point to
   // check format version and info area length.
   if (area_offset + 1 >= fru_image.Size()) {
-    std::cerr << "Given image too small";
+    ErrorLog() << "Given image too small";
     return kParseFailed;
   }
 
@@ -499,7 +500,7 @@ size_t ChassisInfoArea::FillFromImage(const FruImageSource &fru_image,
     return kParseFailed;
   }
   if (format_version_byte != kFormatVersion) {
-    std::cerr << "Chassis info area has unsupported format version";
+    ErrorLog() << "Chassis info area has unsupported format version";
     return kParseFailed;
   }
 
@@ -510,20 +511,20 @@ size_t ChassisInfoArea::FillFromImage(const FruImageSource &fru_image,
   }
   size_t size = FruChunksToBytes(size_byte);
   if (area_offset + size > fru_image.Size()) {
-    std::cerr << "Given image too small according to chassis info area "
-                 "length field";
+    ErrorLog() << "Given image too small according to chassis info area "
+                  "length field";
     return kParseFailed;
   }
 
   // Verify info area checksum.
   uint8_t checksum;
   if (!FruChecksumFromImage(fru_image, area_offset, size, &checksum)) {
-    std::cerr << "Could not compute chassis info area checksum";
+    ErrorLog() << "Could not compute chassis info area checksum";
     return kParseFailed;
   }
   if (checksum != 0) {
-    std::cerr << "Chassis info area checksum invalid (should be 0, is "
-              << checksum << ")";
+    ErrorLog() << "Chassis info area checksum invalid (should be 0, is "
+               << checksum << ")";
     return kParseFailed;
   }
 
@@ -542,7 +543,7 @@ size_t ChassisInfoArea::FillFromImage(const FruImageSource &fru_image,
   ReadFieldsFromFruAreaImage(fru_image, &current_offset, area_offset + size,
                              &fields);
   if (fields.size() < kRequiredFieldCount) {
-    std::cerr << "Field count in chassis info area is too small";
+    ErrorLog() << "Field count in chassis info area is too small";
     return kParseFailed;
   }
 
@@ -665,7 +666,7 @@ size_t BoardInfoArea::FillFromImage(const FruImageSource &fru_image,
   // Sanity check on given vector: we need at least two bytes at this point to
   // check format version and info area length.
   if (area_offset + 1 >= fru_image.Size()) {
-    std::cerr << "Given image too small";
+    ErrorLog() << "Given image too small";
     return kParseFailed;
   }
 
@@ -677,7 +678,7 @@ size_t BoardInfoArea::FillFromImage(const FruImageSource &fru_image,
     return kParseFailed;
   }
   if (format_version_byte != kFormatVersion) {
-    std::cerr << "Board info area has unsupported format version";
+    ErrorLog() << "Board info area has unsupported format version";
     return kParseFailed;
   }
 
@@ -688,20 +689,20 @@ size_t BoardInfoArea::FillFromImage(const FruImageSource &fru_image,
   }
   size_t size = FruChunksToBytes(size_byte);
   if (area_offset + size > fru_image.Size()) {
-    std::cerr << "Given image too small according to board info area "
-                 "length field";
+    ErrorLog() << "Given image too small according to board info area "
+                  "length field";
     return kParseFailed;
   }
 
   // Verify info area checksum.
   uint8_t checksum;
   if (!FruChecksumFromImage(fru_image, area_offset, size, &checksum)) {
-    std::cerr << "Could not compute board info area checksum";
+    ErrorLog() << "Could not compute board info area checksum";
     return kParseFailed;
   }
   if (checksum != 0) {
-    std::cerr << "Board info area checksum invalid (should be 0, is "
-              << checksum << ")";
+    ErrorLog() << "Board info area checksum invalid (should be 0, is "
+               << checksum << ")";
     return kParseFailed;
   }
 
@@ -734,7 +735,7 @@ size_t BoardInfoArea::FillFromImage(const FruImageSource &fru_image,
   ReadFieldsFromFruAreaImage(fru_image, &current_offset, area_offset + size,
                              &fields);
   if (fields.size() < kRequiredFieldCount) {
-    std::cerr << "Field count in board info area is too small";
+    ErrorLog() << "Field count in board info area is too small";
     return kParseFailed;
   }
 
@@ -829,7 +830,7 @@ size_t ProductInfoArea::FillFromImage(const FruImageSource &fru_image,
   // Sanity check on given vector: we need at least two bytes at this point to
   // check format version and info area length.
   if (area_offset + 1 >= fru_image.Size()) {
-    std::cerr << "Given image too small";
+    ErrorLog() << "Given image too small";
     return kParseFailed;
   }
 
@@ -841,7 +842,7 @@ size_t ProductInfoArea::FillFromImage(const FruImageSource &fru_image,
     return kParseFailed;
   }
   if (format_version_byte != kFormatVersion) {
-    std::cerr << "Product info area has unsupported format version";
+    ErrorLog() << "Product info area has unsupported format version";
     return kParseFailed;
   }
 
@@ -852,20 +853,20 @@ size_t ProductInfoArea::FillFromImage(const FruImageSource &fru_image,
   }
   size_t size = FruChunksToBytes(size_byte);
   if (area_offset + size > fru_image.Size()) {
-    std::cerr << "Given image too small according to product info area "
-                 "length field";
+    ErrorLog() << "Given image too small according to product info area "
+                  "length field";
     return kParseFailed;
   }
 
   // Verify info area checksum.
   uint8_t checksum;
   if (!FruChecksumFromImage(fru_image, area_offset, size, &checksum)) {
-    std::cerr << "Could not compute product info area checksum";
+    ErrorLog() << "Could not compute product info area checksum";
     return kParseFailed;
   }
   if (checksum != 0) {
-    std::cerr << "Product info area checksum invalid (should be 0, is "
-              << checksum << ")";
+    ErrorLog() << "Product info area checksum invalid (should be 0, is "
+               << checksum << ")";
     return kParseFailed;
   }
 
@@ -883,7 +884,7 @@ size_t ProductInfoArea::FillFromImage(const FruImageSource &fru_image,
   ReadFieldsFromFruAreaImage(fru_image, &current_offset, area_offset + size,
                              &fields);
   if (fields.size() < kRequiredFieldCount) {
-    std::cerr << "Field count in product info area is too small";
+    ErrorLog() << "Field count in product info area is too small";
     return kParseFailed;
   }
 
@@ -950,7 +951,7 @@ void MultiRecord::GetImage(bool end_of_list,
 bool MultiRecord::FillFromImage(const FruImageSource &fru_image,
                                 size_t area_offset, bool *end_of_list) {
   if (fru_image.Size() < area_offset + kMultiRecordHeaderSize) {
-    std::cerr << "MultiRecord too small.";
+    ErrorLog() << "MultiRecord too small.";
     return false;
   }
   std::vector<unsigned char> header;
@@ -967,8 +968,8 @@ bool MultiRecord::FillFromImage(const FruImageSource &fru_image,
   uint8_t header_checksum;
   FruChecksumFromByteArray(header, 0, kMultiRecordHeaderSize, &header_checksum);
   if (header_checksum) {
-    std::cerr << "MultiRecord Header Checksum failed got: " << std::hex
-              << absl::implicit_cast<int>(header_checksum);
+    ErrorLog() << "MultiRecord Header Checksum failed got: " << std::hex
+               << absl::implicit_cast<int>(header_checksum);
     return false;
   }
 
@@ -982,10 +983,10 @@ bool MultiRecord::FillFromImage(const FruImageSource &fru_image,
     FruChecksumFromByteArray(data, 0, data.size(), &record_sum);
     uint8_t checksum_result = record_checksum + record_sum;
     if (checksum_result) {
-      std::cerr << "MultiRecord Data Checksum failed got: " << std::hex
-                << absl::implicit_cast<int>(record_checksum) << " and sum "
-                << absl::implicit_cast<int>(record_sum)
-                << "result: " << absl::implicit_cast<int>(checksum_result);
+      ErrorLog() << "MultiRecord Data Checksum failed got: " << std::hex
+                 << absl::implicit_cast<int>(record_checksum) << " and sum "
+                 << absl::implicit_cast<int>(record_sum)
+                 << "result: " << absl::implicit_cast<int>(checksum_result);
       return false;
     }
     data_ = data;
@@ -1006,8 +1007,8 @@ bool MultiRecordArea::AddMultiRecord(const MultiRecord &multi_record) {
 bool MultiRecordArea::GetMultiRecord(size_t position,
                                      MultiRecord *record) const {
   if (position >= multi_records_.size()) {
-    std::cerr << "Position " << position << "is out of range of record list "
-              << multi_records_.size();
+    ErrorLog() << "Position " << position << "is out of range of record list "
+               << multi_records_.size();
     return false;
   }
   *record = multi_records_[position];
@@ -1016,8 +1017,8 @@ bool MultiRecordArea::GetMultiRecord(size_t position,
 
 bool MultiRecordArea::RemoveMultiRecord(size_t position) {
   if (position >= multi_records_.size()) {
-    std::cerr << "Position " << position << "is out of range of record list "
-              << multi_records_.size();
+    ErrorLog() << "Position " << position << "is out of range of record list "
+               << multi_records_.size();
     return false;
   }
   auto iter = multi_records_.begin() + position;
@@ -1028,8 +1029,8 @@ bool MultiRecordArea::RemoveMultiRecord(size_t position) {
 bool MultiRecordArea::UpdateMultiRecord(size_t position,
                                         const MultiRecord &record) {
   if (position >= multi_records_.size()) {
-    std::cerr << "Position " << position << "is out of range of record list "
-              << multi_records_.size();
+    ErrorLog() << "Position " << position << "is out of range of record list "
+               << multi_records_.size();
     return false;
   }
   multi_records_[position] = record;

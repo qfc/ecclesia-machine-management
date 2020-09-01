@@ -27,6 +27,7 @@
 #include <vector>
 
 #include "absl/memory/memory.h"
+#include "ecclesia/lib/logging/logging.h"
 #include "ecclesia/lib/smbios/bios.h"
 #include "ecclesia/lib/smbios/entry_point.emb.h"
 #include "ecclesia/lib/smbios/internal.h"
@@ -54,7 +55,7 @@ std::vector<uint8_t> GetBinaryFileContents(const std::string &file_path,
   std::ifstream file(file_path,
                      std::ios::in | std::ios::binary | std::ios::ate);
   if (!file.is_open()) {
-    std::cerr << "failed to open file " << file_path << std::endl;
+    ErrorLog() << "failed to open file " << file_path;
     return std::vector<uint8_t>();
   }
   auto size = file.tellg();
@@ -87,7 +88,7 @@ bool ExtractSmbiosStructure(uint8_t *start_address, std::size_t max_length,
       MakeSmbiosStructureView(start_address, max_length);
 
   if (!smbios_structure_view.Ok()) {
-    std::cerr << "Failure parsing smbios structure" << std::endl;
+    ErrorLog() << "Failure parsing smbios structure";
     return false;
   }
 
@@ -121,12 +122,12 @@ SmbiosReader::SmbiosReader(std::string entry_point_path,
 
   if (!(entry_point_view.entry_point_32bit().Ok() ||
         entry_point_view.entry_point_64bit().Ok())) {
-    std::cerr << "Failure parsing entry point structure" << std::endl;
+    ErrorLog() << "Failure parsing entry point structure";
     return;
   }
 
   if (!VerifyChecksum(entry_point_view)) {
-    std::cerr << "Entry point checksum verification failed." << std::endl;
+    ErrorLog() << "Entry point checksum verification failed.";
     return;
   }
 
@@ -148,7 +149,7 @@ SmbiosReader::SmbiosReader(std::string entry_point_path,
     std::size_t max_length = end_address - start_address + 1;
     SmbiosStructureInfo info;
     if (!ExtractSmbiosStructure(start_address, max_length, &info)) {
-      std::cerr << "Error extracting SMBIOS structure" << std::endl;
+      ErrorLog() << "Error extracting SMBIOS structure";
       return;
     }
     entries_.emplace_back(info);

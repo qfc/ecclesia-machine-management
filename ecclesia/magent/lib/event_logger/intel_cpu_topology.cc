@@ -25,6 +25,7 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_split.h"
 #include "absl/strings/string_view.h"
+#include "ecclesia/lib/logging/logging.h"
 
 namespace ecclesia {
 
@@ -51,24 +52,24 @@ std::vector<int> IntelCpuTopology::GetCpuTopology() {
   std::vector<int> ret;
 
   if (!ReadApifsFile<std::string>("online", &online).ok()) {
-    std::cerr << "Failed to find number of CPUs.";
+    ErrorLog() << "Failed to find number of CPUs.";
     return ret;
   }
   std::vector<absl::string_view> range = absl::StrSplit(online, '-');
 
   if (range.size() != 2) {
-    std::cerr << "Invalid CPU id range: " << online << '.';
+    ErrorLog() << "Invalid CPU id range: " << online << '.';
     return ret;
   }
 
   int from, to;
   if (!absl::SimpleAtoi(range[0], &from) || from != 0) {
-    std::cerr << "Invalid CPU id range, from: ", range[0];
+    ErrorLog() << "Invalid CPU id range, from: ", range[0];
     return ret;
   }
 
   if (!absl::SimpleAtoi(range[1], &to) || to <= 0) {
-    std::cerr << "Invalid CPU id range, to: ", range[1];
+    ErrorLog() << "Invalid CPU id range, to: ", range[1];
     return ret;
   }
 
@@ -85,7 +86,7 @@ std::vector<int> IntelCpuTopology::GetCpuTopology() {
 
 int IntelCpuTopology::GetSocketIdForLpu(int lpu) const {
   if (lpu >= (lpu_to_package_id_).size()) {
-    std::cerr << "LPU index out of range.";
+    ErrorLog() << "LPU index out of range.";
     return -1;
   }
   return lpu_to_package_id_[lpu];

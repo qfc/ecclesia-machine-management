@@ -22,6 +22,7 @@
 #include <utility>
 #include <vector>
 
+#include "ecclesia/lib/logging/logging.h"
 #include "ecclesia/lib/mcedecoder/bit_operator.h"
 #include "ecclesia/lib/mcedecoder/cpu_topology.h"
 #include "ecclesia/lib/mcedecoder/dimm_translator.h"
@@ -126,7 +127,7 @@ bool DecodeIntelMce(CpuIdentifier cpu_identifier, const MceLogMessage &raw_msg,
       DecodeSkylakeMce(dimm_translator, attributes, decoded_msg);
       break;
     default:
-      std::cerr << "Unsupported CPU identifier" << std::endl;
+      ecclesia::ErrorLog() << "Unsupported CPU identifier";
       return false;
   }
   if (!ParseIntelDecodedMceAttributes(*attributes, decoded_msg)) {

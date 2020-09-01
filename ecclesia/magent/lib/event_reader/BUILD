@@ -26,6 +26,8 @@ cc_library(
     visibility = ["//ecclesia:magent_library_users"],
     deps = [
         ":event_reader",
+        "//ecclesia/lib/logging",
+        "//ecclesia/lib/logging:posix",
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/synchronization",
@@ -44,6 +46,7 @@ cc_library(
     deps = [
         ":elog_emb",
         ":event_reader",
+        "//ecclesia/lib/logging",
         "//ecclesia/lib/smbios:reader",
         "//ecclesia/lib/smbios:structures_emb",
         "@com_google_absl//absl/types:optional",

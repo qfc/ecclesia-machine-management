@@ -27,6 +27,7 @@
 
 #include "absl/memory/memory.h"
 #include "absl/strings/string_view.h"
+#include "ecclesia/lib/logging/logging.h"
 #include "ecclesia/lib/smbios/structures.emb.h"
 
 namespace ecclesia {
@@ -76,7 +77,7 @@ class TableEntry {
   absl::string_view GetString(std::size_t num) const {
     if (num == 0) return absl::string_view();
     if (num > strings_.size()) {
-      std::cerr << "string number " << num << " out of bounds" << std::endl;
+      ErrorLog() << "string number " << num << " out of bounds";
       return absl::string_view();
     }
     return strings_[num - 1];

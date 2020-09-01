@@ -34,6 +34,8 @@
 #include "absl/types/span.h"
 #include "ecclesia/lib/cleanup/cleanup.h"
 #include "ecclesia/lib/io/ioctl.h"
+#include "ecclesia/lib/logging/logging.h"
+#include "ecclesia/lib/logging/posix.h"
 #include "ecclesia/magent/lib/io/smbus.h"
 
 namespace ecclesia {
@@ -74,7 +76,7 @@ int KernelSmbusAccess::OpenI2CMasterFile(const SmbusBus &bus) const {
   int ret = open(dev_filename.c_str(), O_RDWR);
   if (ret < 0) {
     ret = -errno;
-    std::cerr << "Unable to open " << dev_filename;
+    PosixErrorLog() << "Unable to open " << dev_filename;
   }
   return ret;
 }
@@ -92,9 +94,9 @@ int KernelSmbusAccess::OpenI2CSlaveFile(const SmbusLocation &loc) const {
   if (ioctl_->Call(fd, I2C_SLAVE, loc.address().value()) < 0) {
     auto fd_closer = FdCloser(fd);
     ret = -errno;
-    std::cerr << "SMBus device " << loc << ": "
-              << "Unable to set slave address to 0x" << std::hex
-              << loc.address().value();
+    PosixErrorLog() << "SMBus device " << loc << ": "
+                    << "Unable to set slave address to 0x" << std::hex
+                    << loc.address().value();
     return ret;
   }
   return fd;
@@ -132,7 +134,7 @@ absl::Status KernelSmbusAccess::ProbeDevice(const SmbusLocation &loc) const {
   }
 
   if (!status.ok()) {
-    std::cerr << status.message() << '\n';
+    ErrorLog() << status.message();
     return absl::NotFoundError(absl::StrFormat(
         "SMBus device %s: probe found no device.", absl::FormatStreamed(loc)));
   }

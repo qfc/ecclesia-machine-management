@@ -34,6 +34,8 @@
 #include "absl/synchronization/notification.h"
 #include "absl/time/time.h"
 #include "absl/types/optional.h"
+#include "ecclesia/lib/logging/logging.h"
+#include "ecclesia/lib/logging/posix.h"
 #include "ecclesia/magent/lib/event_reader/event_reader.h"
 #include "re2/re2.h"
 
@@ -52,8 +54,7 @@ FILE *InitSocket(const std::string &socket_path,
   // Open a unix domain socket.
   int socket_fd = socket_intf->CallSocket(AF_UNIX, SOCK_STREAM, 0);
   if (socket_fd == -1) {
-    std::cerr << "Failed opening socket to mced. errno = " << errno
-              << std::endl;
+    PosixErrorLog() << "Failed opening socket to mced";
     return nullptr;
   }
   // Connect to mced via it's published socket path
@@ -63,17 +64,18 @@ FILE *InitSocket(const std::string &socket_path,
   if (socket_intf->CallConnect(socket_fd,
                                reinterpret_cast<struct sockaddr *>(&remote),
                                sizeof(remote)) == -1) {
-    std::cerr << "Failed to connect to mced. errno = " << errno << std::endl;
+    PosixErrorLog() << "Failed to connect to mced.";
     socket_intf->CallClose(socket_fd);
     return nullptr;
   }
   // Construct a file stream from the file descriptor
   FILE *socket_file = socket_intf->CallFdopen(socket_fd, "r");
   if (!socket_file) {
-    std::cerr << "error during fdopen(). errno = " << errno << std::endl;
+    PosixErrorLog() << "error during fdopen().";
     socket_intf->CallClose(socket_fd);
     return nullptr;
   }
+  ErrorLog() << "Connected successfully to mced.";
   return socket_file;
 }
 
@@ -155,8 +157,8 @@ absl::optional<MachineCheck> ParseLine(absl::string_view mced_line) {
         mce.boot = signed_value;
         break;
       default:
-        std::cerr << "unknown mced key type: 0x" << std::hex
-                  << static_cast<int>(type);
+        ErrorLog() << "unknown mced key type: 0x" << std::hex
+                   << static_cast<int>(type);
     }
   }
   // Sanity check that we parsed a minimum amount of data.
@@ -170,8 +172,7 @@ absl::optional<MachineCheck> ReadOneMce(FILE *socket_file,
   char line_buffer[kMcedMaxLineLength];
 
   if (!socket_intf->CallFgets(line_buffer, kMcedMaxLineLength, socket_file)) {
-    std::cerr << "error reading line from socket_file. errno = " << errno
-              << std::endl;
+    PosixErrorLog() << "error reading line from socket_file.";
     return absl::nullopt;
   }
   absl::string_view mced_line(line_buffer);

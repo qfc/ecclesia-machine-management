@@ -18,6 +18,7 @@ cc_library(
     deps = [
         ":common_header_emb",
         "//ecclesia/lib/codec:text",
+        "//ecclesia/lib/logging",
         "@com_google_absl//absl/base",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings:str_format",

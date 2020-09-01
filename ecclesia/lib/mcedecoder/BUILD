@@ -62,6 +62,7 @@ cc_library(
         ":dimm_translator_interface",
         ":mce_messages",
         ":skylake_mce_decode",
+        "//ecclesia/lib/logging",
     ],
 )
 
@@ -73,6 +74,7 @@ cc_library(
         ":bit_operator",
         ":dimm_translator_interface",
         ":mce_messages",
+        "//ecclesia/lib/logging",
     ],
 )
 

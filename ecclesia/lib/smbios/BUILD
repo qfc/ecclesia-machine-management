@@ -47,6 +47,7 @@ cc_library(
     deps = [
         ":entry_point_emb",
         ":structures_emb",
+        "//ecclesia/lib/logging",
         "//ecclesia/lib/smbios/indus:indus_platform_translator",
         "//ecclesia/lib/smbios/interlaken:interlaken_platform_translator",
         "@com_google_absl//absl/memory",

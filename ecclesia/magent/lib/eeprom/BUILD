@@ -13,6 +13,7 @@ cc_library(
         "smbus_eeprom.h",
     ],
     deps = [
+        "//ecclesia/lib/logging",
         "//ecclesia/magent/lib/io:smbus",
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/status",

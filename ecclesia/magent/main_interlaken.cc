@@ -185,7 +185,7 @@ int main(int argc, char **argv) {
   absl::ParseCommandLine(argc, argv);
 
   if (absl::GetFlag(FLAGS_assemblies_dir).empty()) {
-    std::cerr << "a non-empty --assemblies_dir must be specified" << std::endl;
+    ecclesia::ErrorLog() << "a non-empty --assemblies_dir must be specified";
     return EXIT_FAILURE;
   }
 
@@ -237,7 +237,7 @@ int main(int argc, char **argv) {
     server->WaitForTermination();
     return EXIT_SUCCESS;
   } else {
-    std::cerr << "Failed to start the server." << std::endl;
+    ecclesia::ErrorLog() << "Failed to start the server.";
     return EXIT_FAILURE;
   }
 }

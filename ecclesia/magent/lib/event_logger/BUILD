@@ -78,6 +78,7 @@ cc_library(
     visibility = ["//ecclesia:magent_library_users"],
     deps = [
         "//ecclesia/lib/apifs",
+        "//ecclesia/lib/logging",
         "//ecclesia/lib/mcedecoder:cpu_topology",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",

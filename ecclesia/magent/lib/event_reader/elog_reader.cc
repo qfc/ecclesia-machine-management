@@ -27,6 +27,7 @@
 #include <queue>
 #include <string>
 
+#include "ecclesia/lib/logging/logging.h"
 #include "ecclesia/lib/smbios/structures.emb.h"
 #include "ecclesia/lib/smbios/system_event_log.h"
 #include "ecclesia/magent/lib/event_reader/elog.emb.h"
@@ -64,7 +65,7 @@ class ScopedMmap {
     }
     int fd = open(filename.c_str(), file_flags);
     if (fd < 0) {
-      std::cerr << "Unable to open " << filename << std::endl;
+      ErrorLog() << "Unable to open " << filename;
       return;
     }
     auto page_size = sysconf(_SC_PAGE_SIZE);
@@ -129,7 +130,7 @@ bool ValidateSmbiosSystemEventLog(SystemEventLog *system_event_log) {
 ElogReader::ElogReader(std::unique_ptr<SystemEventLog> system_event_log,
                        const std::string &mem_file) {
   if (!ValidateSmbiosSystemEventLog(system_event_log.get())) {
-    std::cerr << "Error validating smbios system event log structure";
+    ErrorLog() << "Error validating smbios system event log structure";
     return;
   }
   auto view = system_event_log->GetMessageView();
@@ -141,14 +142,14 @@ ElogReader::ElogReader(std::unique_ptr<SystemEventLog> system_event_log,
                         mem_file, elog_address);
 
   if (!memory_map.GetMappedAddress()) {
-    std::cerr << "Failure memory mapping " << mem_file << std::endl;
+    ErrorLog() << "Failure memory mapping " << mem_file;
     return;
   }
   // The log area starts with the header
   auto header_view =
       MakeElogHeaderView(memory_map.GetMappedAddress(), header_length);
   if (!header_view.Ok()) {
-    std::cerr << "Error parsing Elog Header" << std::endl;
+    ErrorLog() << "Error parsing Elog Header";
     return;
   }
   // Following the header are the log records

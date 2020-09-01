@@ -38,6 +38,8 @@ cc_library(
         ":smbus",
         "//ecclesia/lib/cleanup",
         "//ecclesia/lib/io:ioctl",
+        "//ecclesia/lib/logging",
+        "//ecclesia/lib/logging:posix",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings:str_format",
         "@com_google_absl//absl/types:span",

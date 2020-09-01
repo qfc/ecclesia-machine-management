@@ -28,6 +28,7 @@
 #include "absl/synchronization/mutex.h"
 #include "absl/types/optional.h"
 #include "absl/types/span.h"
+#include "ecclesia/lib/logging/logging.h"
 #include "ecclesia/magent/lib/io/smbus.h"
 
 namespace ecclesia {
@@ -52,9 +53,9 @@ absl::optional<int> SmbusEeprom2ByteAddr::SequentialRead(
 
   absl::Status status = device->Write8(hi, lo);
   if (!status.ok()) {
-    std::cout << "smbus device " << device->location()
-              << " Failed to write smbus register 0x" << std::hex << offset
-              << '\n';
+    ErrorLog() << "smbus device " << device->location()
+               << " Failed to write smbus register 0x" << std::hex << offset
+               << '\n';
     return absl::nullopt;
   }
 
@@ -63,9 +64,9 @@ absl::optional<int> SmbusEeprom2ByteAddr::SequentialRead(
   for (i = 0; i < len; ++i) {
     uint8_t val;
     if (!device->ReceiveByte(&val).ok()) {
-      std::cout << "smbus device " << device->location()
-                << " Failed to read smbus register 0x" << std::hex
-                << offset + i;
+      ErrorLog() << "smbus device " << device->location()
+                 << " Failed to read smbus register 0x" << std::hex
+                 << offset + i;
       return absl::nullopt;
     }
     value[i] = val;

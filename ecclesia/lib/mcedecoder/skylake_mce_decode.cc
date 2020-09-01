@@ -21,6 +21,7 @@
 #include <set>
 #include <vector>
 
+#include "ecclesia/lib/logging/logging.h"
 #include "ecclesia/lib/mcedecoder/bit_operator.h"
 #include "ecclesia/lib/mcedecoder/dimm_translator.h"
 #include "ecclesia/lib/mcedecoder/mce_messages.h"
@@ -72,8 +73,8 @@ bool DecodeSkylakeM2MBank(int imc_id, MceAttributes *attributes) {
   attributes->SetAttribute(MceAttributes::kImcId, imc_id);
   uint64_t misc_reg;
   if (!attributes->GetAttribute(MceAttributes::kMciMiscRegister, &misc_reg)) {
-    std::cerr << "Failed to get mci misc register to decode M2M bank."
-              << std::endl;
+    ecclesia::ErrorLog()
+        << "Failed to get mci misc register to decode M2M bank.";
     return false;
   }
   // IA32_MC7_MISC Bits(51:50): Physical memory channel which had the error.
@@ -119,8 +120,8 @@ bool DecodeSkylakeImcBank(int imc_id, int imc_channel_id,
                            imc_id * kSkylakeNumChannelPerImc + imc_channel_id);
   uint64_t misc_reg;
   if (!attributes->GetAttribute(MceAttributes::kMciMiscRegister, &misc_reg)) {
-    std::cerr << "Failed to get mci misc register to decode IMC bank."
-              << std::endl;
+    ecclesia::ErrorLog()
+        << "Failed to get mci misc register to decode IMC bank.";
     return false;
   }
   const BitRange kMciMiscFirstErrRankBits = Bits(50, 46);
@@ -188,8 +189,7 @@ bool DecodeSkylakeImcBank(int imc_id, int imc_channel_id,
 bool DecodeSkylakeBankAttributes(MceAttributes *attributes) {
   uint64_t bank_id;
   if (!attributes->GetAttribute(MceAttributes::kMceBank, &bank_id)) {
-    std::cerr << "Failed to get MCE bank to decode bank attribute."
-              << std::endl;
+    ecclesia::ErrorLog() << "Failed to get MCE bank to decode bank attribute.";
     return false;
   }
   SkylakeMceBank bank = static_cast<SkylakeMceBank>(bank_id);
@@ -232,8 +232,8 @@ bool DecodeSkylakeMemoryError(const MceAttributes &attributes,
   bool uncorrected;
   if (!attributes.GetAttribute(MceAttributes::kMciStatusUncorrected,
                                &uncorrected)) {
-    std::cerr << "Failed to get 'uncorrected' attribute to decode memory error."
-              << std::endl;
+    ecclesia::ErrorLog()
+        << "Failed to get 'uncorrected' attribute to decode memory error.";
     return false;
   }
   // Decode first memory error reported in the MCE.
@@ -288,20 +288,20 @@ bool DecodeSkylakeCpuError(const MceAttributes &attributes,
   CpuError cpu_error;
   int tmp_value;
   if (!attributes.GetAttribute(MceAttributes::kSocketId, &tmp_value)) {
-    std::cerr << "Failed to get socket ID to decode CPU error." << std::endl;
+    ecclesia::ErrorLog() << "Failed to get socket ID to decode CPU error.";
     return false;
   }
   cpu_error.cpu_error_bucket.socket = tmp_value;
   if (!attributes.GetAttribute(MceAttributes::kLpuId, &tmp_value)) {
-    std::cerr << "Failed to get LPU ID to decode CPU error." << std::endl;
+    ecclesia::ErrorLog() << "Failed to get LPU ID to decode CPU error.";
     return false;
   }
   cpu_error.cpu_error_bucket.lpu_id = tmp_value;
   bool uncorrected;
   if (!attributes.GetAttribute(MceAttributes::kMciStatusUncorrected,
                                &uncorrected)) {
-    std::cerr << "Failed to get 'uncorrected' attribute to decode CPU error."
-              << std::endl;
+    ecclesia::ErrorLog()
+        << "Failed to get 'uncorrected' attribute to decode CPU error.";
     return false;
   }
   cpu_error.cpu_error_bucket.correctable = !uncorrected;
