@@ -135,10 +135,15 @@ cc_library(
         ":pci",
         ":pci_location",
         "//ecclesia/lib/apifs",
+        "//ecclesia/lib/cleanup",
         "//ecclesia/lib/codec:endian",
+        "//ecclesia/lib/file:dir",
+        "//ecclesia/lib/logging",
         "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
         "@com_google_absl//absl/strings:str_format",
         "@com_google_absl//absl/types:span",
+        "@com_googlesource_code_re2//:re2",
     ],
 )
 

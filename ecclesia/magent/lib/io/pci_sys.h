@@ -44,10 +44,41 @@ class SysPciRegion : public PciRegion {
   absl::Status Read32(size_t offset, uint32_t *data) override;
   absl::Status Write32(size_t offset, uint32_t data) override;
 
+  absl::Status ReadBytes(uint64_t offset, absl::Span<char> value) override;
+  absl::Status WriteBytes(uint64_t offset,
+                          absl::Span<const char> value) override;
+
  private:
   std::string sys_root_;
   PciLocation loc_;
   ApifsFile apifs_;
+};
+
+class SysfsPci : PciFunction {
+ public:
+  explicit SysfsPci(PciLocation loc);
+  SysfsPci(std::string sys_dir, PciLocation loc);
+
+  bool Exists() override;
+  absl::Status GetBaseAddress(BarNum bar_id,
+                              PciFunction::BAR *out_bar) const override;
+
+  const SysPciRegion &GetConfig() { return config_; }
+
+ private:
+  ApifsDirectory sys_dir_;
+  SysPciRegion config_;
+};
+
+class SysfsPciDiscovery : PciDiscoveryInterface {
+ public:
+  SysfsPciDiscovery(std::string sys_dir);
+
+  absl::Status EnumerateAllDevices(
+      std::vector<PciLocation> *devices) const override;
+
+ private:
+  std::string sys_dir_;
 };
 
 }  // namespace ecclesia

@@ -57,6 +57,10 @@ class PciRegion {
   virtual absl::Status Read32(size_t offset, uint32_t *data) = 0;
   virtual absl::Status Write32(size_t offset, uint32_t data) = 0;
 
+  virtual absl::Status ReadBytes(uint64_t offset, absl::Span<char> value) = 0;
+  virtual absl::Status WriteBytes(uint64_t offset,
+                                  absl::Span<const char> value) = 0;
+
  private:
   const size_t size_;
 };
@@ -141,6 +145,46 @@ class PciDevice {
 
   std::unique_ptr<PciRegion> config_region_;
   PciConfigSpace config_;
+};
+
+
+class PciFunction {
+ public:
+  static constexpr uint8_t kMaxBars = 7;
+  static constexpr uint64_t kIoResourceIo = 0x100ull;
+  // Type of address used in a BAR.
+  enum BarType { kBarTypeMem, kBarTypeIo };
+
+  struct BAR {
+    BarType type;
+    uint64_t address;
+  };
+
+  // An identifier representing a BAR ID.
+  class BarNum : public FixedRangeInteger<BarNum, int, 0, 5> {
+   public:
+    explicit constexpr BarNum(BaseType value) : BaseType(value) {}
+  };
+
+  explicit PciFunction(PciLocation loc);
+  virtual ~PciFunction() = default;
+
+  // Check if Pci exists.
+  virtual bool Exists() = 0;
+
+  // Get address of a BAR register.
+  virtual absl::Status GetBaseAddress(BarNum bar_id, BAR *out_bar) const = 0;
+
+ protected:
+  PciLocation loc_;
+};
+
+class PciDiscoveryInterface {
+ public:
+  virtual ~PciDiscoveryInterface() = default;
+
+  virtual absl::Status EnumerateAllDevices(
+      std::vector<PciLocation> *devices) const = 0;
 };
 
 }  // namespace ecclesia
