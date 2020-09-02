@@ -19,8 +19,7 @@
 #ifndef ECCLESIA_MAGENT_LIB_IO_USB_H_
 #define ECCLESIA_MAGENT_LIB_IO_USB_H_
 
-#include <cstdint>
-#include <string>
+#include <optional>
 #include <vector>
 
 #include "absl/status/status.h"
@@ -47,13 +46,15 @@ class UsbPortSequence {
  public:
   // The maximum length of a chain of USB devices (through hubs).
   static constexpr int kDeviceChainMaxLength = 6;
-  static absl::optional<UsbPortSequence> TryMake(absl::Span<const int> ports);
 
-  int size() const;
+  // constructor for empty port sequence.
+  UsbPortSequence() = default;
+  static absl::optional<UsbPortSequence> TryMake(absl::Span<const int> ports);
 
   UsbPortSequence(const UsbPortSequence &other) = default;
   UsbPortSequence &operator=(const UsbPortSequence &other) = default;
 
+  int size() const;
   absl::optional<UsbPortSequence> Downstream(UsbPort port) const;
 
   friend bool operator==(const UsbPortSequence &lhs,
@@ -82,6 +83,9 @@ class UsbLocation {
   UsbLocation(UsbBusLocation bus, const UsbPortSequence &ports)
       : bus_(bus), ports_(ports) {}
 
+  friend bool operator==(const UsbLocation &lhs, const UsbLocation &rhs);
+  friend bool operator!=(const UsbLocation &lhs, const UsbLocation &rhs);
+
  private:
   // The number of the bus behind a single controller. 1-255.
   UsbBusLocation bus_;
@@ -92,7 +96,7 @@ class UsbLocation {
 // An interface to access USB devices.
 class UsbDiscoveryInterface {
  public:
-  virtual ~UsbDiscoveryInterface();
+  virtual ~UsbDiscoveryInterface() = default;
 
   // Enumerate all USB devices and push their location information into the
   // provided 'devices' vector.

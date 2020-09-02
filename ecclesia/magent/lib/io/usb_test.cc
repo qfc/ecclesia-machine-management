@@ -16,7 +16,8 @@
 
 #include "ecclesia/magent/lib/io/usb.h"
 
-#include "gmock/gmock.h"
+#include <optional>
+
 #include "gtest/gtest.h"
 
 namespace ecclesia {

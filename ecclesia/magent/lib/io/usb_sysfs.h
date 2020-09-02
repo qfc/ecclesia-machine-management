@@ -17,7 +17,11 @@
 #ifndef ECCLESIA_MAGENT_LIB_IO_USB_SYSFS_H_
 #define ECCLESIA_MAGENT_LIB_IO_USB_SYSFS_H_
 
+#include <string>
+#include <vector>
+
 #include "absl/status/status.h"
+#include "absl/strings/string_view.h"
 #include "ecclesia/magent/lib/io/usb.h"
 
 namespace ecclesia {

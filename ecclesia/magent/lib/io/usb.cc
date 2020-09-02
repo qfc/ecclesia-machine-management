@@ -17,9 +17,16 @@
 #include "ecclesia/magent/lib/io/usb.h"
 
 #include <algorithm>
+#include <iterator>
+#include <tuple>
+#include <utility>
+#include <vector>
 
 #include "absl/types/optional.h"
+#include "absl/types/span.h"
+#include "ecclesia/lib/logging/globals.h"
 #include "ecclesia/lib/logging/logging.h"
+#include "ecclesia/lib/types/fixed_range_int.h"
 
 namespace ecclesia {
 
@@ -69,6 +76,9 @@ absl::optional<UsbPortSequence> UsbPortSequence::Downstream(
 }
 
 bool operator==(const UsbPortSequence &lhs, const UsbPortSequence &rhs) {
+  if (lhs.size() != rhs.size()) {
+    return false;
+  }
   return std::equal(lhs.ports_.begin(), lhs.ports_.begin() + lhs.size(),
                     rhs.ports_.begin());
 }
@@ -77,4 +87,11 @@ bool operator!=(const UsbPortSequence &lhs, const UsbPortSequence &rhs) {
   return !(lhs == rhs);
 }
 
+bool operator==(const UsbLocation &lhs, const UsbLocation &rhs) {
+  return std::tie(lhs.bus_, lhs.ports_) == std::tie(rhs.bus_, rhs.ports_);
+}
+
+bool operator!=(const UsbLocation &lhs, const UsbLocation &rhs) {
+  return !(lhs == rhs);
+}
 }  // namespace ecclesia

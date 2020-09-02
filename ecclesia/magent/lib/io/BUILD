@@ -189,8 +189,12 @@ cc_library(
     visibility = ["//ecclesia:magent_library_users"],
     deps = [
         ":usb",
+        "//ecclesia/lib/apifs",
+        "//ecclesia/lib/file:path",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/types:optional",
+        "@com_googlesource_code_re2//:re2",
     ],
 )
 
@@ -200,6 +204,18 @@ cc_test(
     srcs = ["usb_test.cc"],
     deps = [
         ":usb",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "usb_sysfs_test",
+    size = "small",
+    srcs = ["usb_sysfs_test.cc"],
+    deps = [
+        ":usb",
+        ":usb_sysfs",
+        "//ecclesia/lib/file:test_filesystem",
         "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
     ],
