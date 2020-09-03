@@ -52,6 +52,7 @@ cc_library(
         "//ecclesia/lib/smbios:structures_emb",
         "//ecclesia/magent/lib/event_logger:intel_cpu_topology",
         "@com_google_absl//absl/status",
+        "@com_google_absl//absl/status:statusor",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/strings:str_format",
         "@com_google_absl//absl/types:optional",

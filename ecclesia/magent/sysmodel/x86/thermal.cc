@@ -59,11 +59,10 @@ std::vector<PciThermalSensor> CreatePciThermalSensors(
   return sensors;
 }
 
-CpuMarginSensor::CpuMarginSensor(const CpuMarginSensorParams& params)
+CpuMarginSensor::CpuMarginSensor(const CpuMarginSensorParams &params)
     // Right now we don’t know the upper critical limit for (at least some
     // Intel) CPUs. So it is set to some arbitrary number.
-    : ThermalSensor(params.name, 0),
-      lpu_path_(absl::nullopt) {
+    : ThermalSensor(params.name, 0), lpu_path_(absl::nullopt) {
   // Determine the LPU index to use.
   IntelCpuTopology top;
   std::vector<int> lpus = top.GetLpusForSocketId(params.cpu_index);
@@ -73,11 +72,14 @@ CpuMarginSensor::CpuMarginSensor(const CpuMarginSensorParams& params)
 }
 
 absl::optional<int> CpuMarginSensor::Read() {
-  if (!lpu_path_) { return absl::nullopt; }
+  if (!lpu_path_) {
+    return absl::nullopt;
+  }
 
   Msr msr(*lpu_path_);
-  uint64_t val;
-  if (!msr.Read(kMsrIa32PackageThermStatus, &val).ok()) {
+  absl::StatusOr<uint64_t> maybe_therm_status =
+      msr.Read(kMsrIa32PackageThermStatus);
+  if (!maybe_therm_status.ok()) {
     return absl::nullopt;
   }
 
@@ -89,7 +91,7 @@ absl::optional<int> CpuMarginSensor::Read() {
   // if (!(val & (1 << 31))) { return absl::nullopt; }
 
   // Readout is in bits 22:16.
-  uint64_t reading = (val >> 16) & 0x7f;
+  uint64_t reading = (*maybe_therm_status >> 16) & 0x7f;
   return reading;
 }
 

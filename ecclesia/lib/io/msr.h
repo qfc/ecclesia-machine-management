@@ -20,10 +20,11 @@
 #define ECCLESIA_LIB_IO_MSR_H_
 
 #include <cstdint>
-#include <filesystem>
 #include <string>
 
 #include "absl/status/status.h"
+#include "absl/status/statusor.h"
+#include "ecclesia/lib/apifs/apifs.h"
 
 namespace ecclesia {
 
@@ -39,7 +40,7 @@ class Msr {
   Msr &operator=(const Msr &other) = delete;
 
   // Read the value from a specific MSR.
-  absl::Status Read(uint64_t reg, uint64_t *value) const;
+  absl::StatusOr<uint64_t> Read(uint64_t reg) const;
 
   // Write a value to a specific MSR.
   absl::Status Write(uint64_t reg, uint64_t value) const;
@@ -48,7 +49,7 @@ class Msr {
   // Indicates if the given path exists.
   bool Exists() const;
 
-  std::filesystem::path path_;
+  ApifsFile msr_file_;
 };
 
 }  // namespace ecclesia

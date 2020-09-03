@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "absl/status/status.h"
+#include "absl/status/statusor.h"
 #include "absl/strings/numbers.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_format.h"
@@ -36,40 +37,40 @@
 #include "re2/re2.h"
 
 namespace ecclesia {
-
 namespace {
 
-static const LazyRE2 kCpuRegex = {"^CPU\\d+"};
+const LazyRE2 kCpuRegex = {"^CPU\\d+"};
 
-static const int kIntelPPINCapabilityBit = 23;
+constexpr int kIntelPPINCapabilityBit = 23;
 
-bool GetCpuSerialNumberFromMsr(int socket_id, uint64_t *serial) {
+absl::StatusOr<uint64_t> GetCpuSerialNumberFromMsr(int socket_id) {
   IntelCpuTopology top;
   std::vector<int> lpus = top.GetLpusForSocketId(socket_id);
   if (lpus.empty()) {
-    return false;
+    return absl::InternalError(absl::StrFormat(
+        "Unable to find any LPUs associated with socket %d", socket_id));
   }
 
   Msr msr(absl::StrCat("/dev/cpu/", lpus[0], "/msr"));
 
   // kMsrIa32PlatformInfo Msr bit 23 is set for Intel cpus that have PPIN.
-  uint64_t val;
-  if (!msr.Read(kMsrIa32PlatformInfo, &val).ok()) {
-    return false;
+  absl::StatusOr<uint64_t> maybe_platform_info = msr.Read(kMsrIa32PlatformInfo);
+  if (!maybe_platform_info.ok()) {
+    return maybe_platform_info.status();
   }
 
-  if (!(val & (1 << kIntelPPINCapabilityBit))) {
+  if (!(*maybe_platform_info & (1 << kIntelPPINCapabilityBit))) {
     // This cpu does not have PPIN.
-    return false;
+    return absl::UnimplementedError("CPU does not support PPIN");
   }
 
   //  Write 2 to PPIN_CTL (MSR 0x4e) to enable PPIN read.
-  if (!msr.Write(kMsrIa32PpinCtl, 0x2).ok()) {
-    return false;
+  if (absl::Status status = msr.Write(kMsrIa32PpinCtl, 0x2); !status.ok()) {
+    return status;
   }
 
   // Read the PPIN (MSR 0x4f)
-  return msr.Read(kMsrIa32Ppin, serial).ok();
+  return msr.Read(kMsrIa32Ppin);
 }
 
 int GetCpuSocketId(const ProcessorInformation &processor) {
@@ -92,9 +93,10 @@ std::string GetCpuSerialNumber(const ProcessorInformation &processor) {
   if (processor.IsIntelProcessor()) {
     int socket_id;
     if ((socket_id = GetCpuSocketId(processor)) != -1) {
-      uint64_t serial;
-      if (GetCpuSerialNumberFromMsr(socket_id, &serial)) {
-        return absl::StrFormat("0x%016x", serial);
+      absl::StatusOr<uint64_t> maybe_serial =
+          GetCpuSerialNumberFromMsr(socket_id);
+      if (maybe_serial.ok()) {
+        return absl::StrFormat("0x%016x", *maybe_serial);
       }
     }
   }

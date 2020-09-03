@@ -18,12 +18,15 @@
 
 #include <cstdint>
 
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
-#include "absl/status/status.h"
 #include "ecclesia/lib/file/test_filesystem.h"
+#include "ecclesia/lib/testing/status.h"
 
 namespace ecclesia {
 namespace {
+
+using ::testing::Not;
 
 class MsrTest : public ::testing::Test {
  protected:
@@ -40,33 +43,23 @@ class MsrTest : public ::testing::Test {
 };
 
 TEST(Msr, TestMsrNotExist) {
-  uint64_t out_msr_data;
   Msr msr_non_exist(GetTestTempdirPath("dev/cpu/400/msr"));
-  EXPECT_FALSE(msr_non_exist.Read(2, &out_msr_data).ok());
+  EXPECT_THAT(msr_non_exist.Read(2), Not(IsOk()));
 
-  EXPECT_FALSE(msr_non_exist.Write(1, 0xDEADBEEFDEADBEEF).ok());
+  EXPECT_THAT(msr_non_exist.Write(1, 0xDEADBEEFDEADBEEF), Not(IsOk()));
 }
 
 TEST_F(MsrTest, TestReadWriteOk) {
-  uint64_t out_msr_data;
-  EXPECT_TRUE(msr_.Read(2, &out_msr_data).ok());
-  EXPECT_EQ(0x0a0a0a0a0a0a0a0a, out_msr_data);
+  EXPECT_THAT(msr_.Read(2), IsOkAndHolds(0x0a0a0a0a0a0a0a0a));
 
   uint64_t msr_data = 0xDEADBEEFDEADBEEF;
-  EXPECT_TRUE(msr_.Write(1, msr_data).ok());
-  EXPECT_TRUE(msr_.Read(1, &out_msr_data).ok());
-  EXPECT_EQ(msr_data, out_msr_data);
+  EXPECT_THAT(msr_.Write(1, msr_data), IsOk());
+  EXPECT_THAT(msr_.Read(1), IsOkAndHolds(msr_data));
 }
 
-TEST_F(MsrTest, TestSeekFail) {
-  uint64_t out_msr_data;
-  EXPECT_FALSE(msr_.Read(20, &out_msr_data).ok());
-}
+TEST_F(MsrTest, TestSeekFail) { EXPECT_THAT(msr_.Read(20), Not(IsOk())); }
 
-TEST_F(MsrTest, TestReadFail) {
-  uint64_t out_msr_data;
-  EXPECT_FALSE(msr_.Read(5, &out_msr_data).ok());
-}
+TEST_F(MsrTest, TestReadFail) { EXPECT_THAT(msr_.Read(5), Not(IsOk())); }
 
 }  // namespace
 }  // namespace ecclesia

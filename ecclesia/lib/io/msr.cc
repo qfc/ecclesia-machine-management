@@ -18,45 +18,34 @@
 
 #include <array>
 #include <cstdint>
-#include <filesystem>
 #include <string>
-#include <system_error>
 #include <utility>
 
 #include "absl/status/status.h"
+#include "absl/status/statusor.h"
 #include "absl/types/span.h"
 #include "ecclesia/lib/apifs/apifs.h"
 #include "ecclesia/lib/codec/endian.h"
 
 namespace ecclesia {
 
-namespace fs = ::std::filesystem;
+Msr::Msr(std::string path) : msr_file_(std::move(path)) {}
 
-Msr::Msr(std::string path) : path_(std::move(path)) {}
+bool Msr::Exists() const { return msr_file_.Exists(); }
 
-bool Msr::Exists() const {
-  std::error_code ec;  // Ignored on error, we return false.
-  return fs::exists(path_, ec);
-}
-
-absl::Status Msr::Read(uint64_t reg, uint64_t *value) const {
-  ApifsFile apifs(path_);
+absl::StatusOr<uint64_t> Msr::Read(uint64_t reg) const {
   std::array<char, sizeof(uint64_t)> res;
-  absl::Status status = apifs.SeekAndRead(reg, absl::MakeSpan(res));
+  absl::Status status = msr_file_.SeekAndRead(reg, absl::MakeSpan(res));
   if (!status.ok()) {
     return status;
   }
-
-  *value = LittleEndian::Load64(res.data());
-  return absl::OkStatus();
+  return LittleEndian::Load64(res.data());
 }
 
 absl::Status Msr::Write(uint64_t reg, uint64_t value) const {
   char buffer[8];
   LittleEndian::Store64(value, buffer);
-
-  ApifsFile apifs(path_);
-  return apifs.SeekAndWrite(reg, absl::MakeConstSpan(buffer));
+  return msr_file_.SeekAndWrite(reg, absl::MakeConstSpan(buffer));
 }
 
 }  // namespace ecclesia
