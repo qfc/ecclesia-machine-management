@@ -18,6 +18,7 @@
 #define ECCLESIA_MAGENT_REDFISH_INDUS_CHASSIS_H_
 
 #include <string>
+#include <vector>
 
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"

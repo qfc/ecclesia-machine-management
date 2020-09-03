@@ -21,7 +21,6 @@
 
 #include "absl/strings/string_view.h"
 #include "ecclesia/lib/version/version.h"
-#include "ecclesia/magent/redfish/core/json_helper.h"
 #include "ecclesia/magent/redfish/core/redfish_keywords.h"
 #include "ecclesia/magent/redfish/core/resource.h"
 #include "json/value.h"

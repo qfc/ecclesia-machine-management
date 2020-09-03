@@ -18,7 +18,10 @@
 
 #include <filesystem>
 #include <fstream>
+#include <functional>
 #include <string>
+#include <utility>
+#include <vector>
 
 #include "absl/container/flat_hash_map.h"
 #include "absl/strings/match.h"
@@ -53,10 +56,14 @@ Json::Value ReadJsonFile(const std::string &file_path) {
   return Json::Value();
 }
 
-// Given a path to a directory containing json files that represent assembly
-// resources, this function loads up the assemblies into dictionary,
+// Given a path to a directory containing JSON files that represent assembly
+// resources, this function loads up the static data into a dictionary and then
+// applies the given modifiers to the dictionary.
 absl::flat_hash_map<std::string, Json::Value> GetAssemblies(
-    absl::string_view dir_path) {
+    absl::string_view dir_path,
+    std::vector<Assembly::AssemblyModifier> assembly_modifiers) {
+  // First, load static JSON files into the assemblies which is an URL to JSON
+  // value mapping.
   absl::flat_hash_map<std::string, Json::Value> assemblies;
   for (auto &p : std::filesystem::directory_iterator(std::string(dir_path))) {
     std::string file_path = std::string(p.path());
@@ -70,14 +77,20 @@ absl::flat_hash_map<std::string, Json::Value> GetAssemblies(
       }
     }
   }
+  // Second, modify the static assemblies loaded from the files.
+  for (auto &modifier : assembly_modifiers) {
+    modifier(assemblies);
+  }
   return assemblies;
 }
 
 }  // namespace
 
-Assembly::Assembly(absl::string_view assemblies_dir)
+Assembly::Assembly(absl::string_view assemblies_dir,
+                   std::vector<AssemblyModifier> assembly_modifiers)
     : Resource(kAssemblyUriPattern),
-      assemblies_(GetAssemblies(assemblies_dir)) {}
+      assemblies_(
+          GetAssemblies(assemblies_dir, std::move(assembly_modifiers))) {}
 
 void Assembly::RegisterRequestHandler(HTTPServerInterface *server) {
   server->RegisterRequestDispatcher(

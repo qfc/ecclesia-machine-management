@@ -19,7 +19,6 @@
 
 #include <string>
 
-#include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "ecclesia/magent/redfish/core/json_helper.h"
 #include "ecclesia/magent/redfish/core/redfish_keywords.h"

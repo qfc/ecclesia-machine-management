@@ -228,12 +228,13 @@ int main(int argc, char** argv) {
         }));
   }
 
+  // Construct an IPMI interface to Sleipnir BMC and add FRUs if there is any.
   ecclesia::Ipmitool ipmi(ecclesia::GetIpmiCredentialFromPb(kMagentConfigPath));
   auto ipmi_frus = ipmi.GetAllFrus();
-  // Add IPMI FRUs if there is any.
   for (const auto& fru : ipmi_frus) {
     fru_factories.push_back(ecclesia::SysmodelFruReaderFactory(
-        fru.name, [&]() -> std::unique_ptr<ecclesia::SysmodelFruReaderIntf> {
+        absl::StrCat("sleipnir_", fru.name),
+        [&]() -> std::unique_ptr<ecclesia::SysmodelFruReaderIntf> {
           return absl::make_unique<ecclesia::IpmiSysmodelFruReader>(&ipmi,
                                                                     fru.fru_id);
         }));

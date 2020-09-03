@@ -26,7 +26,6 @@
 #include "tensorflow_serving/util/net_http/server/public/httpserver_interface.h"
 #include "tensorflow_serving/util/net_http/server/public/response_code_enum.h"
 #include "tensorflow_serving/util/net_http/server/public/server_request_interface.h"
-#include "re2/re2.h"
 
 namespace ecclesia {
 // When a redfish resource is a part of a collection, prefer to derive from

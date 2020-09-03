@@ -17,7 +17,9 @@
 #ifndef ECCLESIA_MAGENT_REDFISH_CORE_ASSEMBLY_H_
 #define ECCLESIA_MAGENT_REDFISH_CORE_ASSEMBLY_H_
 
+#include <functional>
 #include <string>
+#include <vector>
 
 #include "absl/container/flat_hash_map.h"
 #include "absl/strings/string_view.h"
@@ -39,7 +41,25 @@ namespace ecclesia {
 // valid assemblies.
 class Assembly : public Resource {
  public:
-  explicit Assembly(absl::string_view assemblies_dir);
+  // The modifier can be used to change the static JSON data loaded from files.
+  // For example, adding some dynamic data like part and serial numbers, or
+  // modifying the assemblies based on some conditions like a plugin is detected
+  // or not. Please note the modifier can make any change without restriction.
+  // It's caller's responsibility to ensure the modifier makes the change as
+  // expected.
+  using AssemblyModifier =
+      std::function<void(absl::flat_hash_map<std::string, Json::Value> &)>;
+
+  // This constructor simply loads all the JSON files in the assemblies_dir
+  // without making any change. The static content in the JSON files will be
+  // responded if a request URL is matched.
+  explicit Assembly(absl::string_view assemblies_dir)
+      : Assembly(assemblies_dir, {}) {}
+
+  // This constructor loads all the JSON files in the assemblies_dir and then
+  // applies the given modifiers one by one to the loaded assemblies content.
+  Assembly(absl::string_view assemblies_dir,
+           std::vector<AssemblyModifier> assembly_modifiers);
 
   void RegisterRequestHandler(HTTPServerInterface *server) override;
 

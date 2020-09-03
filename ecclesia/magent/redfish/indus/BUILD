@@ -6,6 +6,7 @@ cc_library(
         "chassis.cc",
         "memory_metrics.cc",
         "processor_metrics.cc",
+        "redfish_service.cc",
     ],
     hdrs = [
         "chassis.h",
@@ -28,6 +29,7 @@ cc_library(
     ],
     visibility = ["//ecclesia:magent_frontend_users"],
     deps = [
+        "//ecclesia/lib/logging",
         "//ecclesia/lib/mcedecoder:cpu_topology",
         "//ecclesia/lib/version",
         "//ecclesia/magent/lib/event_logger:intel_cpu_topology",
