@@ -24,6 +24,7 @@
 #include <cstdint>
 #include <string>
 
+#include "absl/status/statusor.h"
 #include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
 #include "absl/types/span.h"
@@ -50,7 +51,7 @@ class MappedMemory {
   // version will create a shared mapping and support the full set of accessors.
   // There is no mechanism to create a private mapping which is writable.
   enum class Type { kReadOnly, kReadWrite };
-  static absl::optional<MappedMemory> Create(const std::string &path,
+  static absl::StatusOr<MappedMemory> Create(const std::string &path,
                                              size_t offset, size_t size,
                                              Type type);
 

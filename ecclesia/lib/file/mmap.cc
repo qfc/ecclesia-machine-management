@@ -23,6 +23,9 @@
 #include <cstddef>
 #include <string>
 
+#include "absl/status/status.h"
+#include "absl/status/statusor.h"
+#include "absl/strings/str_format.h"
 #include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
 #include "ecclesia/lib/cleanup/cleanup.h"
@@ -31,7 +34,7 @@
 
 namespace ecclesia {
 
-absl::optional<MappedMemory> MappedMemory::Create(const std::string &path,
+absl::StatusOr<MappedMemory> MappedMemory::Create(const std::string &path,
                                                   size_t offset, size_t size,
                                                   Type type) {
   // Parameters for the open() and mmap() calls.
@@ -54,7 +57,8 @@ absl::optional<MappedMemory> MappedMemory::Create(const std::string &path,
   // Open the file for reading.
   const int fd = open(path.c_str(), open_flags);
   if (fd == -1) {
-    return absl::nullopt;
+    return absl::InternalError(
+        absl::StrFormat("unable to open the file: %s", path));
   }
   auto fd_closer = FdCloser(fd);
   // Determine the offset and length to use for the memory mapping, rounding
@@ -65,7 +69,8 @@ absl::optional<MappedMemory> MappedMemory::Create(const std::string &path,
   // Create the memory mapping.
   void *addr = mmap(nullptr, true_size, mmap_prot, mmap_flags, fd, true_offset);
   if (addr == MAP_FAILED) {
-    return absl::nullopt;
+    return absl::InternalError(
+        absl::StrFormat("unable to mmap the file: %s", path));
   }
   // We have a good mapping. Note that we no longer need to keep the fd open.
   return MappedMemory({addr, true_size, user_offset, size, writable});

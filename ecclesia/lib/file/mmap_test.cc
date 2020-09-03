@@ -22,10 +22,12 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "absl/status/statusor.h"
 #include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
 #include "absl/types/span.h"
 #include "ecclesia/lib/file/test_filesystem.h"
+#include "ecclesia/lib/testing/status.h"
 
 namespace ecclesia {
 namespace {
@@ -33,6 +35,7 @@ namespace {
 using ::testing::ElementsAreArray;
 using ::testing::Eq;
 using ::testing::IsEmpty;
+using ::testing::Not;
 
 class MappedMemoryTest : public ::testing::Test {
  protected:
@@ -45,7 +48,7 @@ TEST_F(MappedMemoryTest, ReadOnlyWorksOnSimpleFile) {
   fs_.CreateFile("/a.txt", "0123456789\n");
   auto maybe_mmap = MappedMemory::Create(fs_.GetTruePath("/a.txt"), 0, 11,
                                          MappedMemory::Type::kReadOnly);
-  ASSERT_TRUE(maybe_mmap.has_value());
+  ASSERT_THAT(maybe_mmap, IsOk());
 
   MappedMemory mmap = std::move(*maybe_mmap);
   EXPECT_EQ(mmap.MemoryAsStringView(), "0123456789\n");
@@ -67,14 +70,14 @@ TEST_F(MappedMemoryTest, ReadOnlyWorksOnSimpleFile) {
 TEST_F(MappedMemoryTest, ReadOnlyFailsOnMissingFile) {
   EXPECT_THAT(MappedMemory::Create(fs_.GetTruePath("/b.txt"), 0, 11,
                                    MappedMemory::Type::kReadOnly),
-              Eq(absl::nullopt));
+              Not(IsOk()));
 }
 
 TEST_F(MappedMemoryTest, ReadOnlyWorksOnSmallerFile) {
   fs_.CreateFile("/c.txt", "0123456789\n");
   auto maybe_mmap = MappedMemory::Create(fs_.GetTruePath("/c.txt"), 0, 64,
                                          MappedMemory::Type::kReadOnly);
-  ASSERT_TRUE(maybe_mmap.has_value());
+  ASSERT_THAT(maybe_mmap, IsOk());
 
   MappedMemory mmap = std::move(*maybe_mmap);
   EXPECT_EQ(mmap.MemoryAsStringView().size(), 64);
@@ -87,7 +90,7 @@ TEST_F(MappedMemoryTest, ReadOnlyWorksWithOffset) {
   fs_.CreateFile("/d.txt", "0123456789\n");
   auto maybe_mmap = MappedMemory::Create(fs_.GetTruePath("/d.txt"), 5, 6,
                                          MappedMemory::Type::kReadOnly);
-  ASSERT_TRUE(maybe_mmap.has_value());
+  ASSERT_THAT(maybe_mmap, IsOk());
 
   MappedMemory mmap = std::move(*maybe_mmap);
   EXPECT_EQ(mmap.MemoryAsStringView(), "56789\n");
@@ -97,7 +100,7 @@ TEST_F(MappedMemoryTest, ReadWriteWorksOnSimpleFile) {
   fs_.CreateFile("/e.txt", "0123456789\n");
   auto maybe_mmap = MappedMemory::Create(fs_.GetTruePath("/e.txt"), 0, 11,
                                          MappedMemory::Type::kReadWrite);
-  ASSERT_TRUE(maybe_mmap.has_value());
+  ASSERT_THAT(maybe_mmap, IsOk());
 
   MappedMemory mmap = std::move(*maybe_mmap);
   EXPECT_EQ(mmap.MemoryAsStringView(), "0123456789\n");
@@ -124,14 +127,14 @@ TEST_F(MappedMemoryTest, ReadWriteWorksOnSimpleFile) {
 TEST_F(MappedMemoryTest, ReadWriteFailsOnMissingFile) {
   EXPECT_THAT(MappedMemory::Create(fs_.GetTruePath("/f.txt"), 0, 11,
                                    MappedMemory::Type::kReadWrite),
-              Eq(absl::nullopt));
+              Not(IsOk()));
 }
 
 TEST_F(MappedMemoryTest, ReadWriteWorksOnSmallerFile) {
   fs_.CreateFile("/g.txt", "0123456789\n");
   auto maybe_mmap = MappedMemory::Create(fs_.GetTruePath("/g.txt"), 0, 64,
                                          MappedMemory::Type::kReadWrite);
-  ASSERT_TRUE(maybe_mmap.has_value());
+  ASSERT_THAT(maybe_mmap, IsOk());
 
   MappedMemory mmap = std::move(*maybe_mmap);
   EXPECT_EQ(mmap.MemoryAsStringView().size(), 64);
@@ -144,7 +147,7 @@ TEST_F(MappedMemoryTest, ReadWriteWorksWithOffset) {
   fs_.CreateFile("/h.txt", "0123456789\n");
   auto maybe_mmap = MappedMemory::Create(fs_.GetTruePath("/h.txt"), 5, 6,
                                          MappedMemory::Type::kReadWrite);
-  ASSERT_TRUE(maybe_mmap.has_value());
+  ASSERT_THAT(maybe_mmap, IsOk());
 
   MappedMemory mmap = std::move(*maybe_mmap);
   EXPECT_EQ(mmap.MemoryAsStringView(), "56789\n");
@@ -157,7 +160,7 @@ TEST_F(MappedMemoryTest, ReadWriteChangesAreSaved) {
   {
     auto maybe_mmap = MappedMemory::Create(fs_.GetTruePath("/i.txt"), 0, 11,
                                            MappedMemory::Type::kReadWrite);
-    ASSERT_TRUE(maybe_mmap.has_value());
+    ASSERT_THAT(maybe_mmap, IsOk());
 
     MappedMemory mmap = std::move(*maybe_mmap);
     EXPECT_EQ(mmap.MemoryAsStringView(), "0123456789\n");
@@ -173,7 +176,7 @@ TEST_F(MappedMemoryTest, ReadWriteChangesAreSaved) {
   {
     auto maybe_mmap = MappedMemory::Create(fs_.GetTruePath("/i.txt"), 0, 11,
                                            MappedMemory::Type::kReadOnly);
-    ASSERT_TRUE(maybe_mmap.has_value());
+    ASSERT_THAT(maybe_mmap, IsOk());
 
     MappedMemory mmap = std::move(*maybe_mmap);
     EXPECT_EQ(mmap.MemoryAsStringView(), "a123b5678c\n");
@@ -187,7 +190,7 @@ TEST_F(MappedMemoryTest, ReadWriteChangesExtendFile) {
   {
     auto maybe_mmap = MappedMemory::Create(fs_.GetTruePath("/i.txt"), 0, 14,
                                            MappedMemory::Type::kReadWrite);
-    ASSERT_TRUE(maybe_mmap.has_value());
+    ASSERT_THAT(maybe_mmap, IsOk());
 
     MappedMemory mmap = std::move(*maybe_mmap);
     EXPECT_EQ(mmap.MemoryAsStringView().substr(0, 11), "0123456789\n");
@@ -204,7 +207,7 @@ TEST_F(MappedMemoryTest, ReadWriteChangesExtendFile) {
   {
     auto maybe_mmap = MappedMemory::Create(fs_.GetTruePath("/i.txt"), 0, 14,
                                            MappedMemory::Type::kReadOnly);
-    ASSERT_TRUE(maybe_mmap.has_value());
+    ASSERT_THAT(maybe_mmap, IsOk());
 
     MappedMemory mmap = std::move(*maybe_mmap);
     EXPECT_EQ(mmap.MemoryAsStringView(), "0123456789\nabc");
