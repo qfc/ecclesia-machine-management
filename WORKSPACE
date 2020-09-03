@@ -10,12 +10,12 @@ http_archive(
     urls = ["https://github.com/google/googletest/archive/release-1.10.0.tar.gz"],
 )
 
-# Abseil. Official release from Mar 4, 2020
+# Abseil. Latest feature not releases yet. Picked up a commit from Sep 2, 2020
 http_archive(
     name = "com_google_absl",
-    sha256 = "d3311ead20ffce78c7fde96df803b73d0de8d992d46bdf36753954bd2d459f31",
-    strip_prefix = "abseil-cpp-df3ea785d8c30a9503321a3d35ee7d35808f190d",
-    urls = ["https://github.com/abseil/abseil-cpp/archive/df3ea785d8c30a9503321a3d35ee7d35808f190d.zip"],
+    sha256 = "fc34c6d71993827eec8e77675086563a378b24ed8072a52b50804f2c29f19709",
+    strip_prefix = "abseil-cpp-930fbec75b452af8bb8c796f5bb754e953e29cf5",
+    urls = ["https://github.com/abseil/abseil-cpp/archive/930fbec75b452af8bb8c796f5bb754e953e29cf5.zip"],
 )
 
 # emboss. No official releases yet. Picked up a commit from Oct 9, 2019

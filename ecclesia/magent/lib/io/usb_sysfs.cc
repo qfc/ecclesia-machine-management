@@ -98,16 +98,15 @@ SysfsUsbDiscovery::SysfsUsbDiscovery(absl::string_view sysfs_dir)
 absl::Status SysfsUsbDiscovery::EnumerateAllUsbDevices(
     std::vector<UsbLocation> *devices) const {
   ApifsDirectory dir(sysfs_devices_dir_);
-  std::vector<std::string> usb_device_entries;
 
-  auto result = dir.ListEntries(&usb_device_entries);
-  if (!result.ok()) {
-    return result;
+  auto maybe_usb_device_entries = dir.ListEntries();
+  if (!maybe_usb_device_entries.ok()) {
+    return maybe_usb_device_entries.status();
   }
 
   devices->clear();
 
-  for (absl::string_view entry : usb_device_entries) {
+  for (absl::string_view entry : *maybe_usb_device_entries) {
     auto maybe_usb_location = DirectoryToDeviceLocation(GetBasename(entry));
 
     if (maybe_usb_location.has_value()) {

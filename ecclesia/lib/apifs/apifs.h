@@ -25,11 +25,12 @@
 #include <sys/types.h>  // IWYU pragma: keep
 #include <unistd.h>     // IWYU pragma: keep
 
-#include <filesystem>
 #include <string>
 #include <vector>
 
 #include "absl/status/status.h"
+#include "absl/status/statusor.h"
+#include "absl/strings/string_view.h"
 #include "absl/types/span.h"
 
 namespace ecclesia {
@@ -68,24 +69,23 @@ class ApifsDirectory {
   bool Exists(std::string path) const;
 
   // Retreive the stat information for a given path.
-  absl::Status Stat(std::string path, struct stat *st) const;
+  absl::StatusOr<struct stat> Stat(std::string path) const;
 
   // List all the entries in the apifs, or in a given directory in the apifs.
-  absl::Status ListEntries(std::vector<std::string> *entries) const;
-  absl::Status ListEntries(std::string path,
-                           std::vector<std::string> *entries) const;
+  absl::StatusOr<std::vector<std::string>> ListEntries() const;
+  absl::StatusOr<std::vector<std::string>> ListEntries(std::string path) const;
 
   // Read and write the entire contents of a file.
-  absl::Status Read(std::string path, std::string *value) const;
-  absl::Status Write(std::string path, const std::string &value) const;
+  absl::StatusOr<std::string> Read(std::string path) const;
+  absl::Status Write(std::string path, absl::string_view value) const;
 
   // Read a symlink value for a given path.
-  absl::Status ReadLink(std::string path, std::string *link) const;
+  absl::StatusOr<std::string> ReadLink(std::string path) const;
 
  private:
   friend class ApifsFile;  // For accessing the root.
 
-  std::filesystem::path dir_path_;
+  std::string dir_path_;
 };
 
 class ApifsFile {
@@ -117,11 +117,11 @@ class ApifsFile {
   bool Exists() const;
 
   // Retrieve the stat information for a given path.
-  absl::Status Stat(struct stat *st) const;
+  absl::StatusOr<struct stat> Stat() const;
 
   // Read and write the entire contents of a file.
-  absl::Status Read(std::string *value) const;
-  absl::Status Write(const std::string &value) const;
+  absl::StatusOr<std::string> Read() const;
+  absl::Status Write(absl::string_view value) const;
 
   // Seek to offset then Read spcific number of bytes
   absl::Status SeekAndRead(uint64_t offset, absl::Span<char> value) const;
@@ -130,10 +130,10 @@ class ApifsFile {
                             absl::Span<const char> value) const;
 
   // Read a symlink value for a given path.
-  absl::Status ReadLink(std::string *link) const;
+  absl::StatusOr<std::string> ReadLink() const;
 
  private:
-  std::filesystem::path path_;
+  std::string path_;
 };
 
 }  // namespace ecclesia

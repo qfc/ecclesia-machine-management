@@ -223,15 +223,16 @@ absl::Status SysfsPciDiscovery::EnumerateAllDevices(
 
   std::string path = absl::StrCat(sys_dir_.c_str(), "/devices");
 
-  WithEachFileInDirectory(path, [devices](absl::string_view filename) {
-    auto maybe_loc = PciLocation::FromString(filename);
-    if (maybe_loc.has_value()) {
-      devices->push_back(maybe_loc.value());
-    }
-  });
+  absl::Status status =
+      WithEachFileInDirectory(path, [devices](absl::string_view filename) {
+        auto maybe_loc = PciLocation::FromString(filename);
+        if (maybe_loc.has_value()) {
+          devices->push_back(maybe_loc.value());
+        }
+      });
+  if (!status.ok()) return status;
 
   std::sort(devices->begin(), devices->end());
-
   return absl::OkStatus();
 }
 }  // namespace ecclesia

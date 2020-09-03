@@ -16,9 +16,8 @@
 
 #include "ecclesia/magent/lib/io/usb.h"
 
-#include <optional>
-
 #include "gtest/gtest.h"
+#include "absl/types/optional.h"
 
 namespace ecclesia {
 namespace {

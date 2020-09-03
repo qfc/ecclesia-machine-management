@@ -27,11 +27,14 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "ecclesia/lib/file/test_filesystem.h"
+#include "ecclesia/lib/testing/status.h"
 
 namespace ecclesia {
 namespace {
 
 namespace fs = std::filesystem;
+
+using ::testing::Not;
 using ::testing::UnorderedElementsAre;
 
 // Sets up a temporary directory in the test directory in order to ensure no
@@ -45,9 +48,10 @@ class DirTest : public ::testing::Test {
   std::vector<std::string> WithEachFileInDirectoryVector(
       absl::string_view dirname) {
     std::vector<std::string> files;
-    WithEachFileInDirectory(dirname, [&files](absl::string_view file) {
-      files.push_back(std::string(file));
-    });
+    absl::Status status = WithEachFileInDirectory(
+        dirname,
+        [&files](absl::string_view file) { files.emplace_back(file); });
+    EXPECT_THAT(status, IsOk());
     return files;
   }
 
@@ -102,7 +106,9 @@ TEST_F(DirTest, WithEachFileEmptyDirectory) {
 
 TEST_F(DirTest, WithEachFileDirDoesntExist) {
   std::string bad_dir = absl::StrCat(TestDirName(), "/baddir");
-  EXPECT_THAT(WithEachFileInDirectoryVector(bad_dir), UnorderedElementsAre());
+
+  EXPECT_THAT(WithEachFileInDirectory(bad_dir, [](absl::string_view) {}),
+              Not(IsOk()));
 }
 
 TEST_F(DirTest, WithEachFileDirIsAFile) {
@@ -110,8 +116,9 @@ TEST_F(DirTest, WithEachFileDirIsAFile) {
   std::ofstream touch(filepath);
   EXPECT_TRUE(fs::exists(filepath));
 
-  EXPECT_THAT(WithEachFileInDirectoryVector(filepath.c_str()),
-              UnorderedElementsAre());
+  EXPECT_THAT(
+      WithEachFileInDirectory(filepath.c_str(), [](absl::string_view) {}),
+      Not(IsOk()));
 }
 
 TEST_F(DirTest, WithEachFileOneFile) {

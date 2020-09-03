@@ -16,8 +16,7 @@
 
 #include "ecclesia/magent/lib/io/usb_sysfs.h"
 
-#include <stddef.h>
-
+#include <cstddef>
 #include <string>
 #include <vector>
 

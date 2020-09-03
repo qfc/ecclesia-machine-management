@@ -23,6 +23,7 @@
 #include <string>
 
 #include "absl/status/status.h"
+#include "absl/strings/str_format.h"
 #include "absl/strings/string_view.h"
 
 namespace ecclesia {
@@ -43,7 +44,7 @@ absl::Status MakeDirectories(absl::string_view dirname);
 // "myfile.txt"). If no files were found or there are any errors, output_func
 // will not be called.
 template <typename F>
-void WithEachFileInDirectory(absl::string_view dirname, F output_func) {
+absl::Status WithEachFileInDirectory(absl::string_view dirname, F output_func) {
   // Constants for the names of the pseudo directory entries.
   static constexpr absl::string_view kCurrentDir = ".";
   static constexpr absl::string_view kParentDir = "..";
@@ -64,7 +65,8 @@ void WithEachFileInDirectory(absl::string_view dirname, F output_func) {
   };
 
   struct dirent **namelist;
-  if (int n = scandir(dirname.data(), &namelist, nullptr, nullptr); n >= 0) {
+  std::string c_dirname(dirname);  // Needed to get a NUL terminator.
+  if (int n = scandir(c_dirname.c_str(), &namelist, nullptr, nullptr); n >= 0) {
     ScandirCloser closer(namelist, n);
     while (n--) {
       absl::string_view directory_entry = namelist[n]->d_name;
@@ -75,6 +77,10 @@ void WithEachFileInDirectory(absl::string_view dirname, F output_func) {
       // Call the provided output function with the name.
       output_func(directory_entry);
     }
+    return absl::OkStatus();
+  } else {
+    return absl::InternalError(
+        absl::StrFormat("scandir() failed on directory %s", dirname));
   }
 }
 

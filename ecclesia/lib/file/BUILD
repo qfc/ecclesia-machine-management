@@ -88,6 +88,7 @@ cc_test(
     deps = [
         ":dir",
         ":test_filesystem",
+        "//ecclesia/lib/testing:status",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
@@ -153,6 +154,7 @@ cc_library(
         "//ecclesia/lib/cleanup",
         "//ecclesia/lib/logging",
         "//ecclesia/lib/logging:posix",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
     ],
 )

@@ -56,14 +56,13 @@ class IntelCpuTopology : public mcedecoder::CpuTopologyInterface {
   template <typename T>
   absl::Status ReadApifsFile(const std::string &path, T *value) {
     ApifsFile apifs_file(apifs_, path);
-    std::string str;
-    auto status = apifs_file.Read(&str);
-    if (!status.ok()) {
-      return status;
+    absl::StatusOr<std::string> maybe_str = apifs_file.Read();
+    if (!maybe_str.ok()) {
+      return maybe_str.status();
     }
-    if (!FromString(str, value)) {
+    if (!FromString(*maybe_str, value)) {
       return absl::Status(absl::StatusCode::kInvalidArgument,
-                          absl::StrCat("Unable to parse ", str));
+                          absl::StrCat("Unable to parse ", *maybe_str));
     }
     return absl::OkStatus();
   }

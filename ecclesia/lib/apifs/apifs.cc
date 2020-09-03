@@ -23,20 +23,20 @@
 #include <unistd.h>     // IWYU pragma: keep
 
 #include <cstddef>
-#include <filesystem>
 #include <string>
-#include <system_error>
 #include <utility>
 #include <vector>
 
 #include "absl/status/status.h"
+#include "absl/status/statusor.h"
 #include "absl/strings/str_format.h"
+#include "absl/strings/string_view.h"
 #include "absl/types/span.h"
 #include "ecclesia/lib/cleanup/cleanup.h"
+#include "ecclesia/lib/file/dir.h"
+#include "ecclesia/lib/file/path.h"
 
 namespace ecclesia {
-
-namespace fs = ::std::filesystem;
 
 ApifsDirectory::ApifsDirectory() {}
 
@@ -44,11 +44,10 @@ ApifsDirectory::ApifsDirectory(std::string path) : dir_path_(std::move(path)) {}
 
 ApifsDirectory::ApifsDirectory(const ApifsDirectory &directory,
                                std::string path)
-    : dir_path_(directory.dir_path_ / std::move(path)) {}
+    : dir_path_(JoinFilePaths(directory.dir_path_, path)) {}
 
 bool ApifsDirectory::Exists() const {
-  std::error_code ec;  // Ignored on error, we return false.
-  return fs::exists(dir_path_, ec);
+  return access(dir_path_.c_str(), F_OK) == 0;
 }
 
 bool ApifsDirectory::Exists(std::string path) const {
@@ -56,68 +55,47 @@ bool ApifsDirectory::Exists(std::string path) const {
   return d.Exists();
 }
 
-absl::Status ApifsDirectory::Stat(std::string path, struct stat *st) const {
+absl::StatusOr<struct stat> ApifsDirectory::Stat(std::string path) const {
   ApifsFile f(*this, std::move(path));
-  return f.Stat(st);
+  return f.Stat();
 }
 
-absl::Status ApifsDirectory::ListEntries(
-    std::vector<std::string> *entries) const {
+absl::StatusOr<std::vector<std::string>> ApifsDirectory::ListEntries() const {
   if (!Exists()) {
     return absl::NotFoundError(
         absl::StrFormat("directory not found at path: %s", dir_path_));
   }
-
-  std::error_code ec;  // Used to track errors from directory iteration.
-
-  // Try to construct a directory iterator.
-  fs::directory_iterator end_iter;  // Default instance is an end iterator.
-  auto iter = fs::directory_iterator(dir_path_, ec);
-  if (ec) {
-    return absl::InternalError(
-        absl::StrFormat("error accessing directory at path: %s, error: %s",
-                        dir_path_, ec.message()));
+  std::vector<std::string> entries;
+  absl::Status status = WithEachFileInDirectory(
+      dir_path_, [this, &entries](absl::string_view entry) {
+        entries.push_back(JoinFilePaths(dir_path_, entry));
+      });
+  if (!status.ok()) {
+    return status;
   }
-
-  // If the directory iterator is empty then return after clearing the list.
-  // Doing this check up front lets us use a simpler do-while loop.
-  entries->clear();
-  if (iter == end_iter) return absl::OkStatus();
-
-  // Iterate over the entire directory, populating the vector. If we hit any
-  // failures then stop immediately and return an error.
-  do {
-    entries->push_back(iter->path());
-    iter.increment(ec);
-  } while (!ec && iter != end_iter);
-  if (ec) {
-    return absl::InternalError(absl::StrFormat(
-        "error accessing directory: %s, error: %s", dir_path_, ec.message()));
-  }
-  return absl::OkStatus();  // Iteration terminated without an error.
+  return entries;
 }
 
-absl::Status ApifsDirectory::ListEntries(
-    std::string path, std::vector<std::string> *entries) const {
+absl::StatusOr<std::vector<std::string>> ApifsDirectory::ListEntries(
+    std::string path) const {
   ApifsDirectory d(*this, std::move(path));
-  return d.ListEntries(entries);
+  return d.ListEntries();
 }
 
-absl::Status ApifsDirectory::Read(std::string path, std::string *value) const {
+absl::StatusOr<std::string> ApifsDirectory::Read(std::string path) const {
   ApifsFile f(*this, std::move(path));
-  return f.Read(value);
+  return f.Read();
 }
 
 absl::Status ApifsDirectory::Write(std::string path,
-                                   const std::string &value) const {
+                                   absl::string_view value) const {
   ApifsFile f(*this, std::move(path));
   return f.Write(value);
 }
 
-absl::Status ApifsDirectory::ReadLink(std::string path,
-                                      std::string *link) const {
+absl::StatusOr<std::string> ApifsDirectory::ReadLink(std::string path) const {
   ApifsFile f(*this, std::move(path));
-  return f.ReadLink(link);
+  return f.ReadLink();
 }
 
 ApifsFile::ApifsFile() {}
@@ -125,22 +103,20 @@ ApifsFile::ApifsFile() {}
 ApifsFile::ApifsFile(std::string path) : path_(std::move(path)) {}
 
 ApifsFile::ApifsFile(const ApifsDirectory &directory, std::string path)
-    : path_(directory.dir_path_ / std::move(path)) {}
+    : path_(JoinFilePaths(directory.dir_path_, path)) {}
 
-bool ApifsFile::Exists() const {
-  std::error_code ec;  // Ignored on error, we return false.
-  return fs::exists(path_, ec);
-}
+bool ApifsFile::Exists() const { return access(path_.c_str(), F_OK) == 0; }
 
-absl::Status ApifsFile::Stat(struct stat *st) const {
-  if (stat(path_.c_str(), st) < 0) {
+absl::StatusOr<struct stat> ApifsFile::Stat() const {
+  struct stat st;
+  if (stat(path_.c_str(), &st) < 0) {
     return absl::InternalError(absl::StrFormat(
         "failure while stat-ing file at path: %s, errno: %d", path_, errno));
   }
-  return absl::OkStatus();
+  return st;
 }
 
-absl::Status ApifsFile::Read(std::string *value) const {
+absl::StatusOr<std::string> ApifsFile::Read() const {
   if (!Exists()) {
     return absl::NotFoundError(
         absl::StrFormat("File not found at path: %s", path_));
@@ -153,7 +129,7 @@ absl::Status ApifsFile::Read(std::string *value) const {
   }
   auto fd_closer = FdCloser(fd);
 
-  value->clear();
+  std::string value;
   while (true) {
     char buffer[4096];
     const ssize_t n = read(fd, buffer, sizeof(buffer));
@@ -169,13 +145,13 @@ absl::Status ApifsFile::Read(std::string *value) const {
     } else if (n == 0) {
       break;  // Nothing left to read.
     } else {
-      value->append(buffer, n);
+      value.append(buffer, n);
     }
   }
-  return absl::OkStatus();
+  return value;
 }
 
-absl::Status ApifsFile::Write(const std::string &value) const {
+absl::Status ApifsFile::Write(absl::string_view value) const {
   if (!Exists()) {
     return absl::NotFoundError(
         absl::StrFormat("File not found at path: %s", path_));
@@ -259,17 +235,38 @@ absl::Status ApifsFile::SeekAndWrite(uint64_t offset,
   return absl::OkStatus();
 }
 
-absl::Status ApifsFile::ReadLink(std::string *link) const {
-  if (!Exists()) {
-    return absl::NotFoundError(
-        absl::StrFormat("link not found at path: %s", path_));
+absl::StatusOr<std::string> ApifsFile::ReadLink() const {
+  // Do an lstat of the path to determine the link size and verify the file is
+  // in fact a symlink.
+  struct stat st;
+  if (lstat(path_.c_str(), &st) < 0) {
+    if (errno == ENOENT) {
+      return absl::NotFoundError(
+          absl::StrFormat("file not found at path: %s", path_));
+    } else {
+      return absl::InternalError(absl::StrFormat(
+          "failure while lstat-ing file at path: %s, errno: %d", path_, errno));
+    }
   }
-  if (!fs::is_symlink(path_)) {
+  if (!S_ISLNK(st.st_mode)) {
     return absl::InvalidArgumentError(
         absl::StrFormat("path: %s is not a symlink", path_));
   }
-  *link = fs::read_symlink(path_).string();
-  return absl::OkStatus();
+  // Read the symlink using a std::string buffer size from the lstat.
+  std::string link(st.st_size + 1, '\0');
+  ssize_t rc = readlink(path_.c_str(), &link[0], link.size());
+  if (rc == -1) {
+    return absl::InternalError(absl::StrFormat(
+        "unable to read the link at path: %s, errno: %d", path_, errno));
+  }
+  if (rc > st.st_size) {
+    // If this happens it means someone changed (and enlarged) the link in
+    // between the lstat and readlink. Just consider that an error.
+    return absl::InternalError(absl::StrFormat(
+        "the link at: %s was changed while it was being read", path_));
+  }
+  // The first "rc" characters in the string were populated. Return that.
+  return link.substr(0, rc);
 }
 
 }  // namespace ecclesia

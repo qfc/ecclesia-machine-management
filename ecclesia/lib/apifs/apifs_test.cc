@@ -24,12 +24,15 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
+#include "absl/status/statusor.h"
 #include "absl/types/span.h"
 #include "ecclesia/lib/file/test_filesystem.h"
+#include "ecclesia/lib/testing/status.h"
 
 namespace ecclesia {
 namespace {
 
+using ::testing::Not;
 using ::testing::UnorderedElementsAre;
 
 class ApifsTest : public ::testing::Test {
@@ -57,20 +60,6 @@ class ApifsTest : public ::testing::Test {
   ApifsDirectory apifs_;
 };
 
-class MsrTest : public ::testing::Test {
- protected:
-  MsrTest()
-      : fs_(GetTestTempdirPath()), msr_(GetTestTempdirPath("dev/cpu/0/msr")) {
-    fs_.CreateDir("/dev/cpu/0");
-
-    // content: 0a 0a 0a 0a 0a 0a 0a 0a 0a 0a
-    fs_.CreateFile("/dev/cpu/0/msr", "\n\n\n\n\n\n\n\n\n\n");
-  }
-
-  TestFilesystem fs_;
-  ApifsFile msr_;
-};
-
 TEST_F(ApifsTest, TestExists) {
   EXPECT_TRUE(apifs_.Exists());
   EXPECT_FALSE(apifs_.Exists("a"));
@@ -92,128 +81,131 @@ TEST_F(ApifsTest, TestExists) {
 }
 
 TEST_F(ApifsTest, TestStat) {
-  struct stat st;
+  auto stat_empty = apifs_.Stat("");
+  EXPECT_TRUE(stat_empty.ok());
+  EXPECT_TRUE(S_ISDIR(stat_empty->st_mode));
 
-  EXPECT_TRUE(apifs_.Stat("", &st).ok());
-  EXPECT_TRUE(S_ISDIR(st.st_mode));
+  auto stat_a = apifs_.Stat("a");
+  EXPECT_FALSE(stat_a.ok());
 
-  EXPECT_FALSE(apifs_.Stat("a", &st).ok());
+  auto stat_ab = apifs_.Stat("ab");
+  EXPECT_TRUE(stat_ab.ok());
+  EXPECT_TRUE(S_ISDIR(stat_ab->st_mode));
 
-  EXPECT_TRUE(apifs_.Stat("ab", &st).ok());
-  EXPECT_TRUE(S_ISDIR(st.st_mode));
-
-  EXPECT_TRUE(apifs_.Stat("ab/file1", &st).ok());
-  EXPECT_TRUE(S_ISREG(st.st_mode));
+  auto stat_ab_file1 = apifs_.Stat("ab/file1");
+  EXPECT_TRUE(stat_ab_file1.ok());
+  EXPECT_TRUE(S_ISREG(stat_ab_file1->st_mode));
 
   ApifsFile f1(apifs_, "ab/file1");
-  EXPECT_TRUE(f1.Stat(&st).ok());
-  EXPECT_TRUE(S_ISREG(st.st_mode));
+  stat_ab_file1 = f1.Stat();
+  EXPECT_TRUE(stat_ab_file1.ok());
+  EXPECT_TRUE(S_ISREG(stat_ab_file1->st_mode));
 }
 
 TEST_F(ApifsTest, TestListEntries) {
+  absl::StatusOr<std::vector<std::string>> maybe_entries;
   std::vector<std::string> entries;
   // Helper function that will reduce the values in entries from paths to
   // base names. This simplifies the expectation checking.
-  auto reduce_entries_to_basenames = [&entries]() {
-    for (std::string &entry : entries) {
+  auto reduce_entries_to_basenames = [&]() {
+    EXPECT_TRUE(maybe_entries.ok());
+    entries.clear();
+    for (const std::string &entry : *maybe_entries) {
       auto found = entry.find_last_of('/');
       if (found != entry.npos) {
-        entry = entry.substr(found + 1);
+        entries.push_back(entry.substr(found + 1));
       }
     }
   };
 
   // Look at the root contents.
-  EXPECT_TRUE(apifs_.ListEntries(&entries).ok());
+  maybe_entries = apifs_.ListEntries();
   reduce_entries_to_basenames();
   EXPECT_THAT(entries, UnorderedElementsAre("ab"));
 
   // Look at the contents of "ab".
-  EXPECT_TRUE(apifs_.ListEntries("ab", &entries).ok());
+  maybe_entries = apifs_.ListEntries("ab");
   reduce_entries_to_basenames();
   EXPECT_THAT(entries, UnorderedElementsAre("cd", "file1", "file2", "file3",
                                             "file4", "gh", "largefile"));
 
   // Look at the contents of "ab/cd".
-  EXPECT_TRUE(apifs_.ListEntries("ab/cd", &entries).ok());
+  maybe_entries = apifs_.ListEntries("ab/cd");
   reduce_entries_to_basenames();
   EXPECT_THAT(entries, UnorderedElementsAre("ef"));
 
   // Look at the contents of "ab/cd/ef".
-  EXPECT_TRUE(apifs_.ListEntries("ab/cd/ef", &entries).ok());
+  maybe_entries = apifs_.ListEntries("ab/cd/ef");
   reduce_entries_to_basenames();
   EXPECT_THAT(entries, UnorderedElementsAre());
 
   // Look at a non-existant "ab/cd/ef/gh".
-  EXPECT_EQ(apifs_.ListEntries("ab/cd/ef/gh", &entries).code(),
+  EXPECT_EQ(apifs_.ListEntries("ab/cd/ef/gh").status().code(),
             absl::StatusCode::kNotFound);
 }
 
 TEST_F(ApifsTest, TestRead) {
-  std::string contents;
-
   // Look at the contents of each file in ab.
-  EXPECT_TRUE(apifs_.Read("ab/file1", &contents).ok());
-  EXPECT_EQ("contents**\n", contents);
-  EXPECT_TRUE(apifs_.Read("ab/file2", &contents).ok());
-  EXPECT_EQ("x\ny\nz\n", contents);
-  EXPECT_TRUE(apifs_.Read("ab/file3", &contents).ok());
-  EXPECT_EQ("", contents);
-  EXPECT_TRUE(apifs_.Read("ab/file4", &contents).ok());
-  EXPECT_EQ("contents**\n", contents);
-  EXPECT_TRUE(apifs_.Read("ab/largefile", &contents).ok());
-  EXPECT_EQ(std::string(10000, 'J'), contents);
+  EXPECT_THAT(apifs_.Read("ab/file1"), IsOkAndHolds("contents**\n"));
+  EXPECT_THAT(apifs_.Read("ab/file2"), IsOkAndHolds("x\ny\nz\n"));
+  EXPECT_THAT(apifs_.Read("ab/file3"), IsOkAndHolds(""));
+  EXPECT_THAT(apifs_.Read("ab/file4"), IsOkAndHolds("contents**\n"));
+  EXPECT_THAT(apifs_.Read("ab/largefile"),
+              IsOkAndHolds(std::string(10000, 'J')));
 
   // We should not be able to read directories or non-existant files.
-  EXPECT_FALSE(apifs_.Read("ab", &contents).ok());
-  EXPECT_FALSE(apifs_.Read("ab/file5", &contents).ok());
+  EXPECT_THAT(apifs_.Read("ab"), Not(IsOk()));
+  EXPECT_THAT(apifs_.Read("ab/file5"), Not(IsOk()));
 
   // Use an ApifsFile to do the read.
   ApifsFile f2(apifs_, "ab/file2");
-  EXPECT_TRUE(f2.Read(&contents).ok());
-  EXPECT_EQ("x\ny\nz\n", contents);
+  EXPECT_THAT(f2.Read(), IsOkAndHolds("x\ny\nz\n"));
 }
 
 TEST_F(ApifsTest, TestWrite) {
   // Verify that we can write a file and read it back. Depends on Read also
   // working correctly.
-  std::string contents;
-  EXPECT_TRUE(apifs_.Read("ab/file3", &contents).ok());
-  EXPECT_EQ("", contents);
-  EXPECT_TRUE(apifs_.Write("ab/file3", "hello, world!\n").ok());
-  EXPECT_TRUE(apifs_.Read("ab/file3", &contents).ok());
-  EXPECT_EQ("hello, world!\n", contents);
+  EXPECT_THAT(apifs_.Read("ab/file3"), IsOkAndHolds(""));
+  EXPECT_THAT(apifs_.Write("ab/file3", "hello, world!\n"), IsOk());
+  EXPECT_THAT(apifs_.Read("ab/file3"), IsOkAndHolds("hello, world!\n"));
 
   // We should not be able to write to directories or non-existant files.
-  EXPECT_FALSE(apifs_.Write("ab", "testing").ok());
-  EXPECT_FALSE(apifs_.Write("ab/file5", "testing").ok());
+  EXPECT_THAT(apifs_.Write("ab", "testing"), Not(IsOk()));
+  EXPECT_THAT(apifs_.Write("ab/file5", "testing"), Not(IsOk()));
 
   // Use an ApifsFile to do the same operations.
   ApifsFile f3(apifs_, "ab/file3");
-  EXPECT_TRUE(f3.Read(&contents).ok());
-  EXPECT_EQ("hello, world!\n", contents);
-  EXPECT_TRUE(f3.Write("goodbye, file!\n").ok());
-  EXPECT_TRUE(f3.Read(&contents).ok());
-  EXPECT_EQ("goodbye, file!\n", contents);
+  EXPECT_THAT(f3.Read(), IsOkAndHolds("hello, world!\n"));
+  EXPECT_THAT(f3.Write("goodbye, file!\n"), IsOk());
+  EXPECT_THAT(f3.Read(), IsOkAndHolds("goodbye, file!\n"));
 }
 
 TEST_F(ApifsTest, TestReadLink) {
-  std::string link;
-
   // Test reading the symlink from file4 -> file1.
-  EXPECT_TRUE(apifs_.ReadLink("ab/file4", &link).ok());
-  EXPECT_EQ("file1", link);
+  EXPECT_THAT(apifs_.ReadLink("ab/file4"), IsOkAndHolds("file1"));
 
   // Reading a non-symlink should fail, or a non-existant file.
-  EXPECT_FALSE(apifs_.ReadLink("ab/file1", &link).ok());
-  EXPECT_FALSE(apifs_.ReadLink("ab/file5", &link).ok());
+  EXPECT_THAT(apifs_.ReadLink("ab/file1"), Not(IsOk()));
+  EXPECT_THAT(apifs_.ReadLink("ab/file5"), Not(IsOk()));
 
   // Use an ApifsFile to try the read.
-  link.clear();
   ApifsFile f4(apifs_, "ab/file4");
-  EXPECT_TRUE(f4.ReadLink(&link).ok());
-  EXPECT_EQ("file1", link);
+  EXPECT_THAT(f4.ReadLink(), IsOkAndHolds("file1"));
 }
+
+class MsrTest : public ::testing::Test {
+ protected:
+  MsrTest()
+      : fs_(GetTestTempdirPath()), msr_(GetTestTempdirPath("dev/cpu/0/msr")) {
+    fs_.CreateDir("/dev/cpu/0");
+
+    // content: 0a 0a 0a 0a 0a 0a 0a 0a 0a 0a
+    fs_.CreateFile("/dev/cpu/0/msr", "\n\n\n\n\n\n\n\n\n\n");
+  }
+
+  TestFilesystem fs_;
+  ApifsFile msr_;
+};
 
 TEST_F(MsrTest, TestSeekAndRead) {
   std::vector<char> out_msr_data(8);

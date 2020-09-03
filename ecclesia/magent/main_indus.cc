@@ -79,8 +79,8 @@ constexpr absl::string_view kSmbusPciAddressPath =
     "/sys/bus/pci/devices/0000:00:1f.4/";
 absl::optional<ecclesia::SmbusBus> GetEepromSmbusBus() {
   ecclesia::ApifsDirectory dir(std::string{kSmbusPciAddressPath});
-  std::vector<std::string> entries;
-  if (!dir.ListEntries(&entries).ok()) {
+  auto maybe_entries = dir.ListEntries();
+  if (!maybe_entries.ok()) {
     return absl::nullopt;
   }
 
@@ -88,7 +88,7 @@ absl::optional<ecclesia::SmbusBus> GetEepromSmbusBus() {
   // Search for a pattern "i2c-\d+".
   int pci_bus = -1;
   // int len = sizeof(kSmbusPciAddressPath) + 4;
-  for (absl::string_view f : entries) {
+  for (absl::string_view f : *maybe_entries) {
     f.remove_prefix(kSmbusPciAddressPath.size());
     if (absl::StartsWith(f, "i2c-") &&
         absl::SimpleAtoi(f.substr(4), &pci_bus)) {
@@ -102,16 +102,15 @@ absl::optional<ecclesia::SmbusBus> GetEepromSmbusBus() {
 
   ecclesia::ApifsFile fs(
       absl::StrFormat("/sys/bus/i2c/devices/%d-0077/channel-2", pci_bus));
-  std::string link;
-  absl::Status status = fs.ReadLink(&link);
-  if (status.ok()) {
+  absl::StatusOr<std::string> maybe_link = fs.ReadLink();
+  if (maybe_link.ok()) {
     int smbus_id;
     // link will have the format like : "../i2c-37".
-    if (absl::SimpleAtoi(link.substr(link.find_last_of('-') + 1), &smbus_id)) {
+    if (absl::SimpleAtoi(maybe_link->substr(maybe_link->find_last_of('-') + 1),
+                         &smbus_id)) {
       return ecclesia::SmbusBus::TryMake(smbus_id);
     }
   }
-
   return absl::nullopt;
 }
 
