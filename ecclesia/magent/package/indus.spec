@@ -49,3 +49,27 @@ install -m 0644 {magent_indus.service} %{buildroot}%{_sysconfdir}/systemd/system
 %{_bindir}/magent_indus
 %{_sysconfdir}/google/magent
 %{_sysconfdir}/systemd/system/magent_indus.service
+
+%post
+if [ $1 -eq 1 ]; then
+  # Initial installation
+  systemctl enable magent_indus.service.service >/dev/null 2>&1 || :
+
+  if [ -d /run/systemd/system ]; then
+    systemctl start magent_indus.service.service >/dev/null 2>&1 || :
+  fi
+else
+  # Package upgrade
+  if [ -d /run/systemd/system ]; then
+    systemctl try-restart magent_indus.service.service >/dev/null 2>&1 || :
+  fi
+fi
+
+%preun
+if [ $1 -eq 0 ]; then
+  # Package removal, not upgrade
+  systemctl --no-reload disable magent_indus.service.service >/dev/null 2>&1 || :
+  if [ -d /run/systemd/system ]; then
+    systemctl stop magent_indus.service.service >/dev/null 2>&1 || :
+  fi
+fi
