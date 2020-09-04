@@ -1,0 +1,15 @@
+{
+    "@odata.context": "/redfish/v1/$metadata#Drive.Drive",
+    "@odata.id": "/redfish/v1/Systems/system/Storage/2/Drives/0",
+    "@odata.type": "#Drive.v1_9_0.Drive",
+    "Name": "SSD0",
+    "CapacityBytes": 4398046511104,
+    "MediaType": "SSD",
+    "Manufacturer": "Kingston",
+    "SerialNumber": "1234570",
+    "PartNumber": "C123-1111",
+    "Assembly": {
+          "@odata.id": "/redfish/v1/Systems/system/Storage/2/Drives/0/Assembly"
+    },
+    "Id" : "0"
+}

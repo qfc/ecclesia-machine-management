@@ -1,0 +1,24 @@
+{
+   "@odata.id" : "/redfish/v1/Systems/system/Storage/2",
+   "@odata.type" : "#Storage.v1_7_0.Storage",
+   "Drives" : [
+      {
+         "@odata.id" : "/redfish/v1/Systems/system/Storage/2/Drives/0"
+      }
+   ],
+   "Id" : "2",
+   "StorageControllers" : [
+      {
+         "@odata.id" : "/redfish/v1/Systems/system/Storage/2#/StorageControllers/0",
+         "Links" : {
+            "PCIeFunctions" : [
+               {
+                  "@odata.id" : "/redfish/v1/Systems/system/PCIeDevices/0000:20:00/PCIeFunctions/0"
+               }
+            ]
+         },
+         "SupportedControllerProtocols" : [ "PCIe" ],
+         "SupportedDeviceProtocols" : [ "NVMe" ]
+      }
+   ]
+}

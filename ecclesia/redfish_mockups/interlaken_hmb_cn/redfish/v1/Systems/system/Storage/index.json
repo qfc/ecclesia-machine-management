@@ -1,0 +1,18 @@
+{
+    "@odata.context": "/redfish/v1/$metadata#StorageCollection.StorageCollection",
+    "@odata.id": "/redfish/v1/Systems/system/Storage",
+    "@odata.type": "#StorageCollection.StorageCollection",
+    "Members": [
+        {
+            "@odata.id": "/redfish/v1/Systems/system/Storage/0"
+        },
+        {
+            "@odata.id" : "/redfish/v1/Systems/system/Storage/1"
+        },
+        {
+            "@odata.id" : "/redfish/v1/Systems/system/Storage/2"
+        }
+    ],
+    "Members@odata.count": 3,
+    "Name": "Storage Collection"
+}

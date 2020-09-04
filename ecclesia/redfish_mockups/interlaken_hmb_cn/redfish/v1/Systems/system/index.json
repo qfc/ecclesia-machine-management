@@ -9,5 +9,8 @@
     "Name": "Interlaken",
     "Processors": {
         "@odata.id": "/redfish/v1/Systems/system/Processors"
+    },
+    "Storage": {
+        "@odata.id": "/redfish/v1/Systems/system/Storage"
     }
 }
