@@ -22,11 +22,18 @@
 #include <vector>
 
 #include "absl/status/status.h"
-#include "absl/types/optional.h"
+#include "absl/status/statusor.h"
 #include "absl/types/span.h"
 #include "ecclesia/lib/types/fixed_range_int.h"
 
 namespace ecclesia {
+// Device signature information for a USB device.
+struct UsbSignature {
+  // Manufacturer of the device.
+  uint16_t vendor_id;
+  // Product identifier as allocated by the manufacturer.
+  uint16_t product_id;
+};
 
 // The port number a USB device is connected to.
 class UsbPort : public FixedRangeInteger<UsbPort, int, 1, 15> {
@@ -54,7 +61,9 @@ class UsbPortSequence {
   UsbPortSequence(const UsbPortSequence &other) = default;
   UsbPortSequence &operator=(const UsbPortSequence &other) = default;
 
-  int size() const;
+  size_t Size() const;
+  absl::optional<UsbPort> Port(size_t index) const;
+
   absl::optional<UsbPortSequence> Downstream(UsbPort port) const;
 
   friend bool operator==(const UsbPortSequence &lhs,
@@ -83,6 +92,13 @@ class UsbLocation {
   UsbLocation(UsbBusLocation bus, const UsbPortSequence &ports)
       : bus_(bus), ports_(ports) {}
 
+  // Read the bus and port numbers.
+  UsbBusLocation Bus() const { return bus_; }
+  size_t NumPorts() const { return ports_.Size(); }
+  absl::optional<UsbPort> Port(size_t index) const {
+    return ports_.Port(index);
+  }
+
   friend bool operator==(const UsbLocation &lhs, const UsbLocation &rhs);
   friend bool operator!=(const UsbLocation &lhs, const UsbLocation &rhs);
 
@@ -93,7 +109,7 @@ class UsbLocation {
   UsbPortSequence ports_;
 };
 
-// An interface to access USB devices.
+// An interface to discover USB devices.
 class UsbDiscoveryInterface {
  public:
   virtual ~UsbDiscoveryInterface() = default;
@@ -102,6 +118,17 @@ class UsbDiscoveryInterface {
   // provided 'devices' vector.
   virtual absl::Status EnumerateAllUsbDevices(
       std::vector<UsbLocation> *devices) const = 0;
+};
+
+// An interface to access USB devices.
+class UsbAccessInterface {
+ public:
+  UsbAccessInterface() = default;
+  UsbAccessInterface(const UsbLocation &usb_location);
+  virtual ~UsbAccessInterface() = default;
+
+  // Gets the signature of the device at the given location.
+  virtual absl::StatusOr<UsbSignature> GetSignature() const = 0;
 };
 }  // namespace ecclesia
 

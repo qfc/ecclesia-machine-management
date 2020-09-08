@@ -61,11 +61,18 @@ absl::optional<UsbPortSequence> UsbPortSequence::TryMake(
   return UsbPortSequence(std::move(port_sequence));
 }
 
-int UsbPortSequence::size() const { return ports_.size(); }
+size_t UsbPortSequence::Size() const { return ports_.size(); }
+
+absl::optional<UsbPort> UsbPortSequence::Port(size_t index) const {
+  if (index >= Size()) {
+    return absl::nullopt;
+  }
+  return ports_[index];
+}
 
 absl::optional<UsbPortSequence> UsbPortSequence::Downstream(
     UsbPort port) const {
-  if (size() == kDeviceChainMaxLength) {
+  if (Size() == kDeviceChainMaxLength) {
     return absl::nullopt;
   }
 
@@ -76,10 +83,10 @@ absl::optional<UsbPortSequence> UsbPortSequence::Downstream(
 }
 
 bool operator==(const UsbPortSequence &lhs, const UsbPortSequence &rhs) {
-  if (lhs.size() != rhs.size()) {
+  if (lhs.Size() != rhs.Size()) {
     return false;
   }
-  return std::equal(lhs.ports_.begin(), lhs.ports_.begin() + lhs.size(),
+  return std::equal(lhs.ports_.begin(), lhs.ports_.begin() + lhs.Size(),
                     rhs.ports_.begin());
 }
 

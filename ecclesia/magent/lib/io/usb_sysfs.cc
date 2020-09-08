@@ -16,12 +16,18 @@
 
 #include "ecclesia/magent/lib/io/usb_sysfs.h"
 
+#include <cstdint>
+#include <cstdio>
+#include <limits>
 #include <string>
 #include <vector>
 
 #include "absl/status/status.h"
+#include "absl/status/statusor.h"
 #include "absl/strings/numbers.h"
 #include "absl/strings/str_cat.h"
+#include "absl/strings/str_format.h"
+#include "absl/strings/str_join.h"
 #include "absl/strings/str_split.h"
 #include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
@@ -31,10 +37,44 @@
 #include "re2/re2.h"
 
 namespace ecclesia {
-namespace {
+const char kUsbDevicesDir[] = "/sys/bus/usb/devices";
+const RE2 kHexRegexp = {
+    R"re(([[:xdigit:]]+))re"};
+const RE2 kDecimalRegexp = {
+    R"re((\d+))re"};
 
-// Convert a sysfs device directory name into a device location. Returns nullopt
-// if the conversion failed.
+namespace {
+// Read a single unsigned integer out of a sysfs file. Writes the value into
+// out when success. If is_hex is true then the file must contain a base-16
+// integer and on false it must contain a base-10 number.
+template <typename IntType>
+absl::Status ReadUintFromSysfs(const ApifsFile &api_fs, bool is_hex,
+                               IntType *out) {
+  // Read in the contents of the file. This function only supports files
+  // containing a single integer.
+  auto maybe_contents = api_fs.Read();
+
+  if (!maybe_contents.ok()) {
+    return maybe_contents.status();
+  }
+
+  // The value should just be a number that we can parse and fit into an int.
+  if (is_hex) {
+    if (RE2::FullMatch(*maybe_contents, kHexRegexp, RE2::Hex(out))) {
+      return absl::OkStatus();
+    }
+  } else {
+    if (RE2::FullMatch(*maybe_contents, kDecimalRegexp, out)) {
+      return absl::OkStatus();
+    }
+  }
+  return absl::OutOfRangeError(absl::StrCat("sysfs file ", api_fs.GetPath(),
+                                            " contained '", *maybe_contents,
+                                            "' and not a valid integer"));
+}
+
+// Convert a sysfs device directory name into a usb device location. Returns
+// nullopt if the conversion fails.
 //
 // For every USB device connected to the system there will be a sysfs entry
 // created based on what USB bus # the device lives on as well as the sequence
@@ -51,8 +91,7 @@ namespace {
 // a device entry at "usbX" where X is the number of the USB controller (i.e.
 // the bus number). This is generally a symlink to the actual device entry in
 // the PCI part of sysfs.
-absl::optional<UsbLocation> DirectoryToDeviceLocation(
-    absl::string_view dirname) {
+absl::optional<UsbLocation> DirectoryToUsbLocation(absl::string_view dirname) {
   int bus;
   std::string port_substr;
   if (RE2::FullMatch(dirname, "usb(\\d+)", &bus)) {
@@ -92,14 +131,22 @@ absl::optional<UsbLocation> DirectoryToDeviceLocation(
 }
 }  // namespace
 
-SysfsUsbDiscovery::SysfsUsbDiscovery(absl::string_view sysfs_dir)
-    : sysfs_devices_dir_(absl::StrCat(sysfs_dir, "/bus/usb/devices")) {}
+std::string UsbLocationToDirectory(const UsbLocation &loc) {
+  if (loc.NumPorts() == 0) {
+    return absl::StrFormat("usb%d", loc.Bus().value());
+  }
+
+  std::vector<std::string> port_strings(loc.NumPorts());
+  for (size_t i = 0; i < loc.NumPorts(); ++i) {
+    port_strings[i] = absl::StrCat(loc.Port(i).value().value());
+  }
+  std::string port_substr(absl::StrJoin(port_strings, "."));
+  return absl::StrFormat("%d-%s", loc.Bus().value(), port_substr.c_str());
+}
 
 absl::Status SysfsUsbDiscovery::EnumerateAllUsbDevices(
     std::vector<UsbLocation> *devices) const {
-  ApifsDirectory dir(sysfs_devices_dir_);
-
-  auto maybe_usb_device_entries = dir.ListEntries();
+  auto maybe_usb_device_entries = api_fs_.ListEntries();
   if (!maybe_usb_device_entries.ok()) {
     return maybe_usb_device_entries.status();
   }
@@ -107,13 +154,29 @@ absl::Status SysfsUsbDiscovery::EnumerateAllUsbDevices(
   devices->clear();
 
   for (absl::string_view entry : *maybe_usb_device_entries) {
-    auto maybe_usb_location = DirectoryToDeviceLocation(GetBasename(entry));
+    auto maybe_usb_location = DirectoryToUsbLocation(GetBasename(entry));
 
     if (maybe_usb_location.has_value()) {
       devices->push_back(maybe_usb_location.value());
     }
   }
   return absl::OkStatus();
+}
+
+absl::StatusOr<UsbSignature> SysfsUsbAccess::GetSignature() const {
+  UsbSignature signature;
+  if (auto status = ReadUintFromSysfs(ApifsFile(api_fs_, "idVendor"), true,
+                                      &signature.vendor_id);
+      !status.ok()) {
+    return status;
+  }
+
+  if (auto status = ReadUintFromSysfs(ApifsFile(api_fs_, "idProduct"), true,
+                                      &signature.product_id);
+      !status.ok()) {
+    return status;
+  }
+  return signature;
 }
 
 }  // namespace ecclesia

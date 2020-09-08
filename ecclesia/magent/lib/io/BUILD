@@ -173,6 +173,7 @@ cc_library(
         "//ecclesia/lib/logging",
         "//ecclesia/lib/types:fixed_range_int",
         "@com_google_absl//absl/status",
+        "@com_google_absl//absl/status:statusor",
         "@com_google_absl//absl/types:optional",
         "@com_google_absl//absl/types:span",
     ],
@@ -192,7 +193,9 @@ cc_library(
         "//ecclesia/lib/apifs",
         "//ecclesia/lib/file:path",
         "@com_google_absl//absl/status",
+        "@com_google_absl//absl/status:statusor",
         "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:str_format",
         "@com_google_absl//absl/types:optional",
         "@com_googlesource_code_re2//:re2",
     ],
@@ -216,8 +219,10 @@ cc_test(
     deps = [
         ":usb",
         ":usb_sysfs",
+        "//ecclesia/lib/apifs",
         "//ecclesia/lib/file:test_filesystem",
         "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
 )

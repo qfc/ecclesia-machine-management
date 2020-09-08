@@ -30,7 +30,7 @@ TEST(UsbHelpersTest, UsbPortSequenceValidation) {
   maybe_seq = UsbPortSequence::TryMake({1, 2, 3, 4, 5});
   ASSERT_TRUE(maybe_seq.has_value());
   auto &seq_0 = maybe_seq.value();
-  EXPECT_EQ(seq_0.size(), 5);
+  EXPECT_EQ(seq_0.Size(), 5);
 
   auto maybe_seq_1 = UsbPortSequence::TryMake({1, 2, 3, 4, 5, 6});
   ASSERT_TRUE(maybe_seq_1.has_value());
