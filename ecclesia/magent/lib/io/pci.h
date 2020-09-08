@@ -207,12 +207,76 @@ class PciDevice {
   std::unique_ptr<PciResources> resources_intf_;
 };
 
+// This class represents a node in the PCI topology tree.
+class PciTopologyNode {
+ public:
+  PciTopologyNode(const PciLocation &location, size_t depth,
+                  PciTopologyNode *parent)
+      : location_(location), depth_(depth), parent_(parent) {}
+
+  PciTopologyNode(const PciTopologyNode &) = delete;
+  PciTopologyNode &operator=(const PciTopologyNode &) = delete;
+  PciTopologyNode(PciTopologyNode &&) = default;
+
+  const PciLocation &Location() const { return location_; }
+
+  // This gets the depth in the PCI tree. For a root node, the depth is 0.
+  size_t Depth() const { return depth_; }
+
+  // This gets the parent of this PciTopologyNode, for a root node, this
+  // function returns nullptr.
+  PciTopologyNode *Parent() const { return parent_; }
+
+  // This gets the children of this PciTopologyNode, for a endpoint node without
+  // children, the return vector is empty.
+  std::vector<PciTopologyNode *> Children() const { return children_; }
+
+ private:
+  friend class SysfsPciDiscovery;
+  void AddChild(PciTopologyNode *node) { children_.push_back(node); }
+
+  void SetChildren(std::vector<PciTopologyNode *> children) {
+    children_ = std::move(children);
+  }
+
+  const PciLocation location_;
+  size_t depth_;
+  PciTopologyNode *parent_;
+  std::vector<PciTopologyNode *> children_;
+};
+
+// This interface class defines some methods for discovering the PCI locations
+// and topologies.
 class PciDiscoveryInterface {
  public:
   virtual ~PciDiscoveryInterface() = default;
 
-  virtual absl::StatusOr<std::vector<PciLocation>> EnumerateAllDevices()
-      const = 0;
+  virtual std::vector<PciLocation> EnumerateAllLocations() const = 0;
+
+  // This function returns a vector of root PciTopologyNodes whose depths are 0.
+  virtual std::vector<PciTopologyNode *> GetRootNodes() const = 0;
+
+  // This function returns a PciTopologyNode given a PCI location, or a status
+  // if there is no such node found.
+  virtual absl::StatusOr<PciTopologyNode *> GetNode(
+      const PciLocation &location) const = 0;
+
+  // This function returns the ancestor (root node) of the given PCI location.
+  // Or if there is no such node found, it returns a status.
+  virtual absl::StatusOr<PciTopologyNode *> GetAncestorNode(
+      const PciLocation &location) const {
+    auto maybe_node = GetNode(location);
+    if (!maybe_node.ok()) {
+      return maybe_node.status();
+    }
+    PciTopologyNode *node = maybe_node.value();
+    while (node && node->Parent()) {
+      node = node->Parent();
+    }
+    return node;
+  }
+
+  virtual absl::Status Rescan() = 0;
 };
 
 }  // namespace ecclesia

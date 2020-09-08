@@ -21,6 +21,7 @@
 #define ECCLESIA_MAGENT_LIB_IO_PCI_LOCATION_H_
 
 #include <iosfwd>
+#include <string>
 #include <tuple>
 #include <utility>
 
@@ -91,6 +92,11 @@ class PciLocation {
 
     return PciLocation(maybe_domain.value(), maybe_bus.value(),
                        maybe_device.value(), maybe_function.value());
+  }
+
+  std::string ToString() const {
+    return absl::StrFormat("%04x:%02x:%02x.%x", domain_.value(), bus_.value(),
+                           device_.value(), function_.value());
   }
 
   const PciDomain domain() const { return domain_; }

@@ -119,5 +119,15 @@ TEST(PciLocationTest, IsHashable) {
   EXPECT_EQ(iter->second, "0001:00:03.4");
 }
 
+TEST(PciLocationTest, ToCorrectString) {
+  auto loc0 = PciLocation::Make<1, 2, 3, 4>();
+  auto loc1 = PciLocation::Make<0, 0xa, 0xb, 7>();
+  // The max possible numbers for domain:bus:device.function value
+  auto loc2 = PciLocation::Make<0xffff, 0xff, 0x1f, 7>();
+  EXPECT_EQ(loc0.ToString(), "0001:02:03.4");
+  EXPECT_EQ(loc1.ToString(), "0000:0a:0b.7");
+  EXPECT_EQ(loc2.ToString(), "ffff:ff:1f.7");
+}
+
 }  // namespace
 }  // namespace ecclesia

@@ -40,6 +40,7 @@ ecclesia_oss_static_linked_cc_binary(
         "//ecclesia/lib/types:fixed_range_int",
         "//ecclesia/magent/lib/eeprom",
         "//ecclesia/magent/lib/io:pci_location",
+        "//ecclesia/magent/lib/io:pci_sys",
         "//ecclesia/magent/lib/io:smbus",
         "//ecclesia/magent/lib/io:smbus_kernel_dev",
         "//ecclesia/magent/lib/ipmi:interface_options",

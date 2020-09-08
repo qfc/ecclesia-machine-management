@@ -25,8 +25,10 @@
 #include <string>
 #include <vector>
 
+#include "absl/container/flat_hash_map.h"
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
+#include "absl/strings/string_view.h"
 #include "absl/types/span.h"
 #include "ecclesia/lib/apifs/apifs.h"
 #include "ecclesia/magent/lib/io/pci.h"
@@ -87,16 +89,29 @@ class SysfsPciDevice : public PciDevice {
 
 class SysfsPciDiscovery : public PciDiscoveryInterface {
  public:
-  SysfsPciDiscovery();
+  SysfsPciDiscovery() : SysfsPciDiscovery("/sys/devices") {}
 
-  // This constructor allows customized sysfs PCI devices directory, mostly for
+  // This constructor allows customized sysfs devices directory, mostly for
   // testing purpose.
-  SysfsPciDiscovery(const std::string &sys_pci_devices_dir);
+  SysfsPciDiscovery(const std::string &sys_devices_dir);
 
-  absl::StatusOr<std::vector<PciLocation>> EnumerateAllDevices() const override;
+  std::vector<PciLocation> EnumerateAllLocations() const override;
+
+  std::vector<PciTopologyNode *> GetRootNodes() const override;
+
+  absl::StatusOr<PciTopologyNode *> GetNode(
+      const PciLocation &location) const override;
+
+  absl::Status Rescan() override;
 
  private:
-  std::string sys_pci_devices_dir_;
+  std::vector<PciTopologyNode *> ScanDirectory(absl::string_view directory_path,
+                                               size_t depth,
+                                               PciTopologyNode *parent);
+  // The sysfs dir in Linux is always /sys/devices. This variable is only for
+  // testing purpose.
+  std::string sys_devices_dir_;
+  absl::flat_hash_map<PciLocation, std::unique_ptr<PciTopologyNode>> pci_table_;
 };
 
 }  // namespace ecclesia

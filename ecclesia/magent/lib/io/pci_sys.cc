@@ -20,12 +20,15 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>
 
+#include "absl/container/flat_hash_map.h"
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
+#include "absl/strings/str_cat.h"
 #include "absl/strings/str_format.h"
 #include "absl/strings/str_split.h"
 #include "absl/strings/string_view.h"
@@ -36,6 +39,9 @@
 #include "ecclesia/lib/apifs/apifs.h"
 #include "ecclesia/lib/codec/endian.h"
 #include "ecclesia/lib/file/dir.h"
+#include "ecclesia/lib/file/path.h"
+#include "ecclesia/lib/logging/globals.h"
+#include "ecclesia/lib/logging/logging.h"
 #include "ecclesia/lib/types/fixed_range_int.h"
 #include "ecclesia/magent/lib/io/pci.h"
 #include "ecclesia/magent/lib/io/pci_location.h"
@@ -49,6 +55,9 @@ constexpr size_t kMaxSysFileSize = 4096;
 
 static LazyRE2 kResourceLineRegex = {
     R"((0x[[:xdigit:]]{16}) (0x[[:xdigit:]]{16}) (0x[[:xdigit:]]{16}))"};
+
+static LazyRE2 kPciBusEntryRegex = {
+    R"(pci([[:xdigit:]]{4}):([[:xdigit:]]{2}))"};
 
 }  // namespace
 
@@ -183,25 +192,72 @@ absl::StatusOr<PciResources::BarInfo> SysfsPciResources::GetBaseAddressImpl(
   return BarInfo{(flags & kIoResourceFlag) ? kBarTypeIo : kBarTypeMem, base};
 }
 
-SysfsPciDiscovery::SysfsPciDiscovery() : SysfsPciDiscovery(kSysPciRoot) {}
+SysfsPciDiscovery::SysfsPciDiscovery(const std::string &sys_devices_dir)
+    : sys_devices_dir_(sys_devices_dir) {
+  auto status = Rescan();
+  if (!status.ok()) {
+    ecclesia::ErrorLog() << "PCI topology construction failed. Status: "
+                         << status.ToString();
+  }
+}
 
-SysfsPciDiscovery::SysfsPciDiscovery(const std::string &sys_pci_devices_dir)
-    : sys_pci_devices_dir_(sys_pci_devices_dir) {}
-
-absl::StatusOr<std::vector<PciLocation>>
-SysfsPciDiscovery::EnumerateAllDevices() const {
+std::vector<PciLocation> SysfsPciDiscovery::EnumerateAllLocations() const {
   std::vector<PciLocation> pci_locations;
-
-  absl::Status status = WithEachFileInDirectory(
-      sys_pci_devices_dir_, [&pci_locations](absl::string_view filename) {
-        auto maybe_loc = PciLocation::FromString(filename);
-        if (maybe_loc.has_value()) {
-          pci_locations.push_back(maybe_loc.value());
-        }
-      });
-  if (!status.ok()) return status;
-
+  for (auto &entry : pci_table_) {
+    pci_locations.push_back(entry.first);
+  }
   std::sort(pci_locations.begin(), pci_locations.end());
   return pci_locations;
+}
+
+absl::Status SysfsPciDiscovery::Rescan() {
+  absl::Status status = WithEachFileInDirectory(
+      sys_devices_dir_, [&](absl::string_view entry_name) {
+        if (RE2::FullMatch(entry_name, *kPciBusEntryRegex)) {
+          ScanDirectory(JoinFilePaths(sys_devices_dir_, entry_name), 0,
+                        nullptr);
+        }
+      });
+  return status;
+}
+
+std::vector<PciTopologyNode *> SysfsPciDiscovery::ScanDirectory(
+    absl::string_view directory_path, size_t depth, PciTopologyNode *parent) {
+  std::vector<PciTopologyNode *> nodes_in_this_dir;
+  absl::Status status = WithEachFileInDirectory(
+      directory_path, [&](absl::string_view entry_name) {
+        auto maybe_loc = PciLocation::FromString(entry_name);
+        if (maybe_loc.has_value()) {
+          auto node = std::make_unique<PciTopologyNode>(maybe_loc.value(),
+                                                        depth, parent);
+          node->SetChildren(
+              ScanDirectory(JoinFilePaths(directory_path, entry_name),
+                            depth + 1, node.get()));
+
+          nodes_in_this_dir.push_back(node.get());
+          pci_table_.emplace(maybe_loc.value(), std::move(node));
+        }
+      });
+  return nodes_in_this_dir;
+}
+
+std::vector<PciTopologyNode *> SysfsPciDiscovery::GetRootNodes() const {
+  std::vector<PciTopologyNode *> root_nodes;
+  for (auto &entry : pci_table_) {
+    if (entry.second->Depth() == 0) {
+      root_nodes.push_back(entry.second.get());
+    }
+  }
+  return root_nodes;
+}
+
+absl::StatusOr<PciTopologyNode *> SysfsPciDiscovery::GetNode(
+    const PciLocation &location) const {
+  auto iter = pci_table_.find(location);
+  if (iter != pci_table_.end()) {
+    return iter->second.get();
+  }
+  return absl::NotFoundError(
+      absl::StrCat("Failed to find PCI node: ", location.ToString()));
 }
 }  // namespace ecclesia

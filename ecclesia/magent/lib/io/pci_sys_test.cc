@@ -17,6 +17,7 @@
 #include "ecclesia/magent/lib/io/pci_sys.h"
 
 #include <cstdint>
+#include <vector>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -32,6 +33,8 @@ namespace ecclesia {
 namespace {
 
 using ::testing::Not;
+
+using ::testing::UnorderedElementsAre;
 
 // Helper matchers that can check if a BarInfo is a memory or I/O BAR with the
 // given base address.
@@ -66,6 +69,24 @@ class PciSysTest : public testing::Test {
     fs_.CreateFile("/sys/bus/pci/devices/0001:02:03.4/config", "0123456789");
     fs_.CreateFile("/sys/bus/pci/devices/0001:02:03.4/resource",
                    kTestResourceFile);
+  }
+
+ protected:
+  TestFilesystem fs_;
+};
+
+class PciTopologyTest : public testing::Test {
+ public:
+  PciTopologyTest() : fs_(GetTestTempdirPath()) {
+    fs_.CreateDir("/sys/devices");
+    fs_.CreateDir("/sys/devices/pci0000:ae");
+    fs_.CreateDir("/sys/devices/pci0000:ae/0000:ae:00.0");
+    fs_.CreateDir("/sys/devices/pci0000:ae/0000:ae:00.0/0000:af:00.0");
+    fs_.CreateDir("/sys/devices/pci0000:ae/0000:ae:00.0/0000:af:01.0");
+    fs_.CreateDir("/sys/devices/pci0000:ae/0000:ae:01.0");
+    fs_.CreateDir("/sys/devices/pci0000:d7");
+    fs_.CreateDir("/sys/devices/pci0000:d7/0000.d7:00.0");
+    fs_.CreateDir("/sys/devices/pci0000:ae/0000:d7:00.0/0000:d8:00.0");
   }
 
  protected:
@@ -204,6 +225,65 @@ TEST_F(PciSysTest, TestResourcesNotFound) {
   EXPECT_THAT(resources.GetBaseAddress<3>(), Not(IsOk()));
   EXPECT_THAT(resources.GetBaseAddress<4>(), Not(IsOk()));
   EXPECT_THAT(resources.GetBaseAddress<5>(), Not(IsOk()));
+}
+
+TEST_F(PciTopologyTest, EnumerateAllLocations) {
+  SysfsPciDiscovery pci_discovery(fs_.GetTruePath("/sys/devices/"));
+  auto pci_locations = pci_discovery.EnumerateAllLocations();
+  std::vector<PciLocation> expect_all_locations = {
+      PciLocation::Make<0, 0xae, 0, 0>(), PciLocation::Make<0, 0xae, 1, 0>(),
+      PciLocation::Make<0, 0xaf, 0, 0>(), PciLocation::Make<0, 0xaf, 1, 0>(),
+      PciLocation::Make<0, 0xd7, 0, 0>(), PciLocation::Make<0, 0xd8, 0, 0>()};
+  // The enumerated PCI locations are sorted.
+  EXPECT_THAT(pci_locations, expect_all_locations);
+}
+
+TEST_F(PciTopologyTest, GetCorrectRootNodes) {
+  SysfsPciDiscovery pci_discovery(fs_.GetTruePath("/sys/devices/"));
+  auto root_nodes = pci_discovery.GetRootNodes();
+  std::vector<PciLocation> root_locations;
+  for (auto* root_node : root_nodes) {
+    ASSERT_NE(root_node, nullptr);
+    root_locations.push_back(root_node->Location());
+  }
+  EXPECT_THAT(root_locations,
+              UnorderedElementsAre(PciLocation::Make<0, 0xae, 0, 0>(),
+                                   PciLocation::Make<0, 0xae, 1, 0>(),
+                                   PciLocation::Make<0, 0xd7, 0, 0>()));
+}
+
+TEST_F(PciTopologyTest, GetCorrectNode) {
+  SysfsPciDiscovery pci_discovery(fs_.GetTruePath("/sys/devices/"));
+  std::vector<PciLocation> expect_all_locations = {
+      PciLocation::Make<0, 0xae, 0, 0>(), PciLocation::Make<0, 0xae, 1, 0>(),
+      PciLocation::Make<0, 0xaf, 0, 0>(), PciLocation::Make<0, 0xaf, 1, 0>(),
+      PciLocation::Make<0, 0xd7, 0, 0>(), PciLocation::Make<0, 0xd8, 0, 0>()};
+  // Verify GetNode returns correct node.
+  for (const auto& location : expect_all_locations) {
+    auto maybe_node = pci_discovery.GetNode(location);
+    ASSERT_TRUE(maybe_node.ok());
+    EXPECT_EQ(maybe_node.value()->Location(), location);
+  }
+  // GetNode returns status for non-exist PCI location
+  auto maybe_node = pci_discovery.GetNode(PciLocation::Make<1, 2, 3, 4>());
+  EXPECT_FALSE(maybe_node.ok());
+}
+
+TEST_F(PciTopologyTest, GetCorrectAncestorNode) {
+  SysfsPciDiscovery pci_discovery(fs_.GetTruePath("/sys/devices/"));
+  // 0000:ae:00.0 has two children 0000:af:00.0 and 0000:af:01.0
+  auto maybe_node =
+      pci_discovery.GetAncestorNode(PciLocation::Make<0, 0xaf, 0, 0>());
+  ASSERT_TRUE(maybe_node.ok());
+  EXPECT_EQ(maybe_node.value()->Location(),
+            (PciLocation::Make<0, 0xae, 0, 0>()));
+  maybe_node =
+      pci_discovery.GetAncestorNode(PciLocation::Make<0, 0xaf, 1, 0>());
+  ASSERT_TRUE(maybe_node.ok());
+  EXPECT_EQ(maybe_node.value()->Location(),
+            (PciLocation::Make<0, 0xae, 0, 0>()));
+  EXPECT_EQ(maybe_node.value()->Parent(), nullptr);
+  EXPECT_EQ(maybe_node.value()->Children().size(), 2);
 }
 
 }  // namespace
