@@ -21,9 +21,13 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <memory>
 #include <string>
+#include <vector>
 
 #include "absl/status/status.h"
+#include "absl/status/statusor.h"
+#include "absl/types/span.h"
 #include "ecclesia/lib/apifs/apifs.h"
 #include "ecclesia/magent/lib/io/pci.h"
 #include "ecclesia/magent/lib/io/pci_location.h"
@@ -32,26 +36,37 @@ namespace ecclesia {
 
 class SysPciRegion : public PciRegion {
  public:
-  explicit SysPciRegion(PciLocation pci_loc);
-  SysPciRegion(std::string sys_root, PciLocation pci_loc);
+  explicit SysPciRegion(const PciLocation &pci_loc);
 
-  absl::Status Read8(size_t offset, uint8_t *data) override;
+  // This constructor allows customized sysfs PCI devices directory, mostly for
+  // testing purpose.
+  SysPciRegion(std::string sys_pci_devices_dir, const PciLocation &pci_loc);
+
+  absl::StatusOr<uint8_t> Read8(size_t offset) const override;
   absl::Status Write8(size_t offset, uint8_t data) override;
 
-  absl::Status Read16(size_t offset, uint16_t *data) override;
+  absl::StatusOr<uint16_t> Read16(size_t offset) const override;
   absl::Status Write16(size_t offset, uint16_t data) override;
 
-  absl::Status Read32(size_t offset, uint32_t *data) override;
+  absl::StatusOr<uint32_t> Read32(size_t offset) const override;
   absl::Status Write32(size_t offset, uint32_t data) override;
 
-  absl::Status ReadBytes(uint64_t offset, absl::Span<char> value) override;
+  absl::Status ReadBytes(uint64_t offset,
+                         absl::Span<char> value) const override;
   absl::Status WriteBytes(uint64_t offset,
                           absl::Span<const char> value) override;
 
  private:
-  std::string sys_root_;
+  std::string sys_pci_devices_dir_;
   PciLocation loc_;
   ApifsFile apifs_;
+};
+
+// A sysfs PCI device can be identified by the PCI location.
+class SysfsPciDevice : public PciDevice {
+ public:
+  SysfsPciDevice(const PciLocation &location)
+      : PciDevice(location, std::make_unique<SysPciRegion>(location)) {}
 };
 
 class SysfsPci : PciFunction {
@@ -60,10 +75,9 @@ class SysfsPci : PciFunction {
   SysfsPci(std::string sys_dir, PciLocation loc);
 
   bool Exists() override;
-  absl::Status GetBaseAddress(BarNum bar_id,
-                              PciFunction::BAR *out_bar) const override;
+  absl::StatusOr<PciFunction::BAR> GetBaseAddress(BarNum bar_id) const override;
 
-  const SysPciRegion &GetConfig() { return config_; }
+  const SysPciRegion &GetConfig() const { return config_; }
 
  private:
   ApifsDirectory sys_dir_;
@@ -72,13 +86,16 @@ class SysfsPci : PciFunction {
 
 class SysfsPciDiscovery : PciDiscoveryInterface {
  public:
-  SysfsPciDiscovery(std::string sys_dir);
+  SysfsPciDiscovery();
 
-  absl::Status EnumerateAllDevices(
-      std::vector<PciLocation> *devices) const override;
+  // This constructor allows customized sysfs PCI devices directory, mostly for
+  // testing purpose.
+  SysfsPciDiscovery(const std::string &sys_pci_devices_dir);
+
+  absl::StatusOr<std::vector<PciLocation>> EnumerateAllDevices() const override;
 
  private:
-  std::string sys_dir_;
+  std::string sys_pci_devices_dir_;
 };
 
 }  // namespace ecclesia

@@ -28,8 +28,12 @@
 #include <cstdint>
 #include <memory>
 #include <utility>
+#include <vector>
 
 #include "absl/status/status.h"
+#include "absl/status/statusor.h"
+#include "absl/types/span.h"
+#include "ecclesia/lib/types/fixed_range_int.h"
 #include "ecclesia/magent/lib/io/pci_location.h"
 #include "ecclesia/magent/lib/io/pci_regs.h"
 
@@ -44,20 +48,21 @@ class PciRegion {
   virtual ~PciRegion() = default;
 
   // Size of this region.
-  size_t size() const { return size_; }
+  size_t Size() const { return size_; }
 
   // Read/write function that access within this region
   // Offset is relative to the start of the region.
-  virtual absl::Status Read8(size_t offset, uint8_t *data) = 0;
+  virtual absl::StatusOr<uint8_t> Read8(size_t offset) const = 0;
   virtual absl::Status Write8(size_t offset, uint8_t data) = 0;
 
-  virtual absl::Status Read16(size_t offset, uint16_t *data) = 0;
+  virtual absl::StatusOr<uint16_t> Read16(size_t offset) const = 0;
   virtual absl::Status Write16(size_t offset, uint16_t data) = 0;
 
-  virtual absl::Status Read32(size_t offset, uint32_t *data) = 0;
+  virtual absl::StatusOr<uint32_t> Read32(size_t offset) const = 0;
   virtual absl::Status Write32(size_t offset, uint32_t data) = 0;
 
-  virtual absl::Status ReadBytes(uint64_t offset, absl::Span<char> value) = 0;
+  virtual absl::Status ReadBytes(uint64_t offset,
+                                 absl::Span<char> value) const = 0;
   virtual absl::Status WriteBytes(uint64_t offset,
                                   absl::Span<const char> value) = 0;
 
@@ -71,53 +76,61 @@ class PciConfigSpace {
  public:
   explicit PciConfigSpace(PciRegion *region) : region_(region) {}
 
-  absl::Status vendor_id(uint16_t *vendor_id) const {
-    return region_->Read16(kPciVidReg, vendor_id);
+  virtual ~PciConfigSpace() = default;
+
+  virtual absl::StatusOr<uint16_t> VendorId() const {
+    return region_->Read16(kPciVidReg);
   }
 
-  absl::Status device_id(uint16_t *device_id) const {
-    return region_->Read16(kPciDidReg, device_id);
+  virtual absl::StatusOr<uint16_t> DeviceId() const {
+    return region_->Read16(kPciDidReg);
   }
 
-  absl::Status command(uint16_t *command) const {
-    return region_->Read16(kPciCommandReg, command);
+  virtual absl::StatusOr<uint16_t> Command() const {
+    return region_->Read16(kPciCommandReg);
   }
 
-  absl::Status status(uint16_t *status) const {
-    return region_->Read16(kPciStatusReg, status);
+  virtual absl::StatusOr<uint16_t> Status() const {
+    return region_->Read16(kPciStatusReg);
   }
 
-  absl::Status revision_id(uint8_t *revision_id) const {
-    return region_->Read8(kPciRevisionIdReg, revision_id);
+  virtual absl::StatusOr<uint8_t> RevisionId() const {
+    return region_->Read8(kPciRevisionIdReg);
   }
 
-  absl::Status class_code(uint16_t *class_code) const {
-    return region_->Read16(kPciClassCodeReg, class_code);
+  // Class code occupies 3 bytes. So for a uint32_t return value, only the lower
+  // 3 bytes are valid, the upper 1 byte is filled with 0.
+  virtual absl::StatusOr<uint32_t> ClassCode() const {
+    auto maybe_uint32 = region_->Read32(kPciClassCodeReg);
+    if (!maybe_uint32.ok()) {
+      return maybe_uint32.status();
+    }
+    return maybe_uint32.value() & 0x00ffffff;
   }
 
-  absl::Status subsystem_vendor_id(uint16_t *subsystem_vendor_id) const {
-    return region_->Read16(kPciType0SubsysVendorIdReg, subsystem_vendor_id);
+  virtual absl::StatusOr<uint16_t> SubsystemVendorId() const {
+    return region_->Read16(kPciType0SubsysVendorIdReg);
   }
 
-  absl::Status subsystem_id(uint16_t *subsystem_id) const {
-    return region_->Read16(kPciType0SubsysIdReg, subsystem_id);
+  virtual absl::StatusOr<uint16_t> subsystem_id() const {
+    return region_->Read16(kPciType0SubsysIdReg);
   }
 
-  absl::Status capacity_pointer(uint16_t *capacity_pointer) const {
-    return region_->Read16(kPciCapPointerReg, capacity_pointer);
+  virtual absl::StatusOr<uint16_t> CapacityPointer() const {
+    return region_->Read16(kPciCapPointerReg);
   }
 
-  absl::Status write_command(uint16_t value) {
+  virtual absl::Status WriteCommand(uint16_t value) {
     return region_->Write16(kPciCommandReg, value);
   }
 
-  PciRegion *region() { return region_; }
+  PciRegion *Region() { return region_; }
 
  private:
   PciRegion *region_;
 };
 
-// An object for interacting with a PCI device.
+// A wrappper class for interacting with a PCI device.
 class PciDevice {
  public:
   // Create a PCI device using the provided region for all config space access.
@@ -125,26 +138,26 @@ class PciDevice {
             std::unique_ptr<PciRegion> config_region)
       : location_(location),
         config_region_(std::move(config_region)),
-        config_(config_region_.get()) {}
+        config_space_(config_region_.get()) {}
 
   PciDevice(const PciDevice &) = delete;
   PciDevice &operator=(const PciDevice &) = delete;
 
-  PciDevice(PciDevice&&) = default;
+  PciDevice(PciDevice &&) = default;
   PciDevice &operator=(PciDevice &&) = default;
 
   // Get this device address.
-  const PciLocation &location() const { return location_; }
+  const PciLocation &Location() const { return location_; }
 
   // Get the device config space.
-  PciConfigSpace &config_space() { return config_; }
-  const PciConfigSpace &config_space() const { return config_; }
+  PciConfigSpace &ConfigSpace() { return config_space_; }
+  const PciConfigSpace &ConfigSpace() const { return config_space_; }
 
  private:
   PciLocation location_;
 
   std::unique_ptr<PciRegion> config_region_;
-  PciConfigSpace config_;
+  PciConfigSpace config_space_;
 };
 
 
@@ -166,14 +179,14 @@ class PciFunction {
     explicit constexpr BarNum(BaseType value) : BaseType(value) {}
   };
 
-  explicit PciFunction(PciLocation loc);
+  explicit PciFunction(PciLocation loc) : loc_(loc) {}
   virtual ~PciFunction() = default;
 
   // Check if Pci exists.
   virtual bool Exists() = 0;
 
   // Get address of a BAR register.
-  virtual absl::Status GetBaseAddress(BarNum bar_id, BAR *out_bar) const = 0;
+  virtual absl::StatusOr<BAR> GetBaseAddress(BarNum bar_id) const = 0;
 
  protected:
   PciLocation loc_;
@@ -183,8 +196,8 @@ class PciDiscoveryInterface {
  public:
   virtual ~PciDiscoveryInterface() = default;
 
-  virtual absl::Status EnumerateAllDevices(
-      std::vector<PciLocation> *devices) const = 0;
+  virtual absl::StatusOr<std::vector<PciLocation>> EnumerateAllDevices()
+      const = 0;
 };
 
 }  // namespace ecclesia

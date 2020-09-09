@@ -36,16 +36,19 @@
 namespace ecclesia {
 
 PciThermalSensor::PciThermalSensor(const PciSensorParams &params)
+    : PciThermalSensor(
+          params, std::make_unique<ecclesia::SysfsPciDevice>(params.loc)) {}
+
+PciThermalSensor::PciThermalSensor(const PciSensorParams &params,
+                                   std::unique_ptr<PciDevice> device)
     : ThermalSensor(params.name, params.upper_threshold_critical),
       offset_(params.offset),
-      device_(params.loc,
-              std::make_unique<ecclesia::SysPciRegion>(params.loc)) {}
+      device_(std::move(device)) {}
 
 absl::optional<int> PciThermalSensor::Read() {
-  uint16_t t;
-  absl::Status status = device_.config_space().region()->Read16(offset_, &t);
-  if (status.ok()) {
-    return t;
+  auto maybe_uint16 = device_->ConfigSpace().Region()->Read16(offset_);
+  if (maybe_uint16.ok()) {
+    return maybe_uint16.value();
   }
   return absl::nullopt;
 }

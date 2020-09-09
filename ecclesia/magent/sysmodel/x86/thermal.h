@@ -18,6 +18,7 @@
 #define ECCLESIA_MAGENT_X86_THERMAL_H_
 
 #include <cstddef>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -26,6 +27,7 @@
 #include "absl/types/span.h"
 #include "ecclesia/magent/lib/io/pci.h"
 #include "ecclesia/magent/lib/io/pci_location.h"
+#include "ecclesia/magent/lib/io/pci_sys.h"
 #include "ecclesia/magent/sysmodel/thermal.h"
 
 namespace ecclesia {
@@ -45,22 +47,25 @@ struct PciSensorParams {
 class PciThermalSensor : public ThermalSensor {
  public:
   explicit PciThermalSensor(const PciSensorParams &params);
-  virtual ~PciThermalSensor() = default;
+
+  // This constructor takes in a pci_device to faciliate test.
+  PciThermalSensor(const PciSensorParams &params,
+                   std::unique_ptr<PciDevice> device);
 
   // Disable copy, since PciDevice is not copyable.
-  PciThermalSensor(const PciThermalSensor&) = delete;
-  PciThermalSensor &operator=(const PciThermalSensor&) = delete;
+  PciThermalSensor(const PciThermalSensor &) = delete;
+  PciThermalSensor &operator=(const PciThermalSensor &) = delete;
 
   // But enable move.
-  PciThermalSensor(PciThermalSensor&&) = default;
-  PciThermalSensor &operator=(PciThermalSensor&&) = default;
+  PciThermalSensor(PciThermalSensor &&) = default;
+  PciThermalSensor &operator=(PciThermalSensor &&) = default;
 
   absl::optional<int> Read() override;
 
  private:
   // Thermal info offset
   const size_t offset_;
-  PciDevice device_;
+  std::unique_ptr<PciDevice> device_;
 };
 
 std::vector<PciThermalSensor> CreatePciThermalSensors(

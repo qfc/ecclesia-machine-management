@@ -29,7 +29,10 @@ constexpr int8_t kPciCommandReg = 0x04;
 constexpr int8_t kPciStatusReg = 0x06;
 constexpr int8_t kPciRevisionIdReg = 0x08;
 constexpr int8_t kPciProgIfReg = 0x09;
-constexpr int8_t kPciClassCodeReg = 0x0a;
+// In PCI config space, the "class code" spans three registers with offsets
+// 0x09-0x0b, where upper byte (0x0b) is the base class code; middle byte (0x0a)
+// is the sub-class code; lower byte (0x09) is the Prog IF.
+constexpr int8_t kPciClassCodeReg = 0x09;
 constexpr int8_t kPciCacheLineSizeReg = 0x0c;
 constexpr int8_t kPciLatencyTimerReg = 0x0d;
 constexpr int8_t kPciHeaderTypeReg = 0x0e;

@@ -17,26 +17,27 @@
 #include "ecclesia/magent/lib/io/pci_sys.h"
 
 #include <dirent.h>
-#include <errno.h>
-#include <fcntl.h>
 
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
 #include <fstream>
+#include <optional>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "absl/status/status.h"
+#include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_format.h"
+#include "absl/strings/string_view.h"
 #include "absl/strings/substitute.h"
 #include "absl/types/span.h"
 #include "ecclesia/lib/apifs/apifs.h"
-#include "ecclesia/lib/cleanup/cleanup.h"
 #include "ecclesia/lib/codec/endian.h"
 #include "ecclesia/lib/file/dir.h"
-#include "ecclesia/lib/logging/logging.h"
 #include "ecclesia/magent/lib/io/pci.h"
 #include "ecclesia/magent/lib/io/pci_location.h"
 #include "re2/re2.h"
@@ -67,16 +68,18 @@ class DirCloser {
 
 }  // namespace
 
-SysPciRegion::SysPciRegion(PciLocation loc) : SysPciRegion(kSysPciRoot, loc) {}
+SysPciRegion::SysPciRegion(const PciLocation &loc)
+    : SysPciRegion(kSysPciRoot, loc) {}
 
-SysPciRegion::SysPciRegion(std::string sys_root, PciLocation loc)
+SysPciRegion::SysPciRegion(std::string sys_pci_devices_dir,
+                           const PciLocation &loc)
     : PciRegion(kMaxSysFileSize),
-      sys_root_(std::move(sys_root)),
+      sys_pci_devices_dir_(std::move(sys_pci_devices_dir)),
       loc_(loc),
-      apifs_(absl::StrFormat("%s/%s/config", sys_root_,
+      apifs_(absl::StrFormat("%s/%s/config", sys_pci_devices_dir_,
                              absl::FormatStreamed(loc))) {}
 
-absl::Status SysPciRegion::Read8(size_t offset, uint8_t *data) {
+absl::StatusOr<uint8_t> SysPciRegion::Read8(size_t offset) const {
   std::array<char, sizeof(uint8_t)> res;
   absl::Status status = apifs_.SeekAndRead(offset, absl::MakeSpan(res));
 
@@ -84,8 +87,7 @@ absl::Status SysPciRegion::Read8(size_t offset, uint8_t *data) {
     return status;
   }
 
-  *data = LittleEndian::Load8(res.data());
-  return absl::OkStatus();
+  return LittleEndian::Load8(res.data());
 }
 
 absl::Status SysPciRegion::Write8(size_t offset, uint8_t data) {
@@ -95,7 +97,7 @@ absl::Status SysPciRegion::Write8(size_t offset, uint8_t data) {
   return apifs_.SeekAndWrite(offset, absl::MakeConstSpan(buffer));
 }
 
-absl::Status SysPciRegion::Read16(size_t offset, uint16_t *data) {
+absl::StatusOr<uint16_t> SysPciRegion::Read16(size_t offset) const {
   std::array<char, sizeof(uint16_t)> res;
   absl::Status status = apifs_.SeekAndRead(offset, absl::MakeSpan(res));
 
@@ -103,8 +105,7 @@ absl::Status SysPciRegion::Read16(size_t offset, uint16_t *data) {
     return status;
   }
 
-  *data = LittleEndian::Load16(res.data());
-  return absl::OkStatus();
+  return LittleEndian::Load16(res.data());
 }
 
 absl::Status SysPciRegion::Write16(size_t offset, uint16_t data) {
@@ -114,7 +115,7 @@ absl::Status SysPciRegion::Write16(size_t offset, uint16_t data) {
   return apifs_.SeekAndWrite(offset, absl::MakeConstSpan(buffer));
 }
 
-absl::Status SysPciRegion::Read32(size_t offset, uint32_t *data) {
+absl::StatusOr<uint32_t> SysPciRegion::Read32(size_t offset) const {
   std::array<char, sizeof(uint32_t)> res;
   absl::Status status = apifs_.SeekAndRead(offset, absl::MakeSpan(res));
 
@@ -122,8 +123,7 @@ absl::Status SysPciRegion::Read32(size_t offset, uint32_t *data) {
     return status;
   }
 
-  *data = LittleEndian::Load32(res.data());
-  return absl::OkStatus();
+  return LittleEndian::Load32(res.data());
 }
 
 absl::Status SysPciRegion::Write32(size_t offset, uint32_t data) {
@@ -133,7 +133,8 @@ absl::Status SysPciRegion::Write32(size_t offset, uint32_t data) {
   return apifs_.SeekAndWrite(offset, absl::MakeConstSpan(buffer));
 }
 
-absl::Status SysPciRegion::ReadBytes(uint64_t offset, absl::Span<char> value) {
+absl::Status SysPciRegion::ReadBytes(uint64_t offset,
+                                     absl::Span<char> value) const {
   return apifs_.SeekAndRead(offset, value);
 }
 
@@ -141,8 +142,6 @@ absl::Status SysPciRegion::WriteBytes(uint64_t offset,
                                       absl::Span<const char> value) {
   return apifs_.SeekAndWrite(offset, value);
 }
-
-PciFunction::PciFunction(PciLocation loc) : loc_(loc) {}
 
 SysfsPci::SysfsPci(PciLocation loc) : SysfsPci(kSysPciRoot, loc) {}
 SysfsPci::SysfsPci(std::string sys_dir, PciLocation loc)
@@ -156,9 +155,7 @@ bool SysfsPci::Exists() {
       absl::StrFormat("devices/%s", absl::FormatStreamed(loc_)));
 }
 
-absl::Status SysfsPci::GetBaseAddress(BarNum bar_id,
-                                      PciFunction::BAR *out_bar) const {
-
+absl::StatusOr<PciFunction::BAR> SysfsPci::GetBaseAddress(BarNum bar_id) const {
   std::string path = absl::StrFormat(
       "%s/devices/%s/resource", sys_dir_.GetPath(), absl::FormatStreamed(loc_));
 
@@ -198,41 +195,38 @@ absl::Status SysfsPci::GetBaseAddress(BarNum bar_id,
         absl::Substitute("No bar information found in $0", path));
   }
 
-  int64_t base;
-  int64_t limit;
-  int64_t flags;
+  uint64_t base;
+  uint64_t limit;
+  uint64_t flags;
   if (!RE2::FullMatch(lines[bar_id.value()], *kBARLineRegexp, RE2::Hex(&base),
                       RE2::Hex(&limit), RE2::Hex(&flags))) {
     return absl::InternalError(
         absl::Substitute("Error reading BAR information."));
   }
 
-  out_bar->address = base;
-  out_bar->type = (flags & kIoResourceIo) ? kBarTypeIo : kBarTypeMem;
-
-  return absl::OkStatus();
+  return PciFunction::BAR{(flags & kIoResourceIo) ? kBarTypeIo : kBarTypeMem,
+                          base};
 }
 
-SysfsPciDiscovery::SysfsPciDiscovery(std::string sys_dir) : sys_dir_(sys_dir) {}
+SysfsPciDiscovery::SysfsPciDiscovery() : SysfsPciDiscovery(kSysPciRoot) {}
 
-absl::Status SysfsPciDiscovery::EnumerateAllDevices(
-    std::vector<PciLocation> *devices) const {
-  if (devices == nullptr) {
-    return absl::InvalidArgumentError("devices can not be nullptr.");
-  }
+SysfsPciDiscovery::SysfsPciDiscovery(const std::string &sys_pci_devices_dir)
+    : sys_pci_devices_dir_(sys_pci_devices_dir) {}
 
-  std::string path = absl::StrCat(sys_dir_.c_str(), "/devices");
+absl::StatusOr<std::vector<PciLocation>>
+SysfsPciDiscovery::EnumerateAllDevices() const {
+  std::vector<PciLocation> pci_locations;
 
-  absl::Status status =
-      WithEachFileInDirectory(path, [devices](absl::string_view filename) {
+  absl::Status status = WithEachFileInDirectory(
+      sys_pci_devices_dir_, [&pci_locations](absl::string_view filename) {
         auto maybe_loc = PciLocation::FromString(filename);
         if (maybe_loc.has_value()) {
-          devices->push_back(maybe_loc.value());
+          pci_locations.push_back(maybe_loc.value());
         }
       });
   if (!status.ok()) return status;
 
-  std::sort(devices->begin(), devices->end());
-  return absl::OkStatus();
+  std::sort(pci_locations.begin(), pci_locations.end());
+  return pci_locations;
 }
 }  // namespace ecclesia

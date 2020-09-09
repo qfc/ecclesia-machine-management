@@ -21,6 +21,7 @@
 
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
+#include "absl/status/statusor.h"
 #include "ecclesia/lib/file/test_filesystem.h"
 #include "ecclesia/magent/lib/io/pci_location.h"
 
@@ -42,98 +43,92 @@ TEST_F(PciSysTest, TestRegionDefaultConstructed) {
   auto loc = PciLocation::Make<1, 2, 3, 4>();
   auto region = SysPciRegion(loc);
 
-  uint8_t u8;
-  auto status = region.Read8(4, &u8);
-  EXPECT_TRUE(absl::IsNotFound(status));
+  auto maybe_uint8 = region.Read8(4);
+  EXPECT_TRUE(absl::IsNotFound(maybe_uint8.status()));
 }
 
 TEST_F(PciSysTest, TestRead) {
   auto loc = PciLocation::Make<1, 2, 3, 4>();
   std::string path = GetTestTempdirPath() + "/bus/pci/devices/";
-  auto region = SysPciRegion(path, loc);
+  auto region = SysPciRegion(std::move(path), loc);
 
-  uint8_t u8;
-  EXPECT_TRUE(region.Read8(4, &u8).ok());
-  EXPECT_EQ(u8, 0x34);
+  auto maybe_uint8 = region.Read8(4);
+  EXPECT_TRUE(maybe_uint8.ok());
+  EXPECT_EQ(maybe_uint8.value(), 0x34);
 
-  uint16_t u16;
-  EXPECT_TRUE(region.Read16(4, &u16).ok());
-  EXPECT_EQ(u16, 0x3534);
+  auto maybe_uint16 = region.Read16(4);
+  EXPECT_TRUE(maybe_uint16.ok());
+  EXPECT_EQ(maybe_uint16.value(), 0x3534);
 
-  uint32_t u32;
-  EXPECT_TRUE(region.Read32(4, &u32).ok());
-  EXPECT_EQ(u32, 0x37363534);
+  auto maybe_uint32 = region.Read32(4);
+  EXPECT_TRUE(maybe_uint32.ok());
+  EXPECT_EQ(maybe_uint32.value(), 0x37363534);
 }
 
 TEST_F(PciSysTest, TestReadFailOutofRange) {
   auto loc = PciLocation::Make<1, 2, 3, 4>();
   std::string path = GetTestTempdirPath() + "/bus/pci/devices/";
-  auto region = SysPciRegion(path, loc);
-  absl::Status status;
+  SysPciRegion region(std::move(path), loc);
 
-  uint8_t u8;
-  status = region.Read8(10, &u8);
-  EXPECT_FALSE(status.ok());
-  EXPECT_TRUE(absl::IsInternal(status));
+  auto maybe_uint8 = region.Read8(10);
+  EXPECT_FALSE(maybe_uint8.ok());
+  EXPECT_TRUE(absl::IsInternal(maybe_uint8.status()));
 
-  uint16_t u16;
-  status = region.Read16(10, &u16);
-  EXPECT_FALSE(status.ok());
-  EXPECT_TRUE(absl::IsInternal(status));
+  auto maybe_uint16 = region.Read16(10);
+  EXPECT_FALSE(maybe_uint16.ok());
+  EXPECT_TRUE(absl::IsInternal(maybe_uint16.status()));
 
-  uint32_t u32;
-  status = region.Read32(10, &u32);
-  EXPECT_FALSE(status.ok());
-  EXPECT_TRUE(absl::IsInternal(status));
+  auto maybe_uint32 = region.Read32(10);
+  EXPECT_FALSE(maybe_uint32.ok());
+  EXPECT_TRUE(absl::IsInternal(maybe_uint32.status()));
 }
 
 TEST_F(PciSysTest, TestReadFailNotFound) {
   auto loc = PciLocation::Make<1, 2, 3, 5>();
   std::string path = GetTestTempdirPath() + "/bus/pci/devices/";
-  auto region = SysPciRegion(path, loc);
-  absl::Status status;
+  SysPciRegion region(std::move(path), loc);
 
-  uint8_t u8;
-  status = region.Read8(10, &u8);
-  EXPECT_FALSE(status.ok());
-  EXPECT_TRUE(absl::IsNotFound(status));
+  auto maybe_uint8 = region.Read8(10);
+  EXPECT_FALSE(maybe_uint8.ok());
+  EXPECT_TRUE(absl::IsNotFound(maybe_uint8.status()));
 
-  uint16_t u16;
-  status = region.Read16(10, &u16);
-  EXPECT_FALSE(status.ok());
-  EXPECT_TRUE(absl::IsNotFound(status));
+  auto maybe_uint16 = region.Read16(10);
+  EXPECT_FALSE(maybe_uint16.ok());
+  EXPECT_TRUE(absl::IsNotFound(maybe_uint16.status()));
 
-  uint32_t u32;
-  status = region.Read32(10, &u32);
-  EXPECT_FALSE(status.ok());
-  EXPECT_TRUE(absl::IsNotFound(status));
+  auto maybe_uint32 = region.Read32(10);
+  EXPECT_FALSE(maybe_uint32.ok());
+  EXPECT_TRUE(absl::IsNotFound(maybe_uint32.status()));
 }
 
 TEST_F(PciSysTest, TestWrite) {
   auto loc = PciLocation::Make<1, 2, 3, 4>();
   std::string path = GetTestTempdirPath() + "/bus/pci/devices/";
-  auto region = SysPciRegion(path, loc);
+  SysPciRegion region(std::move(path), loc);
 
-  uint8_t u8 = 0x0B, expected8 = 0;
+  uint8_t u8 = 0x0B;
   EXPECT_TRUE(region.Write8(4, u8).ok());
-  EXPECT_TRUE(region.Read8(4, &expected8).ok());
-  EXPECT_EQ(u8, expected8);
+  auto maybe_uint8 = region.Read8(4);
+  EXPECT_TRUE(maybe_uint8.ok());
+  EXPECT_EQ(maybe_uint8.value(), u8);
 
-  uint16_t u16 = 0xBE, expected16 = 0;
+  uint16_t u16 = 0xBE;
   EXPECT_TRUE(region.Write16(4, u16).ok());
-  EXPECT_TRUE(region.Read16(4, &expected16).ok());
-  EXPECT_EQ(u16, expected16);
+  auto maybe_uint16 = region.Read16(4);
+  EXPECT_TRUE(maybe_uint16.ok());
+  EXPECT_EQ(maybe_uint16.value(), u16);
 
-  uint32_t u32 = 0xBEEF, expected32 = 0;
+  uint32_t u32 = 0xBEEF;
   EXPECT_TRUE(region.Write32(4, u32).ok());
-  EXPECT_TRUE(region.Read32(4, &expected32).ok());
-  EXPECT_EQ(u32, expected32);
+  auto maybe_uint32 = region.Read32(4);
+  EXPECT_TRUE(maybe_uint32.ok());
+  EXPECT_EQ(maybe_uint32.value(), u32);
 }
 
 TEST_F(PciSysTest, TestWriteFailNotFound) {
   auto loc = PciLocation::Make<1, 2, 3, 5>();
   std::string path = GetTestTempdirPath() + "/bus/pci/devices/";
-  auto region = SysPciRegion(path, loc);
+  SysPciRegion region(std::move(path), loc);
   absl::Status status;
 
   uint8_t u8 = 0x0B;

@@ -41,6 +41,7 @@ cc_library(
         "//ecclesia/lib/logging",
         "//ecclesia/lib/logging:posix",
         "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
         "@com_google_absl//absl/strings:str_format",
         "@com_google_absl//absl/types:span",
     ],
@@ -112,17 +113,10 @@ cc_library(
     visibility = ["//ecclesia:magent_library_users"],
     deps = [
         ":pci_location",
+        "//ecclesia/lib/types:fixed_range_int",
         "@com_google_absl//absl/status",
-    ],
-)
-
-cc_library(
-    name = "pci_cc",
-    hdrs = ["pci.h"],
-    deps = [
-        ":pci",
-        ":pci_location",
-        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/status:statusor",
+        "@com_google_absl//absl/types:span",
     ],
 )
 
@@ -135,11 +129,10 @@ cc_library(
         ":pci",
         ":pci_location",
         "//ecclesia/lib/apifs",
-        "//ecclesia/lib/cleanup",
         "//ecclesia/lib/codec:endian",
         "//ecclesia/lib/file:dir",
-        "//ecclesia/lib/logging",
         "@com_google_absl//absl/status",
+        "@com_google_absl//absl/status:statusor",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/strings:str_format",
         "@com_google_absl//absl/types:span",
@@ -156,6 +149,7 @@ cc_test(
         ":pci_sys",
         "//ecclesia/lib/file:test_filesystem",
         "@com_google_absl//absl/status",
+        "@com_google_absl//absl/status:statusor",
         "@com_google_googletest//:gtest_main",
     ],
 )
