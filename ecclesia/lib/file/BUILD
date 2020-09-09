@@ -99,6 +99,7 @@ cc_library(
     name = "mmap",
     srcs = ["mmap.cc"],
     hdrs = ["mmap.h"],
+    visibility = ["//ecclesia:library_users"],
     deps = [
         "//ecclesia/lib/cleanup",
         "//ecclesia/lib/logging",
