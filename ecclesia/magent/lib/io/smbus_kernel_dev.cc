@@ -31,9 +31,11 @@
 
 #include "absl/status/status.h"
 #include "absl/strings/str_format.h"
+#include "absl/strings/string_view.h"
 #include "absl/types/span.h"
 #include "ecclesia/lib/cleanup/cleanup.h"
 #include "ecclesia/lib/io/ioctl.h"
+#include "ecclesia/lib/logging/globals.h"
 #include "ecclesia/lib/logging/logging.h"
 #include "ecclesia/lib/logging/posix.h"
 #include "ecclesia/magent/lib/io/smbus.h"

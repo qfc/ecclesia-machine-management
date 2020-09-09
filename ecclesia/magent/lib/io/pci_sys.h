@@ -62,29 +62,30 @@ class SysPciRegion : public PciRegion {
   ApifsFile apifs_;
 };
 
-// A sysfs PCI device can be identified by the PCI location.
-class SysfsPciDevice : public PciDevice {
+class SysfsPciResources : public PciResources {
  public:
-  SysfsPciDevice(const PciLocation &location)
-      : PciDevice(location, std::make_unique<SysPciRegion>(location)) {}
-};
-
-class SysfsPci : PciFunction {
- public:
-  explicit SysfsPci(PciLocation loc);
-  SysfsPci(std::string sys_dir, PciLocation loc);
+  explicit SysfsPciResources(PciLocation loc);
+  SysfsPciResources(std::string sys_pci_devices_dir, PciLocation loc);
 
   bool Exists() override;
-  absl::StatusOr<PciFunction::BAR> GetBaseAddress(BarNum bar_id) const override;
-
-  const SysPciRegion &GetConfig() const { return config_; }
 
  private:
-  ApifsDirectory sys_dir_;
-  SysPciRegion config_;
+  // Resource flag that indicate that a resource is an I/O resource.
+  static constexpr uint64_t kIoResourceFlag = 0x100;
+
+  absl::StatusOr<BarInfo> GetBaseAddressImpl(BarNum bar_id) const override;
+
+  ApifsDirectory apifs_;
 };
 
-class SysfsPciDiscovery : PciDiscoveryInterface {
+class SysfsPciDevice : public PciDevice {
+ public:
+  explicit SysfsPciDevice(const PciLocation &location)
+      : PciDevice(location, std::make_unique<SysPciRegion>(location),
+                  std::make_unique<SysfsPciResources>(location)) {}
+};
+
+class SysfsPciDiscovery : public PciDiscoveryInterface {
  public:
   SysfsPciDiscovery();
 

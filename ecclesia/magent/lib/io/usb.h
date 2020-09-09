@@ -19,10 +19,13 @@
 #ifndef ECCLESIA_MAGENT_LIB_IO_USB_H_
 #define ECCLESIA_MAGENT_LIB_IO_USB_H_
 
+#include <cstddef>
+#include <cstdint>
 #include <vector>
 
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
+#include "absl/types/optional.h"
 #include "absl/types/span.h"
 #include "ecclesia/lib/types/fixed_range_int.h"
 

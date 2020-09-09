@@ -130,15 +130,56 @@ class PciConfigSpace {
   PciRegion *region_;
 };
 
+class PciResources {
+ public:
+  // Type of address used in a BAR.
+  enum BarType { kBarTypeMem, kBarTypeIo };
+
+  // An identifier representing a BAR ID.
+  class BarNum : public FixedRangeInteger<BarNum, int, 0, 5> {
+   public:
+    explicit constexpr BarNum(BaseType value) : BaseType(value) {}
+  };
+
+  explicit PciResources(PciLocation loc) : loc_(std::move(loc)) {}
+  virtual ~PciResources() = default;
+
+  // Check if Pci exists.
+  virtual bool Exists() = 0;
+
+  // Get information about a BAR.
+  struct BarInfo {
+    BarType type;
+    uint64_t address;
+  };
+  absl::StatusOr<BarInfo> GetBaseAddress(BarNum bar_id) const {
+    return GetBaseAddressImpl(bar_id);
+  }
+  // Templated version for when the BAR number is known at compile time.
+  template <int BarId>
+  absl::StatusOr<BarInfo> GetBaseAddress() const {
+    return GetBaseAddressImpl(BarNum::Make<BarId>());
+  }
+
+ protected:
+  PciLocation loc_;
+
+ private:
+  // The underlying implementation of GetBaseAddress.
+  virtual absl::StatusOr<BarInfo> GetBaseAddressImpl(BarNum bar_id) const = 0;
+};
+
 // A wrappper class for interacting with a PCI device.
 class PciDevice {
  public:
   // Create a PCI device using the provided region for all config space access.
   PciDevice(const PciLocation &location,
-            std::unique_ptr<PciRegion> config_region)
+            std::unique_ptr<PciRegion> config_region,
+            std::unique_ptr<PciResources> resources_intf)
       : location_(location),
         config_region_(std::move(config_region)),
-        config_space_(config_region_.get()) {}
+        config_space_(config_region_.get()),
+        resources_intf_(std::move(resources_intf)) {}
 
   PciDevice(const PciDevice &) = delete;
   PciDevice &operator=(const PciDevice &) = delete;
@@ -153,43 +194,17 @@ class PciDevice {
   PciConfigSpace &ConfigSpace() { return config_space_; }
   const PciConfigSpace &ConfigSpace() const { return config_space_; }
 
+  // Get the device resource information.
+  PciResources &Resources() { return *resources_intf_; }
+  const PciResources &Resources() const { return *resources_intf_; }
+
  private:
   PciLocation location_;
 
   std::unique_ptr<PciRegion> config_region_;
   PciConfigSpace config_space_;
-};
 
-
-class PciFunction {
- public:
-  static constexpr uint8_t kMaxBars = 7;
-  static constexpr uint64_t kIoResourceIo = 0x100ull;
-  // Type of address used in a BAR.
-  enum BarType { kBarTypeMem, kBarTypeIo };
-
-  struct BAR {
-    BarType type;
-    uint64_t address;
-  };
-
-  // An identifier representing a BAR ID.
-  class BarNum : public FixedRangeInteger<BarNum, int, 0, 5> {
-   public:
-    explicit constexpr BarNum(BaseType value) : BaseType(value) {}
-  };
-
-  explicit PciFunction(PciLocation loc) : loc_(loc) {}
-  virtual ~PciFunction() = default;
-
-  // Check if Pci exists.
-  virtual bool Exists() = 0;
-
-  // Get address of a BAR register.
-  virtual absl::StatusOr<BAR> GetBaseAddress(BarNum bar_id) const = 0;
-
- protected:
-  PciLocation loc_;
+  std::unique_ptr<PciResources> resources_intf_;
 };
 
 class PciDiscoveryInterface {

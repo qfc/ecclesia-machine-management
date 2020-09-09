@@ -17,13 +17,13 @@
 #include "ecclesia/magent/redfish/indus/redfish_service.h"
 
 #include <memory>
-#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
 
 #include "absl/container/flat_hash_map.h"
 #include "absl/strings/string_view.h"
+#include "absl/types/optional.h"
 #include "ecclesia/lib/logging/logging.h"
 #include "ecclesia/magent/redfish/core/assembly.h"
 #include "ecclesia/magent/redfish/core/redfish_keywords.h"

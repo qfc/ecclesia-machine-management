@@ -17,12 +17,15 @@
 #include "ecclesia/magent/lib/io/usb_sysfs.h"
 
 #include <cstddef>
+#include <cstdint>
 #include <string>
 #include <vector>
 
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
+#include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
+#include "absl/types/optional.h"
 #include "ecclesia/lib/apifs/apifs.h"
 #include "ecclesia/lib/file/test_filesystem.h"
 #include "ecclesia/magent/lib/io/usb.h"

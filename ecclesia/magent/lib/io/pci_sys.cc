@@ -16,55 +16,39 @@
 
 #include "ecclesia/magent/lib/io/pci_sys.h"
 
-#include <dirent.h>
-
 #include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
-#include <fstream>
-#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
 
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
-#include "absl/strings/str_cat.h"
 #include "absl/strings/str_format.h"
+#include "absl/strings/str_split.h"
 #include "absl/strings/string_view.h"
+#include "absl/strings/strip.h"
 #include "absl/strings/substitute.h"
+#include "absl/types/optional.h"
 #include "absl/types/span.h"
 #include "ecclesia/lib/apifs/apifs.h"
 #include "ecclesia/lib/codec/endian.h"
 #include "ecclesia/lib/file/dir.h"
+#include "ecclesia/lib/types/fixed_range_int.h"
 #include "ecclesia/magent/lib/io/pci.h"
 #include "ecclesia/magent/lib/io/pci_location.h"
 #include "re2/re2.h"
 
-namespace {
-
-static LazyRE2 kBARLineRegexp = {
-    R"((0x[0-9a-fA-F]{16}) (0x[0-9a-fA-F]{16}) (0x[0-9a-fA-F]{16}))"};
-
-}  // namespace
-
 namespace ecclesia {
-
 namespace {
+
 constexpr char kSysPciRoot[] = "/sys/bus/pci/devices";
 constexpr size_t kMaxSysFileSize = 4096;
 
-class DirCloser {
- public:
-  explicit DirCloser(DIR *dir) : dir_(dir) {}
-  DirCloser(const DirCloser &) = delete;
-  DirCloser &operator=(const DirCloser &) = delete;
-  ~DirCloser() { closedir(dir_); }
-
- private:
-  DIR *dir_;
-};
+static LazyRE2 kResourceLineRegex = {
+    R"((0x[[:xdigit:]]{16}) (0x[[:xdigit:]]{16}) (0x[[:xdigit:]]{16}))"};
 
 }  // namespace
 
@@ -143,32 +127,30 @@ absl::Status SysPciRegion::WriteBytes(uint64_t offset,
   return apifs_.SeekAndWrite(offset, value);
 }
 
-SysfsPci::SysfsPci(PciLocation loc) : SysfsPci(kSysPciRoot, loc) {}
-SysfsPci::SysfsPci(std::string sys_dir, PciLocation loc)
-    : PciFunction{loc},
-      // pass a copy to sys_dir_ since config_ will "move" sys_dir next.
-      sys_dir_(sys_dir),
-      config_(sys_dir, loc) {}
+SysfsPciResources::SysfsPciResources(PciLocation loc)
+    : SysfsPciResources(kSysPciRoot, std::move(loc)) {}
 
-bool SysfsPci::Exists() {
-  return sys_dir_.Exists(
-      absl::StrFormat("devices/%s", absl::FormatStreamed(loc_)));
-}
+SysfsPciResources::SysfsPciResources(std::string sys_pci_devices_dir,
+                                     PciLocation loc)
+    : PciResources(loc),
+      apifs_(absl::StrFormat("%s/%s", sys_pci_devices_dir,
+                             absl::FormatStreamed(loc))) {}
 
-absl::StatusOr<PciFunction::BAR> SysfsPci::GetBaseAddress(BarNum bar_id) const {
-  std::string path = absl::StrFormat(
-      "%s/devices/%s/resource", sys_dir_.GetPath(), absl::FormatStreamed(loc_));
+bool SysfsPciResources::Exists() { return apifs_.Exists(); }
 
-  std::ifstream ifs(path, std::ifstream::in);
-
-  if (!ifs.is_open()) {
-    return absl::NotFoundError(absl::Substitute("Can't open path: $0", path));
+absl::StatusOr<PciResources::BarInfo> SysfsPciResources::GetBaseAddressImpl(
+    BarNum bar_id) const {
+  ApifsFile resource_file(apifs_, "resource");
+  auto maybe_contents = resource_file.Read();
+  if (!maybe_contents.ok()) {
+    return maybe_contents.status();
   }
 
-  // BAR is total 24 bytes(4bytes x 6 BAR) in config space
-  // We are reading 'resource' file in sysfs.
-  // The 'resource' file uses ascii string to represent hex values.
-  // It has 13 lines, each line is 57 bytes long, '\0' terminated.
+  // BAR is total 24 bytes(4bytes x 6 BAR) in config space. We are reading
+  // 'resource' file in sysfs. The 'resource' file uses ascii string to
+  // represent hex values. Each line is 57 bytes long, '\0' terminated where the
+  // first six lines correspond to the standard BAR resources.
+  //
   // Example: /sys/bus/pci/devices/0000:3a:05.4/resource on indus.
   // 0x00000000b8700000 0x00000000b8700fff 0x0000000000040200
   // 0x0000000000000000 0x0000000000000000 0x0000000000000000
@@ -183,29 +165,22 @@ absl::StatusOr<PciFunction::BAR> SysfsPci::GetBaseAddress(BarNum bar_id) const {
   // 0x0000000000000000 0x0000000000000000 0x0000000000000000
   // 0x0000000000000000 0x0000000000000000 0x0000000000000000
   // 0x0000000000000000 0x0000000000000000 0x0000000000000000
-  std::string line;
-  std::vector<std::string> lines;
-  while (getline(ifs, line)) {
-    lines.push_back(line);
-  }
-  ifs.close();
+  std::vector<absl::string_view> lines =
+      absl::StrSplit(absl::StripSuffix(*maybe_contents, "\n"), '\n');
 
-  if (lines.empty() || lines.size() < kMaxBars) {
-    return absl::InternalError(
-        absl::Substitute("No bar information found in $0", path));
+  if (lines.size() < BarNum::kMaxValue) {
+    return absl::InternalError(absl::Substitute(
+        "No bar information found in $0", resource_file.GetPath()));
   }
 
-  uint64_t base;
-  uint64_t limit;
-  uint64_t flags;
-  if (!RE2::FullMatch(lines[bar_id.value()], *kBARLineRegexp, RE2::Hex(&base),
-                      RE2::Hex(&limit), RE2::Hex(&flags))) {
+  uint64_t base, limit, flags;
+  if (!RE2::FullMatch(lines[bar_id.value()], *kResourceLineRegex,
+                      RE2::Hex(&base), RE2::Hex(&limit), RE2::Hex(&flags))) {
     return absl::InternalError(
         absl::Substitute("Error reading BAR information."));
   }
 
-  return PciFunction::BAR{(flags & kIoResourceIo) ? kBarTypeIo : kBarTypeMem,
-                          base};
+  return BarInfo{(flags & kIoResourceFlag) ? kBarTypeIo : kBarTypeMem, base};
 }
 
 SysfsPciDiscovery::SysfsPciDiscovery() : SysfsPciDiscovery(kSysPciRoot) {}

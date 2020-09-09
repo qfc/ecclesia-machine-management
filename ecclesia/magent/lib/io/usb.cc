@@ -17,6 +17,7 @@
 #include "ecclesia/magent/lib/io/usb.h"
 
 #include <algorithm>
+#include <cstddef>
 #include <iterator>
 #include <tuple>
 #include <utility>
