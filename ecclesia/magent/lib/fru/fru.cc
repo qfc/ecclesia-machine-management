@@ -220,23 +220,23 @@ const uint8_t ChassisInfoArea::kFormatVersion;
 const uint8_t BoardInfoArea::kFormatVersion;
 const uint8_t ProductInfoArea::kFormatVersion;
 std::string FruField::GetDataAsString() const {
-  std::string value;
+  absl::StatusOr<std::string> maybe_value;
   switch (type_) {
     case kTypeBcdPlus: {  // BCD plus decoding.
-      auto status = ParseBcdPlus(data_, &value);
-      if (!status.ok()) {
-        ErrorLog() << status.message();
+      auto maybe_value = ParseBcdPlus(data_);
+      if (!maybe_value.ok()) {
+        ErrorLog() << maybe_value.status().message();
         return "";
       }
-      return value;
+      return *maybe_value;
     }
     case kType6BitAscii: {  // 6-bits ASCII packed decoding
-      auto status = ParseSixBitAscii(data_, &value);
-      if (!status.ok()) {
-        ErrorLog() << status.message();
+      auto maybe_value = ParseSixBitAscii(data_);
+      if (!maybe_value.ok()) {
+        ErrorLog() << maybe_value.status().message();
         return "";
       }
-      return value;
+      return *maybe_value;
     }
     default: {
       return std::string(data_.begin(), data_.end());

@@ -27,19 +27,18 @@
 
 #include <string>
 
-#include "absl/status/status.h"
+#include "absl/status/statusor.h"
 #include "absl/types/span.h"
 
 namespace ecclesia {
 
 // Parse a given BCD Plus encoded byte string from the provided span of bytes.
-absl::Status ParseBcdPlus(
-    absl::Span<const unsigned char> bytes, std::string *value);
+absl::StatusOr<std::string> ParseBcdPlus(absl::Span<const unsigned char> bytes);
 
 // Given a span of bytes, parses those bytes into a string, interpreting as six
 // bit ascii as described in the standards mentioned above.
-absl::Status ParseSixBitAscii(
-    absl::Span<const unsigned char> bytes, std::string *value);
+absl::StatusOr<std::string> ParseSixBitAscii(
+    absl::Span<const unsigned char> bytes);
 
 }  // namespace ecclesia
 

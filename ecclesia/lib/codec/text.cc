@@ -21,6 +21,7 @@
 #include <string>
 
 #include "absl/status/status.h"
+#include "absl/status/statusor.h"
 #include "absl/types/span.h"
 #include "ecclesia/lib/codec/bits.h"
 
@@ -36,10 +37,10 @@ constexpr size_t kBcdUpperBound = sizeof(kBcdPlusTable) - 1;
 
 }  // namespace
 
-absl::Status ParseBcdPlus(
-    absl::Span<const unsigned char> bytes, std::string *value) {
-  value->clear();
-  value->reserve(2 * bytes.size());
+absl::StatusOr<std::string> ParseBcdPlus(
+    absl::Span<const unsigned char> bytes) {
+  std::string value;
+  value.reserve(2 * bytes.size());
   for (uint8_t byte : bytes) {
     uint8_t lower_code = ExtractBits(byte, BitRange(3, 0));
     uint8_t upper_code = ExtractBits(byte, BitRange(7, 4));
@@ -48,18 +49,18 @@ absl::Status ParseBcdPlus(
           "BCD plus decoding failed! Data must be "
           "between 0h-Ch");
     } else {
-      value->push_back(kBcdPlusTable[upper_code]);
-      value->push_back(kBcdPlusTable[lower_code]);
+      value.push_back(kBcdPlusTable[upper_code]);
+      value.push_back(kBcdPlusTable[lower_code]);
     }
   }
-  return absl::OkStatus();
+  return value;
 }
 
-absl::Status ParseSixBitAscii(
-    absl::Span<const unsigned char> bytes, std::string *value) {
+absl::StatusOr<std::string> ParseSixBitAscii(
+    absl::Span<const unsigned char> bytes) {
   uint32_t idx = 0;  // packed bytes starting index
   uint32_t buf = 0;  // buffer that holds 4 encoded bytes
-  value->clear();
+  std::string value;
   for (uint8_t byte : bytes) {
     buf |= byte << (idx << 3);
     idx++;
@@ -67,10 +68,10 @@ absl::Status ParseSixBitAscii(
     //  characters to every 3 bytes, with the first character in the least
     //  significant 6-bits of the first byte
     if (idx == 3) {
-      value->push_back(0x20 + ExtractBits(buf, BitRange(5, 0)));
-      value->push_back(0x20 + ExtractBits(buf, BitRange(11, 6)));
-      value->push_back(0x20 + ExtractBits(buf, BitRange(17, 12)));
-      value->push_back(0x20 + ExtractBits(buf, BitRange(23, 18)));
+      value.push_back(0x20 + ExtractBits(buf, BitRange(5, 0)));
+      value.push_back(0x20 + ExtractBits(buf, BitRange(11, 6)));
+      value.push_back(0x20 + ExtractBits(buf, BitRange(17, 12)));
+      value.push_back(0x20 + ExtractBits(buf, BitRange(23, 18)));
       buf = 0;
       idx = 0;
     }
@@ -78,10 +79,9 @@ absl::Status ParseSixBitAscii(
   // Handle the remaining byte_offset bytes if data length is not a
   // multiple of 3
   for (uint8_t bit_idx = 0; bit_idx < idx * 6; bit_idx += 6) {
-    value->push_back(
-        0x20 + ExtractBits(buf, BitRange(bit_idx + 5, bit_idx)));
+    value.push_back(0x20 + ExtractBits(buf, BitRange(bit_idx + 5, bit_idx)));
   }
-  return absl::OkStatus();
+  return value;
 }
 
 }  // namespace ecclesia

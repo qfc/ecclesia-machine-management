@@ -48,6 +48,7 @@ cc_library(
     deps = [
         ":bits",
         "@com_google_absl//absl/status",
+        "@com_google_absl//absl/status:statusor",
         "@com_google_absl//absl/types:span",
     ],
 )
@@ -57,7 +58,7 @@ cc_test(
     srcs = ["text_test.cc"],
     deps = [
         ":text",
-        "@com_google_absl//absl/status",
+        "//ecclesia/lib/testing:status",
         "@com_google_googletest//:gtest_main",
     ],
 )
