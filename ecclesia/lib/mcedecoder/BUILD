@@ -8,7 +8,6 @@ package_group(
     packages = [
         "//ecclesia/lib/...",
         "//ecclesia/magent/...",
-        "//platforms/baremetal/healthagent/...",
     ],
 )
 
