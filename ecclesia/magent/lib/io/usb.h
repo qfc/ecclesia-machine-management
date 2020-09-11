@@ -76,10 +76,10 @@ class UsbPortSequence {
       EmptyStruct empty;
     };
   };
-  // Make sure UsbPort can be trivially destroyed. Because UsbPortStorage
+  // Make sure that UsbPort can be trivially destroyed. Because UsbPortStorage
   // disables the UsbPort destructor we rely on the fact that it has a trivial
   // destructor (and thus is allowed to be omitted when the storage is
-  // discarded). If this is not true then we would need to explicitly destroy
+  // discarded). If this is not true, then we would need to explicitly destroy
   // the stored values.
   static_assert(std::is_trivially_destructible_v<UsbPort>);
 
