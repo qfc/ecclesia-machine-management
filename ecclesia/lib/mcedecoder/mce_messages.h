@@ -26,7 +26,7 @@
 #include <utility>
 #include <vector>
 
-namespace mcedecoder {
+namespace ecclesia {
 
 // A structure storing raw information of a MCE entry.
 struct MceLogMessage {
@@ -74,12 +74,6 @@ struct CpuErrorBucket {
            " correctable:" + (correctable ? "true" : "false") +
            " whitelisted:" + (whitelisted ? "true" : "false");
   }
-  // Enable this struct as key in std::map
-  bool operator<(const CpuErrorBucket& other) const {
-    return std::tie(socket, lpu_id, correctable, whitelisted) <
-           std::tie(other.socket, other.lpu_id, other.correctable,
-                    other.whitelisted);
-  }
 };
 
 struct CpuError {
@@ -101,11 +95,6 @@ struct MemoryErrorBucket {
   std::string ToString() const {
     return "gldn:" + std::to_string(gldn) +
            " correctable:" + (correctable ? "true" : "false");
-  }
-  // Enable this struct as key in std::map
-  bool operator<(const MemoryErrorBucket& other) const {
-    return std::tie(gldn, correctable) <
-           std::tie(other.gldn, other.correctable);
   }
 };
 
@@ -135,13 +124,6 @@ struct MceBucket {
            " uncorrectable:" + (uncorrectable ? "true" : "false") +
            " processor_context_corrupted:" +
            (processor_context_corrupted ? "true" : "false");
-  }
-  // Enable this struct as key in std::map
-  bool operator<(const MceBucket& other) const {
-    return std::tie(bank, socket, mce_corrupt, uncorrectable,
-                    processor_context_corrupted) <
-           std::tie(other.bank, other.socket, other.mce_corrupt,
-                    other.uncorrectable, other.processor_context_corrupted);
   }
 };
 
@@ -261,5 +243,5 @@ class MceAttributes {
   std::unordered_map<MceAttributeKey, uint64_t> attributes_;
 };
 
-}  // namespace mcedecoder
+}  // namespace ecclesia
 #endif  // ECCLESIA_LIB_MCEDECODER_MCE_MESSAGES_H_

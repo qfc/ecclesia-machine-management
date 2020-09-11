@@ -17,7 +17,6 @@
 #include "ecclesia/magent/lib/nvme/device_self_test_log.h"
 
 #include <memory>
-#include <optional>
 #include <utility>
 #include <vector>
 
@@ -25,6 +24,7 @@
 #include "absl/status/statusor.h"
 #include "absl/strings/str_format.h"
 #include "absl/strings/string_view.h"
+#include "absl/types/optional.h"
 #include "ecclesia/magent/lib/nvme/nvme_types.h"
 
 namespace ecclesia {

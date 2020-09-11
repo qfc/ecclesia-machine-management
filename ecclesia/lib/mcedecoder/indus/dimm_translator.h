@@ -17,9 +17,10 @@
 #ifndef ECCLESIA_LIB_MCEDECODER_INDUS_INDUS_DIMM_TRANSLATOR_H_
 #define ECCLESIA_LIB_MCEDECODER_INDUS_INDUS_DIMM_TRANSLATOR_H_
 
+#include "absl/status/statusor.h"
 #include "ecclesia/lib/mcedecoder/dimm_translator.h"
 
-namespace mcedecoder {
+namespace ecclesia {
 
 // DIMM translator class for Indus server which has 2 CPU sockets, each CPU with
 // 2 IMCs, each IMC with 3 IMC channels and each IMC channel with 2 slots.
@@ -28,13 +29,12 @@ class IndusDimmTranslator : public DimmTranslatorInterface {
   // imc_channel is 0~5, channel_slot is 0~1. If imc_id (0 or 1) and
   // imc_channel_id (0~2) are given instead, then the input imc_channel = imc_id
   // * 3 + imc_channel_id.
-  bool GetGLDN(int socket_id, int imc_channel, int channel_slot,
-               int *gldn) const override;
+  absl::StatusOr<int> GetGldn(const DimmSlotId &dimm_slot) const override;
 
   // A valid GLDN is 0~23.
-  bool GldnToSlot(int gldn, DimmSlotId *dimm_slot) const override;
+  absl::StatusOr<DimmSlotId> GldnToSlot(int gldn) const override;
 };
 
-}  // namespace mcedecoder
+}  // namespace ecclesia
 
 #endif  // ECCLESIA_LIB_MCEDECODER_INDUS_INDUS_DIMM_TRANSLATOR_H_

@@ -17,16 +17,17 @@
 #include "ecclesia/lib/mcedecoder/skylake_mce_decode.h"
 
 #include <cstdint>
-#include <iostream>
 #include <set>
 #include <vector>
 
+#include "absl/status/statusor.h"
+#include "ecclesia/lib/codec/bits.h"
+#include "ecclesia/lib/logging/globals.h"
 #include "ecclesia/lib/logging/logging.h"
-#include "ecclesia/lib/mcedecoder/bit_operator.h"
 #include "ecclesia/lib/mcedecoder/dimm_translator.h"
 #include "ecclesia/lib/mcedecoder/mce_messages.h"
 
-namespace mcedecoder {
+namespace ecclesia {
 namespace {
 
 constexpr int kSkylakeNumChannelPerImc = 3;
@@ -73,12 +74,12 @@ bool DecodeSkylakeM2MBank(int imc_id, MceAttributes *attributes) {
   attributes->SetAttribute(MceAttributes::kImcId, imc_id);
   uint64_t misc_reg;
   if (!attributes->GetAttribute(MceAttributes::kMciMiscRegister, &misc_reg)) {
-    ecclesia::ErrorLog()
-        << "Failed to get mci misc register to decode M2M bank.";
+    ErrorLog() << "Failed to get mci misc register to decode M2M bank.";
     return false;
   }
+
   // IA32_MC7_MISC Bits(51:50): Physical memory channel which had the error.
-  const BitRange kMciMiscMcCmdChannelBits = Bits(51, 50);
+  static constexpr BitRange kMciMiscMcCmdChannelBits(51, 50);
   unsigned int imc_channel_id = ExtractBits(misc_reg, kMciMiscMcCmdChannelBits);
   attributes->SetAttribute(MceAttributes::kImcChannelId, imc_channel_id);
   attributes->SetAttribute(MceAttributes::kMemoryChannel,
@@ -92,19 +93,19 @@ bool DecodeSkylakeM2MBank(int imc_id, MceAttributes *attributes) {
   uint64_t mci_status;
   if (attributes->GetAttribute(MceAttributes::kMciStatusRegister,
                                &mci_status)) {
-    if (ExtractBits(mci_status, Bit(23))) {
+    if (ExtractBits(mci_status, BitRange(23))) {
       unique_id = MceAttributes::kIdM2MMcBucket1Error;
     }
-    if (ExtractBits(mci_status, Bit(21))) {
+    if (ExtractBits(mci_status, BitRange(21))) {
       unique_id = MceAttributes::kIdM2MMcTimeoutError;
     }
-    if (ExtractBits(mci_status, Bit(19))) {
+    if (ExtractBits(mci_status, BitRange(19))) {
       unique_id = MceAttributes::kIdM2MMcFullWriteError;
     }
-    if (ExtractBits(mci_status, Bit(18))) {
+    if (ExtractBits(mci_status, BitRange(18))) {
       unique_id = MceAttributes::kIdM2MMcPartialWriteError;
     }
-    if (ExtractBits(mci_status, Bit(16))) {
+    if (ExtractBits(mci_status, BitRange(16))) {
       unique_id = MceAttributes::kIdM2MMcDataReadError;
     }
   }
@@ -120,12 +121,12 @@ bool DecodeSkylakeImcBank(int imc_id, int imc_channel_id,
                            imc_id * kSkylakeNumChannelPerImc + imc_channel_id);
   uint64_t misc_reg;
   if (!attributes->GetAttribute(MceAttributes::kMciMiscRegister, &misc_reg)) {
-    ecclesia::ErrorLog()
-        << "Failed to get mci misc register to decode IMC bank.";
+    ErrorLog() << "Failed to get mci misc register to decode IMC bank.";
     return false;
   }
-  const BitRange kMciMiscFirstErrRankBits = Bits(50, 46);
-  const BitRange kMciMiscSecondErrRankBits = Bits(55, 51);
+
+  static constexpr BitRange kMciMiscFirstErrRankBits(50, 46);
+  static constexpr BitRange kMciMiscSecondErrRankBits(55, 51);
   uint64_t first_rank = ExtractBits(misc_reg, kMciMiscFirstErrRankBits);
   attributes->SetAttribute(MceAttributes::kImcChannelSlot,
                            first_rank / kSkylakeNumRankPerSlot);
@@ -189,7 +190,7 @@ bool DecodeSkylakeImcBank(int imc_id, int imc_channel_id,
 bool DecodeSkylakeBankAttributes(MceAttributes *attributes) {
   uint64_t bank_id;
   if (!attributes->GetAttribute(MceAttributes::kMceBank, &bank_id)) {
-    ecclesia::ErrorLog() << "Failed to get MCE bank to decode bank attribute.";
+    ErrorLog() << "Failed to get MCE bank to decode bank attribute.";
     return false;
   }
   SkylakeMceBank bank = static_cast<SkylakeMceBank>(bank_id);
@@ -232,7 +233,7 @@ bool DecodeSkylakeMemoryError(const MceAttributes &attributes,
   bool uncorrected;
   if (!attributes.GetAttribute(MceAttributes::kMciStatusUncorrected,
                                &uncorrected)) {
-    ecclesia::ErrorLog()
+    ErrorLog()
         << "Failed to get 'uncorrected' attribute to decode memory error.";
     return false;
   }
@@ -240,14 +241,18 @@ bool DecodeSkylakeMemoryError(const MceAttributes &attributes,
   MemoryError first_mem_error;
   first_mem_error.error_count = 1;
   first_mem_error.mem_error_bucket.correctable = !uncorrected;
-  int socket_id, imc_channel, channel_slot, gldn;
+  int socket_id, imc_channel, channel_slot;
   if (!attributes.GetAttribute(MceAttributes::kSocketId, &socket_id) ||
       !attributes.GetAttribute(MceAttributes::kMemoryChannel, &imc_channel) ||
-      !attributes.GetAttribute(MceAttributes::kImcChannelSlot, &channel_slot) ||
-      !dimm_translator->GetGLDN(socket_id, imc_channel, channel_slot, &gldn)) {
+      !attributes.GetAttribute(MceAttributes::kImcChannelSlot, &channel_slot)) {
     return false;
   }
-  first_mem_error.mem_error_bucket.gldn = gldn;
+  absl::StatusOr<int> maybe_gldn =
+      dimm_translator->GetGldn({.socket_id = socket_id,
+                                .imc_channel = imc_channel,
+                                .channel_slot = channel_slot});
+  if (!maybe_gldn.ok()) return false;
+  first_mem_error.mem_error_bucket.gldn = *maybe_gldn;
   decoded_msg->mem_errors.push_back(first_mem_error);
   accounted_mem_error_count++;
 
@@ -256,15 +261,19 @@ bool DecodeSkylakeMemoryError(const MceAttributes &attributes,
     MemoryError second_mem_error;
     second_mem_error.error_count = 1;
     second_mem_error.mem_error_bucket.correctable = !uncorrected;
-    int second_error_channel_slot, second_error_gldn;
+    int second_error_channel_slot;
     if (!attributes.GetAttribute(MceAttributes::kImcChannelSlotSecond,
-                                 &second_error_channel_slot) ||
-        !dimm_translator->GetGLDN(socket_id, imc_channel,
-                                  second_error_channel_slot,
-                                  &second_error_gldn)) {
+                                 &second_error_channel_slot)) {
       return false;
     }
-    second_mem_error.mem_error_bucket.gldn = second_error_gldn;
+    absl::StatusOr<int> maybe_second_gldn =
+        dimm_translator->GetGldn({.socket_id = socket_id,
+                                  .imc_channel = imc_channel,
+                                  .channel_slot = second_error_channel_slot});
+    if (!maybe_second_gldn.ok()) {
+      return false;
+    }
+    second_mem_error.mem_error_bucket.gldn = *maybe_second_gldn;
     decoded_msg->mem_errors.push_back(second_mem_error);
     accounted_mem_error_count++;
   }
@@ -273,7 +282,7 @@ bool DecodeSkylakeMemoryError(const MceAttributes &attributes,
   if (total_error_count > accounted_mem_error_count) {
     MemoryError remaining_mem_error;
     remaining_mem_error.mem_error_bucket.correctable = !uncorrected;
-    remaining_mem_error.mem_error_bucket.gldn = gldn;
+    remaining_mem_error.mem_error_bucket.gldn = *maybe_gldn;
     remaining_mem_error.error_count =
         total_error_count - accounted_mem_error_count;
     decoded_msg->mem_errors.push_back(remaining_mem_error);
@@ -288,20 +297,19 @@ bool DecodeSkylakeCpuError(const MceAttributes &attributes,
   CpuError cpu_error;
   int tmp_value;
   if (!attributes.GetAttribute(MceAttributes::kSocketId, &tmp_value)) {
-    ecclesia::ErrorLog() << "Failed to get socket ID to decode CPU error.";
+    ErrorLog() << "Failed to get socket ID to decode CPU error.";
     return false;
   }
   cpu_error.cpu_error_bucket.socket = tmp_value;
   if (!attributes.GetAttribute(MceAttributes::kLpuId, &tmp_value)) {
-    ecclesia::ErrorLog() << "Failed to get LPU ID to decode CPU error.";
+    ErrorLog() << "Failed to get LPU ID to decode CPU error.";
     return false;
   }
   cpu_error.cpu_error_bucket.lpu_id = tmp_value;
   bool uncorrected;
   if (!attributes.GetAttribute(MceAttributes::kMciStatusUncorrected,
                                &uncorrected)) {
-    ecclesia::ErrorLog()
-        << "Failed to get 'uncorrected' attribute to decode CPU error.";
+    ErrorLog() << "Failed to get 'uncorrected' attribute to decode CPU error.";
     return false;
   }
   cpu_error.cpu_error_bucket.correctable = !uncorrected;
@@ -347,4 +355,4 @@ bool DecodeSkylakeMce(DimmTranslatorInterface *dimm_translator,
     return DecodeSkylakeCpuError(*attributes, decoded_msg);
   }
 }
-}  // namespace mcedecoder
+}  // namespace ecclesia

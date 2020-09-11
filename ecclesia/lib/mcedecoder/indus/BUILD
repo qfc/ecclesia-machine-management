@@ -10,6 +10,8 @@ cc_library(
     visibility = ["//ecclesia/lib/mcedecoder:mcedecoder_users"],
     deps = [
         "//ecclesia/lib/mcedecoder:dimm_translator_interface",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/status:statusor",
     ],
 )
 
@@ -17,12 +19,14 @@ cc_test(
     name = "mce_decode_test",
     srcs = ["mce_decode_test.cc"],
     deps = [
+        ":indus_dimm_translator",
         "//ecclesia/lib/mcedecoder:cpu_topology",
         "//ecclesia/lib/mcedecoder:cpu_topology_mock",
+        "//ecclesia/lib/mcedecoder:dimm_translator_interface",
         "//ecclesia/lib/mcedecoder:mce_decode",
         "//ecclesia/lib/mcedecoder:mce_messages",
-        "//ecclesia/lib/mcedecoder/indus:indus_dimm_translator",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status:statusor",
         "@com_google_googletest//:gtest_main",
     ],
 )

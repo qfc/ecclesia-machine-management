@@ -45,6 +45,7 @@ cc_library(
         "//ecclesia/magent/lib/event_reader",
         "//ecclesia/magent/lib/event_reader:elog_emb",
         "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/status:statusor",
         "@com_google_absl//absl/time",
         "@com_google_absl//absl/types:optional",
         "@com_google_absl//absl/types:variant",
@@ -58,12 +59,13 @@ cc_test(
     deps = [
         ":event_logger",
         ":system_event_visitors",
-        "//ecclesia/lib/mcedecoder:mce_decode",
+        "//ecclesia/lib/mcedecoder:mce_decode_mock",
         "//ecclesia/lib/mcedecoder:mce_messages",
         "//ecclesia/lib/time:clock",
         "//ecclesia/magent/lib/event_reader",
         "@com_google_absl//absl/container:flat_hash_map",
         "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status:statusor",
         "@com_google_absl//absl/synchronization",
         "@com_google_absl//absl/time",
         "@com_google_absl//absl/types:optional",
@@ -81,7 +83,9 @@ cc_library(
         "//ecclesia/lib/logging",
         "//ecclesia/lib/mcedecoder:cpu_topology",
         "@com_google_absl//absl/status",
+        "@com_google_absl//absl/status:statusor",
         "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:str_format",
     ],
 )
 
@@ -93,7 +97,9 @@ cc_test(
         "intel_cpu_topology",
         "//ecclesia/lib/apifs",
         "//ecclesia/lib/file:test_filesystem",
+        "//ecclesia/lib/testing:status",
         "@com_google_absl//absl/status",
+        "@com_google_absl//absl/status:statusor",
         "@com_google_googletest//:gtest_main",
     ],
 )

@@ -21,8 +21,10 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/status/status.h"
+#include "absl/status/statusor.h"
 #include "ecclesia/lib/apifs/apifs.h"
 #include "ecclesia/lib/file/test_filesystem.h"
+#include "ecclesia/lib/testing/status.h"
 
 namespace ecclesia {
 namespace {
@@ -105,7 +107,7 @@ TEST_F(IntelCpuTopologyTest, TestCPURangeOnlineFail) {
   IntelCpuTopology intel_top(
       {.apifs_path = GetTestTempdirPath("sys/devices/system/cpu")});
 
-  EXPECT_EQ(-1, intel_top.GetSocketIdForLpu(0));
+  EXPECT_TRUE(absl::IsNotFound(intel_top.GetSocketIdForLpu(0).status()));
 }
 
 TEST_F(IntelCpuTopologyTest, TestCPURangeFromFail) {
@@ -113,7 +115,7 @@ TEST_F(IntelCpuTopologyTest, TestCPURangeFromFail) {
   IntelCpuTopology intel_top(
       {.apifs_path = GetTestTempdirPath("sys/devices/system/cpu")});
 
-  EXPECT_EQ(-1, intel_top.GetSocketIdForLpu(0));
+  EXPECT_TRUE(absl::IsNotFound(intel_top.GetSocketIdForLpu(0).status()));
 }
 
 TEST_F(IntelCpuTopologyTest, TestCPURangeToFail) {
@@ -121,7 +123,7 @@ TEST_F(IntelCpuTopologyTest, TestCPURangeToFail) {
   IntelCpuTopology intel_top(
       {.apifs_path = GetTestTempdirPath("sys/devices/system/cpu")});
 
-  EXPECT_EQ(-1, intel_top.GetSocketIdForLpu(0));
+  EXPECT_TRUE(absl::IsNotFound(intel_top.GetSocketIdForLpu(0).status()));
 }
 
 TEST_F(IntelCpuTopologyTest, TestGetSocketIdForLpu) {
@@ -131,7 +133,7 @@ TEST_F(IntelCpuTopologyTest, TestGetSocketIdForLpu) {
       {.apifs_path = GetTestTempdirPath("sys/devices/system/cpu")});
 
   for (int i = 0; i < 8; i++) {
-    EXPECT_EQ(i / 4, intel_top.GetSocketIdForLpu(i));
+    EXPECT_THAT(intel_top.GetSocketIdForLpu(i), IsOkAndHolds(i / 4));
   }
 }
 

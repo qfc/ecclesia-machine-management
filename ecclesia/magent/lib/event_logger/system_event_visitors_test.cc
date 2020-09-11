@@ -17,7 +17,6 @@
 #include "ecclesia/magent/lib/event_logger/system_event_visitors.h"
 
 #include <memory>
-#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -25,10 +24,11 @@
 #include "gtest/gtest.h"
 #include "absl/container/flat_hash_map.h"
 #include "absl/memory/memory.h"
+#include "absl/status/statusor.h"
 #include "absl/synchronization/notification.h"
 #include "absl/time/time.h"
 #include "absl/types/optional.h"
-#include "ecclesia/lib/mcedecoder/mce_decode.h"
+#include "ecclesia/lib/mcedecoder/mce_decode_mock.h"
 #include "ecclesia/lib/mcedecoder/mce_messages.h"
 #include "ecclesia/lib/time/clock.h"
 #include "ecclesia/magent/lib/event_logger/event_logger.h"
@@ -56,13 +56,6 @@ class SystemEventVisitorTest : public ::testing::Test {
 
   MockEventReader *reader_;
   absl::Notification last_event_logged_;
-};
-
-class MockMceDecoder : public mcedecoder::MceDecoderInterface {
- public:
-  MOCK_METHOD(bool, DecodeMceMessage,
-              (const mcedecoder::MceLogMessage &,
-               mcedecoder::MceDecodedMessage *));
 };
 
 TEST_F(SystemEventVisitorTest, MemoryErrorCounts) {
@@ -97,23 +90,24 @@ TEST_F(SystemEventVisitorTest, MemoryErrorCounts) {
 
   // Mock the Mce decoding by just incrementing the dimm number and invetring
   // the correctible bit on successive mces.
-  auto decode_message = [](testing::Unused,
-                           mcedecoder::MceDecodedMessage *output) {
+  auto decode_message =
+      [](testing::Unused) -> absl::StatusOr<MceDecodedMessage> {
     static int gldn = 5;
     static int correctable = false;
-    output->mem_errors.push_back(mcedecoder::MemoryError{});
-    output->mem_errors[0].mem_error_bucket.gldn = gldn++;
-    output->mem_errors[0].mem_error_bucket.correctable = correctable;
-    output->mem_errors[0].error_count = 1;
+    MceDecodedMessage output;
+    output.mem_errors.push_back(MemoryError{});
+    output.mem_errors[0].mem_error_bucket.gldn = gldn++;
+    output.mem_errors[0].mem_error_bucket.correctable = correctable;
+    output.mem_errors[0].error_count = 1;
     correctable = !correctable;
-    return true;
+    return output;
   };
 
   {
-    // Visit all of the events
+    // Visit all of the events.
     auto mce_decoder = absl::make_unique<MockMceDecoder>();
 
-    EXPECT_CALL(*mce_decoder, DecodeMceMessage(_, _))
+    EXPECT_CALL(*mce_decoder, DecodeMceMessage(_))
         .WillRepeatedly(testing::Invoke(decode_message));
 
     auto dimm_visitor = DimmErrorCountingVisitor(
@@ -164,23 +158,24 @@ TEST_F(SystemEventVisitorTest, CpuErrorCounts) {
 
   // Mock the Mce decoding by just incrementing the dimm number and invetring
   // the correctible bit on successive mces.
-  auto decode_message = [](testing::Unused,
-                           mcedecoder::MceDecodedMessage *output) {
+  auto decode_message =
+      [](testing::Unused) -> absl::StatusOr<MceDecodedMessage> {
     static int correctable = false;
     static int socket = 0;
-    output->cpu_errors.push_back(mcedecoder::CpuError{});
-    output->cpu_errors[0].cpu_error_bucket.socket = socket++;
-    output->cpu_errors[0].cpu_error_bucket.correctable = correctable;
-    output->cpu_errors[0].error_count = 1;
+    MceDecodedMessage output;
+    output.cpu_errors.push_back(CpuError{});
+    output.cpu_errors[0].cpu_error_bucket.socket = socket++;
+    output.cpu_errors[0].cpu_error_bucket.correctable = correctable;
+    output.cpu_errors[0].error_count = 1;
     correctable = !correctable;
-    return true;
+    return output;
   };
 
   {
     // Visit all of the events
     auto mce_decoder = absl::make_unique<MockMceDecoder>();
 
-    EXPECT_CALL(*mce_decoder, DecodeMceMessage(_, _))
+    EXPECT_CALL(*mce_decoder, DecodeMceMessage(_))
         .WillRepeatedly(testing::Invoke(decode_message));
 
     auto cpu_visitor = CpuErrorCountingVisitor(

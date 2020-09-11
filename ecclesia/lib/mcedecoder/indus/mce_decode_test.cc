@@ -23,12 +23,14 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
+#include "absl/status/statusor.h"
 #include "ecclesia/lib/mcedecoder/cpu_topology.h"
 #include "ecclesia/lib/mcedecoder/cpu_topology_mock.h"
+#include "ecclesia/lib/mcedecoder/dimm_translator.h"
 #include "ecclesia/lib/mcedecoder/indus/dimm_translator.h"
 #include "ecclesia/lib/mcedecoder/mce_messages.h"
 
-namespace mcedecoder {
+namespace ecclesia {
 namespace {
 
 using ::testing::Return;
@@ -47,8 +49,9 @@ TEST(MceDecodeTest, DecodeCorrectableMemoryControllerWriteError) {
 
   MceLogMessage raw_msg{
       0, lpu_id, bank, 0, 0x9c000040010400a1, 0x35a4456040, 0x200414a228001086};
-  MceDecodedMessage decoded_msg;
-  EXPECT_TRUE(mce_decoder.DecodeMceMessage(raw_msg, &decoded_msg));
+  auto maybe_decoded_msg = mce_decoder.DecodeMceMessage(raw_msg);
+  ASSERT_TRUE(maybe_decoded_msg.ok());
+  MceDecodedMessage decoded_msg = *maybe_decoded_msg;
 
   EXPECT_EQ(decoded_msg.mce_bucket.bank, bank);
   EXPECT_EQ(decoded_msg.mce_bucket.socket, socket_id);
@@ -77,8 +80,9 @@ TEST(MceDecodeTest, DecodeUnCorrectableMemoryControllerReadError) {
 
   MceLogMessage raw_msg{
       0, lpu_id, bank, 0, 0xbc00000001010090, 0x34fe426040, 0x200001c080602086};
-  MceDecodedMessage decoded_msg;
-  EXPECT_TRUE(mce_decoder.DecodeMceMessage(raw_msg, &decoded_msg));
+  auto maybe_decoded_msg = mce_decoder.DecodeMceMessage(raw_msg);
+  ASSERT_TRUE(maybe_decoded_msg.ok());
+  MceDecodedMessage decoded_msg = *maybe_decoded_msg;
 
   EXPECT_EQ(decoded_msg.mce_bucket.bank, bank);
   EXPECT_EQ(decoded_msg.mce_bucket.socket, socket_id);
@@ -107,8 +111,9 @@ TEST(MceDecodeTest, DecodeCorrectableMultipleMemError) {
 
   MceLogMessage raw_msg{
       0, lpu_id, bank, 0, 0xc80000c100800090, 0, 0xd129e00204404400};
-  MceDecodedMessage decoded_msg;
-  EXPECT_TRUE(mce_decoder.DecodeMceMessage(raw_msg, &decoded_msg));
+  auto maybe_decoded_msg = mce_decoder.DecodeMceMessage(raw_msg);
+  ASSERT_TRUE(maybe_decoded_msg.ok());
+  MceDecodedMessage decoded_msg = *maybe_decoded_msg;
 
   EXPECT_EQ(decoded_msg.mce_bucket.bank, bank);
   EXPECT_EQ(decoded_msg.mce_bucket.socket, socket_id);
@@ -143,8 +148,9 @@ TEST(MceDecodeTest, DecodeUnCorrectableCpuCacheError) {
 
   MceLogMessage raw_msg{0,           lpu_id, bank, 7, 0xbd80000000100134,
                         0x166fab040, 0x86};
-  MceDecodedMessage decoded_msg;
-  EXPECT_TRUE(mce_decoder.DecodeMceMessage(raw_msg, &decoded_msg));
+  auto maybe_decoded_msg = mce_decoder.DecodeMceMessage(raw_msg);
+  ASSERT_TRUE(maybe_decoded_msg.ok());
+  MceDecodedMessage decoded_msg = *maybe_decoded_msg;
 
   EXPECT_EQ(decoded_msg.mce_bucket.bank, bank);
   EXPECT_EQ(decoded_msg.mce_bucket.socket, socket_id);
@@ -175,8 +181,9 @@ TEST(MceDecodeTest, DecodeUnCorrectableInstructionFetchError) {
 
   MceLogMessage raw_msg{0,           lpu_id, bank, 7, 0xbd800000000c0150,
                         0x16a616040, 0x86};
-  MceDecodedMessage decoded_msg;
-  EXPECT_TRUE(mce_decoder.DecodeMceMessage(raw_msg, &decoded_msg));
+  auto maybe_decoded_msg = mce_decoder.DecodeMceMessage(raw_msg);
+  ASSERT_TRUE(maybe_decoded_msg.ok());
+  MceDecodedMessage decoded_msg = *maybe_decoded_msg;
 
   EXPECT_EQ(decoded_msg.mce_bucket.bank, bank);
   EXPECT_EQ(decoded_msg.mce_bucket.socket, socket_id);
@@ -207,8 +214,9 @@ TEST(MceDecodeTest, DecodeCorruptedMce) {
 
   MceLogMessage raw_msg{0,           lpu_id, bank, 7, 0x4d800000000c0150,
                         0x16a616040, 0x86};
-  MceDecodedMessage decoded_msg;
-  EXPECT_TRUE(mce_decoder.DecodeMceMessage(raw_msg, &decoded_msg));
+  auto maybe_decoded_msg = mce_decoder.DecodeMceMessage(raw_msg);
+  ASSERT_TRUE(maybe_decoded_msg.ok());
+  MceDecodedMessage decoded_msg = *maybe_decoded_msg;
 
   EXPECT_EQ(decoded_msg.mce_bucket.bank, bank);
   EXPECT_EQ(decoded_msg.mce_bucket.socket, socket_id);
@@ -219,4 +227,4 @@ TEST(MceDecodeTest, DecodeCorruptedMce) {
 }
 
 }  // namespace
-}  // namespace mcedecoder
+}  // namespace ecclesia

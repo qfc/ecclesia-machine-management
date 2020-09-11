@@ -10,5 +10,7 @@ cc_library(
     visibility = ["//ecclesia/lib/mcedecoder:mcedecoder_users"],
     deps = [
         "//ecclesia/lib/mcedecoder:dimm_translator_interface",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/status:statusor",
     ],
 )

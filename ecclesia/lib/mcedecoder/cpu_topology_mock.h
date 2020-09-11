@@ -18,13 +18,16 @@
 #define ECCLESIA_LIB_MCEDECODER_CPU_TOPOLOGY_MOCK_H_
 
 #include "gmock/gmock.h"
+#include "absl/status/statusor.h"
 #include "ecclesia/lib/mcedecoder/cpu_topology.h"
 
-namespace mcedecoder {
+namespace ecclesia {
 
 class MockCpuTopology : public CpuTopologyInterface {
  public:
-  MOCK_METHOD(int, GetSocketIdForLpu, (int), (const, override));
+  MOCK_METHOD(absl::StatusOr<int>, GetSocketIdForLpu, (int), (const, override));
 };
-}  // namespace mcedecoder
+
+}  // namespace ecclesia
+
 #endif  // ECCLESIA_LIB_MCEDECODER_CPU_TOPOLOGY_MOCK_H_

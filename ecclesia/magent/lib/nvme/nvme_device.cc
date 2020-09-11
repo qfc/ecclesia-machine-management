@@ -17,9 +17,9 @@
 #include "ecclesia/magent/lib/nvme/nvme_device.h"
 
 #include <linux/nvme_ioctl.h>
-#include <stddef.h>
-#include <stdint.h>
 
+#include <cstddef>
+#include <cstdint>
 #include <iterator>
 #include <map>
 #include <memory>

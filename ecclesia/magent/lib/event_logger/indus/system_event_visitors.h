@@ -32,11 +32,9 @@ namespace ecclesia {
 // This is to hide the platform specific object that are needed for the
 // construction of the mcedecoder required by these visitors
 std::unique_ptr<CpuErrorCountingVisitor> CreateIndusCpuErrorCountingVisitor(
-    absl::Time lower_bound,
-    std::unique_ptr<mcedecoder::CpuTopologyInterface> cpu_topology);
+    absl::Time lower_bound, std::unique_ptr<CpuTopologyInterface> cpu_topology);
 std::unique_ptr<DimmErrorCountingVisitor> CreateIndusDimmErrorCountingVisitor(
-    absl::Time lower_bound,
-    std::unique_ptr<mcedecoder::CpuTopologyInterface> cpu_topology);
+    absl::Time lower_bound, std::unique_ptr<CpuTopologyInterface> cpu_topology);
 
 }  // namespace ecclesia
 

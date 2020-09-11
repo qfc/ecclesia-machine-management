@@ -20,11 +20,14 @@
 #include "ecclesia/lib/mcedecoder/dimm_translator.h"
 #include "ecclesia/lib/mcedecoder/mce_messages.h"
 
-namespace mcedecoder {
+namespace ecclesia {
+
 // Decode Intel Skylake machine check exception. Add the decoded attributes and
 // message and return true after success; otherwise, return false.
 bool DecodeSkylakeMce(DimmTranslatorInterface *dimm_translator,
                       MceAttributes *attributes,
                       MceDecodedMessage *decoded_msg);
-}  // namespace mcedecoder
+
+}  // namespace ecclesia
+
 #endif  // ECCLESIA_LIB_MCEDECODER_SKYLAKE_MCE_DECODE_H_

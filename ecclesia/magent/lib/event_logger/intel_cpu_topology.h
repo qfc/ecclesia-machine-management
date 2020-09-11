@@ -25,6 +25,7 @@
 #include <vector>
 
 #include "absl/status/status.h"
+#include "absl/status/statusor.h"
 #include "absl/strings/numbers.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
@@ -33,7 +34,7 @@
 
 namespace ecclesia {
 
-class IntelCpuTopology : public mcedecoder::CpuTopologyInterface {
+class IntelCpuTopology : public CpuTopologyInterface {
  public:
   // Used to initialize ApifsDirectory object.
   // Defines the filesystem path where CPU attributes will be exported.
@@ -47,7 +48,7 @@ class IntelCpuTopology : public mcedecoder::CpuTopologyInterface {
   explicit IntelCpuTopology(const Options &options);
 
   // Return physical package id based on lpu.
-  int GetSocketIdForLpu(int lpu) const override;
+  absl::StatusOr<int> GetSocketIdForLpu(int lpu) const override;
 
   std::vector<int> GetLpusForSocketId(int socket_id) const;
 

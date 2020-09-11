@@ -18,16 +18,18 @@
 #define ECCLESIA_LIB_MCEDECODER_MCE_DECODE_MOCK_H_
 
 #include "gmock/gmock.h"
+#include "absl/status/statusor.h"
 #include "ecclesia/lib/mcedecoder/mce_decode.h"
 #include "ecclesia/lib/mcedecoder/mce_messages.h"
 
-namespace mcedecoder {
+namespace ecclesia {
 
 class MockMceDecoder : public MceDecoderInterface {
  public:
-  MOCK_METHOD(bool, DecodeMceMessage,
-              (const MceLogMessage& raw_msg, MceDecodedMessage* decoded_msg),
-              (override));
+  MOCK_METHOD(absl::StatusOr<MceDecodedMessage>, DecodeMceMessage,
+              (const MceLogMessage& raw_msg), (override));
 };
-}  // namespace mcedecoder
+
+}  // namespace ecclesia
+
 #endif  // ECCLESIA_LIB_MCEDECODER_MCE_DECODE_MOCK_H_

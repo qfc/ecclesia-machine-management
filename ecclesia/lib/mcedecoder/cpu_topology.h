@@ -17,17 +17,20 @@
 #ifndef ECCLESIA_LIB_MCEDECODER_CPU_TOPOLOGY_H_
 #define ECCLESIA_LIB_MCEDECODER_CPU_TOPOLOGY_H_
 
-namespace mcedecoder {
+#include "absl/status/statusor.h"
+
+namespace ecclesia {
 
 class CpuTopologyInterface {
  public:
-  virtual ~CpuTopologyInterface() {}
+  virtual ~CpuTopologyInterface() = default;
+
   // Given a logic processing unit (LPU) ID, return the corresponding CPU socket
   // ID. If any exception happened or the matched CPU socket ID cannot be found,
-  // return -1.
-  virtual int GetSocketIdForLpu(int lpu) const = 0;
+  // return a NotFoundError.
+  virtual absl::StatusOr<int> GetSocketIdForLpu(int lpu) const = 0;
 };
 
-}  // namespace mcedecoder
+}  // namespace ecclesia
 
 #endif  // ECCLESIA_LIB_CPU_TOPOLOGY_H_

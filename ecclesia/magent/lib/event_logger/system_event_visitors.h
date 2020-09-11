@@ -66,19 +66,18 @@ struct DimmErrorCount {
   }
 };
 
-// The mcedecoder::MceDecoder expects different interface for providing the raw
+// The MceDecoder expects different interface for providing the raw
 // mces. This adapter allows us to translate the ecclesia::MachineCheck into
-// mcedecoder::MceLogMessage and perform the decoding.
+// MceLogMessage and perform the decoding.
 class MceDecoderAdapter {
  public:
-  MceDecoderAdapter(
-      std::unique_ptr<mcedecoder::MceDecoderInterface> mce_decoder)
+  MceDecoderAdapter(std::unique_ptr<MceDecoderInterface> mce_decoder)
       : mce_decoder_(std::move(mce_decoder)) {}
 
-  absl::optional<mcedecoder::MceDecodedMessage> Decode(const MachineCheck &mce);
+  absl::optional<MceDecodedMessage> Decode(const MachineCheck &mce);
 
  private:
-  std::unique_ptr<mcedecoder::MceDecoderInterface> mce_decoder_;
+  std::unique_ptr<MceDecoderInterface> mce_decoder_;
 };
 
 // A system event visitor for deriving cpu error counts

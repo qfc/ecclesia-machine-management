@@ -16,9 +16,8 @@
 
 #include "ecclesia/magent/lib/nvme/controller_registers.h"
 
-#include <stdint.h>
-
 #include <array>
+#include <cstdint>
 #include <utility>
 
 #include "gtest/gtest.h"

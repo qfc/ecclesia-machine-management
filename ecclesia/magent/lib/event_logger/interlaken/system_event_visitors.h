@@ -33,13 +33,11 @@ namespace ecclesia {
 // construction of the mcedecoder required by these visitors
 std::unique_ptr<CpuErrorCountingVisitor>
 CreateInterlakenCpuErrorCountingVisitor(
-    absl::Time lower_bound,
-    std::unique_ptr<mcedecoder::CpuTopologyInterface> cpu_topology);
+    absl::Time lower_bound, std::unique_ptr<CpuTopologyInterface> cpu_topology);
 
 std::unique_ptr<DimmErrorCountingVisitor>
 CreateInterlakenDimmErrorCountingVisitor(
-    absl::Time lower_bound,
-    std::unique_ptr<mcedecoder::CpuTopologyInterface> cpu_topology);
+    absl::Time lower_bound, std::unique_ptr<CpuTopologyInterface> cpu_topology);
 
 }  // namespace ecclesia
 

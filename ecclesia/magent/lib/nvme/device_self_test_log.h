@@ -21,7 +21,6 @@
 
 #include <cstdint>
 #include <memory>
-#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
@@ -30,6 +29,7 @@
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/string_view.h"
+#include "absl/types/optional.h"
 #include "ecclesia/lib/codec/endian.h"
 #include "ecclesia/magent/lib/nvme/nvme_types.h"
 

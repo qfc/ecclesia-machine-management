@@ -20,21 +20,22 @@
 #include <memory>
 #include <utility>
 
+#include "absl/status/statusor.h"
 #include "ecclesia/lib/mcedecoder/cpu_topology.h"
 #include "ecclesia/lib/mcedecoder/dimm_translator.h"
 #include "ecclesia/lib/mcedecoder/mce_messages.h"
 
-namespace mcedecoder {
+namespace ecclesia {
 
 // Interface class of Machine check exception (MCE) decoder.
 class MceDecoderInterface {
  public:
   virtual ~MceDecoderInterface() {}
 
-  // Decode MCE and fill in the input decoded_msg. If the event is not a MCE
-  // or decoding failed, return false; otherwise return true.
-  virtual bool DecodeMceMessage(const MceLogMessage& raw_msg,
-                                MceDecodedMessage* decoded_msg) = 0;
+  // Decode MCE and fill in the input decoded_msg. Returns a not-OK status
+  // either if the decoding fails or the event is not a MCE.
+  virtual absl::StatusOr<MceDecodedMessage> DecodeMceMessage(
+      const MceLogMessage& raw_msg) = 0;
 };
 
 enum class CpuVendor { kIntel, kAmd, kUnknown };
@@ -52,8 +53,8 @@ class MceDecoder : public MceDecoderInterface {
         cpu_topology_(std::move(cpu_topology)),
         dimm_translator_(std::move(dimm_translator)) {}
 
-  bool DecodeMceMessage(const MceLogMessage& raw_msg,
-                        MceDecodedMessage* decoded_msg) override;
+  absl::StatusOr<MceDecodedMessage> DecodeMceMessage(
+      const MceLogMessage& raw_msg) override;
 
  private:
   CpuVendor cpu_vendor_;
@@ -62,5 +63,5 @@ class MceDecoder : public MceDecoderInterface {
   std::unique_ptr<DimmTranslatorInterface> dimm_translator_;
 };
 
-}  // namespace mcedecoder
+}  // namespace ecclesia
 #endif  // ECCLESIA_LIB_MCEDECODER_MCE_DECODE_H_

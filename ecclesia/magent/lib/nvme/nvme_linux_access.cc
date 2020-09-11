@@ -19,12 +19,12 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <linux/nvme_ioctl.h>
-#include <stddef.h>
 #include <string.h>
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 
+#include <cstddef>
 #include <memory>
 #include <string>
 #include <utility>

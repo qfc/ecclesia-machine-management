@@ -20,6 +20,7 @@
 #include <type_traits>
 
 #include "absl/container/flat_hash_map.h"
+#include "absl/status/statusor.h"
 #include "absl/time/time.h"
 #include "absl/types/optional.h"
 #include "absl/types/variant.h"
@@ -146,20 +147,22 @@ class DecodeAndUpdateDimmCounts {
 
 }  // namespace
 
-absl::optional<mcedecoder::MceDecodedMessage> MceDecoderAdapter::Decode(
+absl::optional<MceDecodedMessage> MceDecoderAdapter::Decode(
     const MachineCheck &mce) {
-  mcedecoder::MceLogMessage raw_mce;
-  mcedecoder::MceDecodedMessage decoded_mce;
+  MceLogMessage raw_mce;
   if (mce.cpu) raw_mce.lpu_id = mce.cpu.value();
   if (mce.bank) raw_mce.bank = mce.bank.value();
   if (mce.mcg_status) raw_mce.mcg_status = mce.mcg_status.value();
   if (mce.mci_status) raw_mce.mci_status = mce.mci_status.value();
   if (mce.mci_address) raw_mce.mci_address = mce.mci_address.value();
   if (mce.mci_misc) raw_mce.mci_misc = mce.mci_misc.value();
-  if (!mce_decoder_->DecodeMceMessage(raw_mce, &decoded_mce)) {
+
+  auto maybe_decoded_mce = mce_decoder_->DecodeMceMessage(raw_mce);
+  if (maybe_decoded_mce.ok()) {
+    return *maybe_decoded_mce;
+  } else {
     return absl::nullopt;
   }
-  return decoded_mce;
 }
 
 bool CpuErrorCountingVisitor::Visit(const SystemEventRecord &record) {

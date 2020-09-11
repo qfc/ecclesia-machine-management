@@ -17,6 +17,7 @@
 #include "ecclesia/magent/lib/event_logger/interlaken/system_event_visitors.h"
 
 #include <memory>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -24,6 +25,9 @@
 #include "gtest/gtest.h"
 #include "absl/container/flat_hash_map.h"
 #include "absl/memory/memory.h"
+#include "absl/status/status.h"
+#include "absl/status/statusor.h"
+#include "absl/strings/str_format.h"
 #include "absl/synchronization/notification.h"
 #include "absl/time/time.h"
 #include "absl/types/optional.h"
@@ -49,12 +53,12 @@ class MockClock : public Clock {
 };
 
 // Cpu topology as observed on an Interlaken machine
-class FakeCpuTopology : public mcedecoder::CpuTopologyInterface {
+class FakeCpuTopology : public CpuTopologyInterface {
  public:
-  int GetSocketIdForLpu(int lpu) const override {
+  absl::StatusOr<int> GetSocketIdForLpu(int lpu) const override {
     if ((lpu >= 0 && lpu < 28) || (lpu >= 56 && lpu < 84)) return 0;
     if ((lpu >= 28 && lpu < 56) || (lpu >= 84 && lpu < 112)) return 1;
-    return -1;
+    return absl::NotFoundError(absl::StrFormat("unknown lpu %d", lpu));
   }
 };
 

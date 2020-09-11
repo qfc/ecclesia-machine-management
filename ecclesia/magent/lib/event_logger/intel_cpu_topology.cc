@@ -16,15 +16,17 @@
 
 #include "ecclesia/magent/lib/event_logger/intel_cpu_topology.h"
 
-#include <iostream>
 #include <string>
 #include <vector>
 
 #include "absl/status/status.h"
+#include "absl/status/statusor.h"
 #include "absl/strings/numbers.h"
 #include "absl/strings/str_cat.h"
+#include "absl/strings/str_format.h"
 #include "absl/strings/str_split.h"
 #include "absl/strings/string_view.h"
+#include "ecclesia/lib/logging/globals.h"
 #include "ecclesia/lib/logging/logging.h"
 
 namespace ecclesia {
@@ -84,10 +86,9 @@ std::vector<int> IntelCpuTopology::GetCpuTopology() {
   return ret;
 }
 
-int IntelCpuTopology::GetSocketIdForLpu(int lpu) const {
+absl::StatusOr<int> IntelCpuTopology::GetSocketIdForLpu(int lpu) const {
   if (lpu >= (lpu_to_package_id_).size()) {
-    ErrorLog() << "LPU index out of range.";
-    return -1;
+    return absl::NotFoundError(absl::StrFormat("lpu %d is out of range", lpu));
   }
   return lpu_to_package_id_[lpu];
 }

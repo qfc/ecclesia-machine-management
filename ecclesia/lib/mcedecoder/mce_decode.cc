@@ -17,19 +17,19 @@
 #include "ecclesia/lib/mcedecoder/mce_decode.h"
 
 #include <cstdint>
-#include <iostream>
 #include <memory>
 #include <utility>
 #include <vector>
 
-#include "ecclesia/lib/logging/logging.h"
-#include "ecclesia/lib/mcedecoder/bit_operator.h"
+#include "absl/status/status.h"
+#include "absl/status/statusor.h"
+#include "ecclesia/lib/codec/bits.h"
 #include "ecclesia/lib/mcedecoder/cpu_topology.h"
 #include "ecclesia/lib/mcedecoder/dimm_translator.h"
 #include "ecclesia/lib/mcedecoder/mce_messages.h"
 #include "ecclesia/lib/mcedecoder/skylake_mce_decode.h"
 
-namespace mcedecoder {
+namespace ecclesia {
 namespace {
 
 // Linux reports thermal throttle events as a fake machine check on bank 128.
@@ -39,17 +39,18 @@ using AttributeBits = std::pair<MceAttributes::MceAttributeKey, BitRange>;
 
 void DecodeGenericIntelMceAttributes(const MceLogMessage &raw_msg,
                                      MceAttributes *attributes) {
-  bool mci_status_valid = ExtractBits(raw_msg.mci_status, Bit(63));
+  bool mci_status_valid = ExtractBits(raw_msg.mci_status, BitRange(63));
   attributes->SetAttribute(MceAttributes::kMciStatusValid, mci_status_valid);
   if (mci_status_valid) {
     static const std::vector<AttributeBits> &attribute_bit_map =
         *(new std::vector<AttributeBits>(
-            {{MceAttributes::kMciStatusUncorrected, Bit(61)},
-             {MceAttributes::kMciStatusMiscValid, Bit(59)},
-             {MceAttributes::kMciStatusAddrValid, Bit(58)},
-             {MceAttributes::kMciStatusProcessorContexCorrupted, Bit(57)},
-             {MceAttributes::kMciStatusModelSpecificErrorCode, Bits(31, 16)},
-             {MceAttributes::kMciStatusMcaErrorCode, Bits(15, 0)}}));
+            {{MceAttributes::kMciStatusUncorrected, BitRange(61)},
+             {MceAttributes::kMciStatusMiscValid, BitRange(59)},
+             {MceAttributes::kMciStatusAddrValid, BitRange(58)},
+             {MceAttributes::kMciStatusProcessorContexCorrupted, BitRange(57)},
+             {MceAttributes::kMciStatusModelSpecificErrorCode,
+              BitRange(31, 16)},
+             {MceAttributes::kMciStatusMcaErrorCode, BitRange(15, 0)}}));
 
     for (const auto &attribut_bit : attribute_bit_map) {
       attributes->SetAttribute(
@@ -74,8 +75,9 @@ void DecodeGenericIntelMceAttributes(const MceLogMessage &raw_msg,
     }
     if (!attributes->GetAttributeWithDefault(
             MceAttributes::kMciStatusUncorrected, true)) {
-      attributes->SetAttribute(MceAttributes::kMciStatusCorrectedErrorCount,
-                               ExtractBits(raw_msg.mci_status, Bits(52, 38)));
+      attributes->SetAttribute(
+          MceAttributes::kMciStatusCorrectedErrorCount,
+          ExtractBits(raw_msg.mci_status, BitRange(52, 38)));
     }
   }
 }
@@ -116,49 +118,53 @@ bool ParseIntelDecodedMceAttributes(const MceAttributes &attributes,
 }
 
 // Decode Intel MCE. Return true upon success; otherwise return false.
-bool DecodeIntelMce(CpuIdentifier cpu_identifier, const MceLogMessage &raw_msg,
-                    DimmTranslatorInterface *dimm_translator,
-                    MceAttributes *attributes, MceDecodedMessage *decoded_msg) {
+absl::StatusOr<MceDecodedMessage> DecodeIntelMce(
+    CpuIdentifier cpu_identifier, const MceLogMessage &raw_msg,
+    DimmTranslatorInterface *dimm_translator, MceAttributes *attributes) {
   DecodeGenericIntelMceAttributes(raw_msg, attributes);
+  MceDecodedMessage decoded_msg;
   // Decode model specific MCE.
   switch (cpu_identifier) {
     case CpuIdentifier::kSkylake:
     case CpuIdentifier::kCascadeLake:
-      DecodeSkylakeMce(dimm_translator, attributes, decoded_msg);
+      DecodeSkylakeMce(dimm_translator, attributes, &decoded_msg);
       break;
     default:
-      ecclesia::ErrorLog() << "Unsupported CPU identifier";
-      return false;
+      return absl::UnimplementedError("system CPU is not supported");
   }
-  if (!ParseIntelDecodedMceAttributes(*attributes, decoded_msg)) {
-    return false;
+  if (!ParseIntelDecodedMceAttributes(*attributes, &decoded_msg)) {
+    return absl::InvalidArgumentError(
+        "MCE attributes are not sufficient to decode it");
   }
-  return true;
+  return decoded_msg;
 }
 
 }  // namespace
 
-bool MceDecoder::DecodeMceMessage(const MceLogMessage &raw_msg,
-                                  MceDecodedMessage *decoded_msg) {
+absl::StatusOr<MceDecodedMessage> MceDecoder::DecodeMceMessage(
+    const MceLogMessage &raw_msg) {
   MceAttributes mce_attributes;
   // Bypass the thermal throttle which is not a real MCE.
   if (raw_msg.bank == kLinuxThermalThrottleMceBank) {
-    return false;
+    return absl::InvalidArgumentError("message is a thermal throttle error");
   }
   mce_attributes.SetAttribute(MceAttributes::kMceBank, raw_msg.bank);
   mce_attributes.SetAttribute(MceAttributes::kLpuId, raw_msg.lpu_id);
   if (cpu_topology_) {
-    mce_attributes.SetAttribute(
-        MceAttributes::kSocketId,
-        cpu_topology_->GetSocketIdForLpu(raw_msg.lpu_id));
+    absl::StatusOr<int> maybe_socket =
+        cpu_topology_->GetSocketIdForLpu(raw_msg.lpu_id);
+    if (maybe_socket.ok()) {
+      mce_attributes.SetAttribute(MceAttributes::kSocketId, *maybe_socket);
+    }
   }
 
   switch (cpu_vendor_) {
     case CpuVendor::kIntel:
       return DecodeIntelMce(cpu_identifier_, raw_msg, dimm_translator_.get(),
-                            &mce_attributes, decoded_msg);
+                            &mce_attributes);
     default:
-      return false;
+      return absl::UnimplementedError("CPU vendor is not supported");
   }
 }
-}  // namespace mcedecoder
+
+}  // namespace ecclesia

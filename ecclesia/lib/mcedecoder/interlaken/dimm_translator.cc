@@ -16,7 +16,11 @@
 
 #include "ecclesia/lib/mcedecoder/interlaken/dimm_translator.h"
 
-namespace mcedecoder {
+#include "absl/status/status.h"
+#include "absl/status/statusor.h"
+#include "ecclesia/lib/mcedecoder/dimm_translator.h"
+
+namespace ecclesia {
 namespace {
 
 constexpr int kInterlakenNumCpuSocket = 2;
@@ -31,40 +35,43 @@ constexpr int kInterlakenSlotNumGldnMap[] = {11, 10, 9,  8,  7,  6,  0,  1,
                                              16, 17, 23, 22, 21, 20, 19, 18};
 }  // namespace
 
-bool InterlakenDimmTranslator::GetGLDN(int socket_id, int imc_channel,
-                                       int channel_slot, int *gldn) const {
-  if (socket_id < 0 || socket_id >= kInterlakenNumCpuSocket ||
-      imc_channel < 0 || imc_channel >= kInterlakenNumImcChannelsPerCpu ||
-      channel_slot < 0 || channel_slot >= kInterlakenNumDimmSlotPerImcChannel) {
-    return false;
+absl::StatusOr<int> InterlakenDimmTranslator::GetGldn(
+    const DimmSlotId &dimm_slot) const {
+  if (dimm_slot.socket_id < 0 ||
+      dimm_slot.socket_id >= kInterlakenNumCpuSocket ||
+      dimm_slot.imc_channel < 0 ||
+      dimm_slot.imc_channel >= kInterlakenNumImcChannelsPerCpu ||
+      dimm_slot.channel_slot < 0 ||
+      dimm_slot.channel_slot >= kInterlakenNumDimmSlotPerImcChannel) {
+    return absl::NotFoundError("dimm slot doesn't not match any known gldn");
   }
-  int slot_num = socket_id * kInterlakenNumImcChannelsPerCpu *
+  int slot_num = dimm_slot.socket_id * kInterlakenNumImcChannelsPerCpu *
                      kInterlakenNumDimmSlotPerImcChannel +
-                 imc_channel * kInterlakenNumDimmSlotPerImcChannel +
-                 channel_slot;
-  *gldn = kInterlakenSlotNumGldnMap[slot_num];
-  return true;
+                 dimm_slot.imc_channel * kInterlakenNumDimmSlotPerImcChannel +
+                 dimm_slot.channel_slot;
+  return kInterlakenSlotNumGldnMap[slot_num];
 }
 
-bool InterlakenDimmTranslator::GldnToSlot(int gldn,
-                                          DimmSlotId *dimm_slot) const {
+absl::StatusOr<DimmSlotId> InterlakenDimmTranslator::GldnToSlot(
+    int gldn) const {
   int num_slots = kInterlakenNumCpuSocket * kInterlakenNumImcChannelsPerCpu *
                   kInterlakenNumDimmSlotPerImcChannel;
   if (gldn < 0 || gldn >= num_slots) {
-    return false;
+    return absl::NotFoundError("gldn does not match any known dimm slot");
   }
   for (int slot_idx = 0; slot_idx < num_slots; ++slot_idx) {
     if (kInterlakenSlotNumGldnMap[slot_idx] == gldn) {
       int num_dimm_slot_per_cpu =
           kInterlakenNumImcChannelsPerCpu * kInterlakenNumDimmSlotPerImcChannel;
-      dimm_slot->socket_id = slot_idx / num_dimm_slot_per_cpu;
-      dimm_slot->imc_channel = (slot_idx % num_dimm_slot_per_cpu) /
-                               kInterlakenNumDimmSlotPerImcChannel;
-      dimm_slot->channel_slot = slot_idx % kInterlakenNumDimmSlotPerImcChannel;
-      return true;
+      return DimmSlotId{
+          .socket_id = slot_idx / num_dimm_slot_per_cpu,
+          .imc_channel = (slot_idx % num_dimm_slot_per_cpu) /
+                         kInterlakenNumDimmSlotPerImcChannel,
+          .channel_slot = slot_idx % kInterlakenNumDimmSlotPerImcChannel,
+      };
     }
   }
-  return false;
+  return absl::NotFoundError("gldn does not match any known dimm slot");
 }
 
-}  // namespace mcedecoder
+}  // namespace ecclesia

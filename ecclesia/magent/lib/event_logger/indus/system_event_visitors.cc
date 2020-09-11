@@ -29,20 +29,20 @@ namespace ecclesia {
 
 namespace {
 
-std::unique_ptr<mcedecoder::MceDecoder> CreateIndusMceDecoder(
-    std::unique_ptr<mcedecoder::CpuTopologyInterface> cpu_topology) {
-  mcedecoder::CpuVendor vendor = mcedecoder::CpuVendor::kIntel;
-  mcedecoder::CpuIdentifier identifier = mcedecoder::CpuIdentifier::kSkylake;
-  return absl::make_unique<mcedecoder::MceDecoder>(
+std::unique_ptr<MceDecoder> CreateIndusMceDecoder(
+    std::unique_ptr<CpuTopologyInterface> cpu_topology) {
+  CpuVendor vendor = CpuVendor::kIntel;
+  CpuIdentifier identifier = CpuIdentifier::kSkylake;
+  return absl::make_unique<MceDecoder>(
       vendor, identifier, std::move(cpu_topology),
-      absl::make_unique<mcedecoder::IndusDimmTranslator>());
+      absl::make_unique<IndusDimmTranslator>());
 }
 
 }  // namespace
 
 std::unique_ptr<CpuErrorCountingVisitor> CreateIndusCpuErrorCountingVisitor(
     absl::Time lower_bound,
-    std::unique_ptr<mcedecoder::CpuTopologyInterface> cpu_topology) {
+    std::unique_ptr<CpuTopologyInterface> cpu_topology) {
   auto mce_decoder = CreateIndusMceDecoder(std::move(cpu_topology));
   auto mce_adapter =
       absl::make_unique<MceDecoderAdapter>(std::move(mce_decoder));
@@ -52,7 +52,7 @@ std::unique_ptr<CpuErrorCountingVisitor> CreateIndusCpuErrorCountingVisitor(
 
 std::unique_ptr<DimmErrorCountingVisitor> CreateIndusDimmErrorCountingVisitor(
     absl::Time lower_bound,
-    std::unique_ptr<mcedecoder::CpuTopologyInterface> cpu_topology) {
+    std::unique_ptr<CpuTopologyInterface> cpu_topology) {
   auto mce_decoder = CreateIndusMceDecoder(std::move(cpu_topology));
   auto mce_adapter =
       absl::make_unique<MceDecoderAdapter>(std::move(mce_decoder));
