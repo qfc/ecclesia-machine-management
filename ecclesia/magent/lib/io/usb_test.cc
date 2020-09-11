@@ -22,8 +22,28 @@
 namespace ecclesia {
 namespace {
 
-// Sanity test the UsbPortSequence behavior.
-TEST(UsbHelpersTest, UsbPortSequenceValidation) {
+TEST(UsbPortSequenceTest, ValidateStaticFunctions) {
+  static constexpr UsbPortSequence kEmptyDefault;
+  EXPECT_EQ(kEmptyDefault.Size(), 0);
+
+  static constexpr UsbPortSequence kEmptyExplicit = UsbPortSequence::Make<>();
+  EXPECT_EQ(kEmptyExplicit.Size(), 0);
+
+  static constexpr UsbPortSequence kLongSequence =
+      UsbPortSequence::Make<1, 2, 3, 4, 5>();
+  EXPECT_EQ(kLongSequence.Size(), 5);
+
+  static constexpr UsbPortSequence kMaxSequence =
+      UsbPortSequence::Make<1, 2, 3, 4, 5, 6>();
+  EXPECT_EQ(kMaxSequence.Size(), 6);
+
+  auto maybe_long_to_max = kLongSequence.Downstream(UsbPort::Make<6>());
+  ASSERT_TRUE(maybe_long_to_max.has_value());
+  auto &long_to_max = maybe_long_to_max.value();
+  EXPECT_EQ(kMaxSequence, long_to_max);
+}
+
+TEST(UsbPortSequenceTest, ValidateDynamicFunctions) {
   auto maybe_seq = UsbPortSequence::TryMake({1, 2, 3, 4, 5, 6, 7});
   EXPECT_FALSE(maybe_seq.has_value());
 
@@ -41,6 +61,16 @@ TEST(UsbHelpersTest, UsbPortSequenceValidation) {
 
   auto maybe_seq_1_child = seq_1.Downstream(UsbPort::Make<7>());
   EXPECT_FALSE(maybe_seq_1_child.has_value());
+}
+
+TEST(UsbLocationTest, ValidateStaticFunctions) {
+  static constexpr UsbLocation kController = UsbLocation::Make<3>();
+  EXPECT_EQ(kController.Bus().value(), 3);
+  EXPECT_EQ(kController.NumPorts(), 0);
+
+  static constexpr UsbLocation kDevice = UsbLocation::Make<3, 1, 1, 5>();
+  EXPECT_EQ(kDevice.Bus().value(), 3);
+  EXPECT_EQ(kDevice.NumPorts(), 3);
 }
 
 }  // namespace

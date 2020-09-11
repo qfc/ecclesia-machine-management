@@ -19,8 +19,10 @@
 #ifndef ECCLESIA_MAGENT_LIB_IO_USB_H_
 #define ECCLESIA_MAGENT_LIB_IO_USB_H_
 
+#include <array>
 #include <cstddef>
 #include <cstdint>
+#include <type_traits>
 #include <vector>
 
 #include "absl/status/status.h"
@@ -57,16 +59,63 @@ class UsbPortSequence {
   // The maximum length of a chain of USB devices (through hubs).
   static constexpr int kDeviceChainMaxLength = 6;
 
-  // constructor for empty port sequence.
-  UsbPortSequence() = default;
+ private:
+  // Define a storage type that can hold UsbPort values but which can also be
+  // default initialized. This type stores the port in a union where by default
+  // the empty element is constructed. It is undefined behavior to access the
+  // port value without explicitly initializing it first, but since port
+  // sequence tracks how many elements in its underlying array have been
+  // populated it will prevent uninitialized elements from being accessed.
+  struct EmptyStruct {};
+  struct UsbPortStorage {
+    constexpr UsbPortStorage() : empty({}) {}
+    explicit constexpr UsbPortStorage(UsbPort port) : value(port) {}
+
+    union {
+      UsbPort value;
+      EmptyStruct empty;
+    };
+  };
+  // Make sure UsbPort can be trivially destroyed. Because UsbPortStorage
+  // disables the UsbPort destructor we rely on the fact that it has a trivial
+  // destructor (and thus is allowed to be omitted when the storage is
+  // discarded). If this is not true then we would need to explicitly destroy
+  // the stored values.
+  static_assert(std::is_trivially_destructible_v<UsbPort>);
+
+  // The underlying array storage type for the port sequence.
+  using StoredArray = std::array<UsbPortStorage, kDeviceChainMaxLength>;
+
+ public:
+  // Default construtor that creates an empty sequence. Equivalent to
+  // UsbPortSequence::Make<>();
+  constexpr UsbPortSequence() : size_(0) {}
+
+  // Compile-time factory function. Enforces the input range and length.
+  template <UsbPort::StoredType... Values>
+  static constexpr UsbPortSequence Make() {
+    static_assert(sizeof...(Values) <= kDeviceChainMaxLength,
+                  "port sequence length exceeds the allowed maximum");
+    StoredArray ports = {UsbPortStorage(UsbPort::Make<Values>())...};
+    return UsbPortSequence(ports, sizeof...(Values));
+  };
+
+  // Run-time factory function. Returns nullopt if the given value is out of
+  // range, either due to out of range values or too many ports.
   static absl::optional<UsbPortSequence> TryMake(absl::Span<const int> ports);
 
   UsbPortSequence(const UsbPortSequence &other) = default;
   UsbPortSequence &operator=(const UsbPortSequence &other) = default;
 
+  // Determine the size of the entire sequence;
   size_t Size() const;
+
+  // Fetch the port at a particular position in the sequence. Returns nullopt if
+  // the index is out of range.
   absl::optional<UsbPort> Port(size_t index) const;
 
+  // Compute the port sequence for a particular port downstream of this
+  // sequence. Returns nullopt if the sequence is already at the maximum length.
   absl::optional<UsbPortSequence> Downstream(UsbPort port) const;
 
   friend bool operator==(const UsbPortSequence &lhs,
@@ -75,8 +124,15 @@ class UsbPortSequence {
                          const UsbPortSequence &rhs);
 
  private:
-  UsbPortSequence(absl::Span<const UsbPort> ports);
-  std::vector<UsbPort> ports_;
+  // Unchecked constructor.
+  constexpr UsbPortSequence(const StoredArray &ports, size_t size)
+      : ports_(ports), size_(size) {}
+
+  // The underlying ports array, and how many of the entries in the array are
+  // populated. Values in the array after ports_[size_-1] are uninitialized and
+  // it would be undefined behavior to access them.
+  StoredArray ports_;
+  size_t size_;
 };
 
 // This is not a hard limit from any specification, but we're unlikely to
@@ -92,8 +148,17 @@ class UsbBusLocation : public FixedRangeInteger<UsbBusLocation, int, 1, 255> {
 // the root controller.
 class UsbLocation {
  public:
-  UsbLocation(UsbBusLocation bus, const UsbPortSequence &ports)
+  constexpr UsbLocation(UsbBusLocation bus, const UsbPortSequence &ports)
       : bus_(bus), ports_(ports) {}
+
+  // Construt a USB location that is statically constructed a compile time. The
+  // first parameter is the bus location, and any additional parameters are the
+  // port sequence.
+  template <UsbBusLocation::StoredType Bus, UsbPort::StoredType... Ports>
+  static constexpr UsbLocation Make() {
+    return UsbLocation(UsbBusLocation::Make<Bus>(),
+                       UsbPortSequence::Make<Ports...>());
+  }
 
   // Read the bus and port numbers.
   UsbBusLocation Bus() const { return bus_; }

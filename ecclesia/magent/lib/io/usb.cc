@@ -17,11 +17,9 @@
 #include "ecclesia/magent/lib/io/usb.h"
 
 #include <algorithm>
+#include <array>
 #include <cstddef>
-#include <iterator>
 #include <tuple>
-#include <utility>
-#include <vector>
 
 #include "absl/types/optional.h"
 #include "absl/types/span.h"
@@ -31,18 +29,6 @@
 
 namespace ecclesia {
 
-UsbPortSequence::UsbPortSequence(absl::Span<const UsbPort> ports) {
-  if (ports.size() > kDeviceChainMaxLength) {
-    WarningLog() << "Usb ports excceed max length";
-  }
-
-  ports_.clear();
-  std::copy(ports.begin(),
-            ports.begin() +
-                std::min(kDeviceChainMaxLength, static_cast<int>(ports.size())),
-            std::back_inserter(ports_));
-}
-
 absl::optional<UsbPortSequence> UsbPortSequence::TryMake(
     absl::Span<const int> ports) {
   if (ports.size() > kDeviceChainMaxLength) {
@@ -50,45 +36,39 @@ absl::optional<UsbPortSequence> UsbPortSequence::TryMake(
     return absl::nullopt;
   }
 
-  std::vector<UsbPort> port_sequence;
-  for (const auto port : ports) {
-    auto maybe_port = UsbPort::TryMake(port);
+  StoredArray stored_ports;
+  for (size_t i = 0; i < ports.size(); ++i) {
+    auto maybe_port = UsbPort::TryMake(ports[i]);
     if (!maybe_port.has_value()) {
       return absl::nullopt;
     }
-    port_sequence.push_back(maybe_port.value());
+    stored_ports[i].value = *maybe_port;
   }
-
-  return UsbPortSequence(std::move(port_sequence));
+  return UsbPortSequence(stored_ports, ports.size());
 }
 
-size_t UsbPortSequence::Size() const { return ports_.size(); }
+size_t UsbPortSequence::Size() const { return size_; }
 
 absl::optional<UsbPort> UsbPortSequence::Port(size_t index) const {
-  if (index >= Size()) {
-    return absl::nullopt;
-  }
-  return ports_[index];
+  if (index >= size_) return absl::nullopt;
+  return ports_[index].value;
 }
 
 absl::optional<UsbPortSequence> UsbPortSequence::Downstream(
     UsbPort port) const {
-  if (Size() == kDeviceChainMaxLength) {
-    return absl::nullopt;
-  }
+  if (size_ == kDeviceChainMaxLength) return absl::nullopt;
 
   // The downstream sequence is this sequence with the port number appended.
-  UsbPortSequence child(*this);
-  child.ports_.push_back(port);
-  return child;
+  StoredArray child_ports = ports_;
+  child_ports[size_].value = port;
+  return UsbPortSequence(child_ports, size_ + 1);
 }
 
 bool operator==(const UsbPortSequence &lhs, const UsbPortSequence &rhs) {
-  if (lhs.Size() != rhs.Size()) {
-    return false;
-  }
-  return std::equal(lhs.ports_.begin(), lhs.ports_.begin() + lhs.Size(),
-                    rhs.ports_.begin());
+  if (lhs.size_ != rhs.size_) return false;
+  return std::equal(
+      lhs.ports_.begin(), lhs.ports_.begin() + lhs.size_, rhs.ports_.begin(),
+      [](const auto &lhs, const auto &rhs) { return lhs.value == rhs.value; });
 }
 
 bool operator!=(const UsbPortSequence &lhs, const UsbPortSequence &rhs) {
@@ -102,4 +82,5 @@ bool operator==(const UsbLocation &lhs, const UsbLocation &rhs) {
 bool operator!=(const UsbLocation &lhs, const UsbLocation &rhs) {
   return !(lhs == rhs);
 }
+
 }  // namespace ecclesia

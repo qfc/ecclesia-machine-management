@@ -75,6 +75,10 @@ class FixedRangeInteger {
   // definition of the subclass constructor without having to repeat all of the
   // template parameters.
   using BaseType = FixedRangeInteger<T, IntType, MinValue, MaxValue>;
+
+  // The underlying integer type.
+  using StoredType = IntType;
+
   // The min and max range this type enforces.
   static constexpr IntType kMinValue = MinValue;
   static constexpr IntType kMaxValue = MaxValue;
@@ -140,8 +144,8 @@ class FixedRangeInteger {
   }
 
  private:
-  // Unchecked constructor. Only invoked by Make and TryMake, both of which
-  // check the range of value before calling this. This is private so that
+  // Unchecked constructor. Only invoked by the static factory functions which
+  // all check the range of value before calling this. This is private so that
   // users and subclasses CANNOT construct this directly.
   explicit constexpr FixedRangeInteger(IntType value) : value_(value) {}
 
