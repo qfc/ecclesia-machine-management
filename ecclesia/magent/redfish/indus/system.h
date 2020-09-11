@@ -36,7 +36,7 @@ class ComputerSystem : public Resource {
  private:
   void Get(ServerRequestInterface *req, const ParamsType &params) override {
     Json::Value json;
-    json[kOdataType] = "#ComputerSystem.v1_8_0_.ComputerSystem";
+    json[kOdataType] = "#ComputerSystem.v1_8_0.ComputerSystem";
     json[kOdataId] = std::string(Uri());
     json[kOdataContext] = "/redfish/v1/$metadata#ComputerSystem.ComputerSystem";
 

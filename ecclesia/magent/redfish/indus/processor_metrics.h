@@ -36,7 +36,7 @@ class ProcessorMetrics : public IndexResource {
   void Get(ServerRequestInterface *req, const ParamsType &params) override;
 
   void AddStaticFields(Json::Value *json) {
-    (*json)[kOdataType] = "#ProcessorMetrics.v1_2_0.ProcessorMetrics";
+    (*json)[kOdataType] = "#ProcessorMetrics.v1_1_1.ProcessorMetrics";
     (*json)[kOdataContext] =
         "/redfish/v1/$metadata#ProcessorMetrics.ProcessorMetrics";
     (*json)[kName] = "Processor Metrics";

@@ -26,6 +26,7 @@
 #include "absl/types/optional.h"
 #include "ecclesia/lib/logging/logging.h"
 #include "ecclesia/magent/redfish/core/assembly.h"
+#include "ecclesia/magent/redfish/core/odata_metadata.h"
 #include "ecclesia/magent/redfish/core/redfish_keywords.h"
 #include "ecclesia/magent/redfish/core/resource.h"
 #include "ecclesia/magent/redfish/indus/chassis.h"
@@ -82,9 +83,9 @@ Assembly::AssemblyModifier CreateModifierToAddFruInfo(
 }
 }  // namespace
 
-IndusRedfishService::IndusRedfishService(HTTPServerInterface *server,
-                                         SystemModel *system_model,
-                                         absl::string_view assemblies_dir) {
+IndusRedfishService::IndusRedfishService(
+    HTTPServerInterface *server, SystemModel *system_model,
+    absl::string_view assemblies_dir, const std::string &odata_metadata_path) {
   resources_.push_back(CreateResource<Root>(server));
   resources_.push_back(CreateResource<ServiceRoot>(server));
   resources_.push_back(CreateResource<ComputerSystemCollection>(server));
@@ -128,6 +129,7 @@ IndusRedfishService::IndusRedfishService(HTTPServerInterface *server,
   resources_.push_back(CreateResource<SoftwareInventoryCollection>(server));
   resources_.push_back(CreateResource<SoftwareInventory>(server));
   resources_.push_back(CreateResource<FirmwareInventoryCollection>(server));
+  metadata_ = CreateMetadata(server, odata_metadata_path);
 }
 
 }  // namespace ecclesia

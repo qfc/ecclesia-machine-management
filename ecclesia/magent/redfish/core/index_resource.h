@@ -30,7 +30,7 @@
 namespace ecclesia {
 // When a redfish resource is a part of a collection, and the uri contains an
 // index to the resource, prefer to derive from this class.
-// Unlike the generic resoruce, the URI of this IndexResoruce is normally a
+// Unlike the generic resource, the URI of this IndexResource is normally a
 // regex pattern, e.g., "/redfish/v1/Systems/system/Memory/(\\d+)"
 class IndexResource : public Resource {
  public:
@@ -84,8 +84,8 @@ class IndexResource : public Resource {
 
  private:
   void RequestHandler(ServerRequestInterface *req) override {
-    // The URI of this IndexResoruce is normally a regex pattern. Here we get
-    // the aresource index from the request URI. The extracted index will be
+    // The URI of this IndexResource is normally a regex pattern. Here we get
+    // the resource index from the request URI. The extracted index will be
     // passed as parameter into the corresponding resource handler.
     RE2 regex(this->Uri());
 

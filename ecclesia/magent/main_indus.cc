@@ -59,6 +59,10 @@ ABSL_FLAG(
     "Path to a file containing the raw EEPROM dump of the motherbord FRU. If "
     "left empty, magent will read the EEPROM directly via SMBUS.");
 
+ABSL_FLAG(std::string, odata_metadata_file_path,
+          "/root/csdl/$metadata/index.xml",
+          "Path to a file containing the OData metadata document.");
+
 namespace {
 
 using tensorflow::serving::net_http::HTTPServerInterface;
@@ -257,7 +261,8 @@ int main(int argc, char** argv) {
 
   auto server = ecclesia::CreateServer(absl::GetFlag(FLAGS_port));
   ecclesia::IndusRedfishService redfish_service(
-      server.get(), system_model.get(), absl::GetFlag(FLAGS_assemblies_dir));
+      server.get(), system_model.get(), absl::GetFlag(FLAGS_assemblies_dir),
+      absl::GetFlag(FLAGS_odata_metadata_file_path));
 
   bool success = server->StartAcceptingRequests();
   if (server != nullptr && success) {

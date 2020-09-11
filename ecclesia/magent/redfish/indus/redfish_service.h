@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "absl/strings/string_view.h"
+#include "ecclesia/magent/redfish/core/odata_metadata.h"
 #include "ecclesia/magent/redfish/core/resource.h"
 #include "ecclesia/magent/sysmodel/x86/sysmodel.h"
 #include "tensorflow_serving/util/net_http/server/public/httpserver_interface.h"
@@ -33,13 +34,15 @@ class IndusRedfishService {
  public:
   explicit IndusRedfishService(HTTPServerInterface *server,
                                SystemModel *system_model,
-                               absl::string_view assemblies_dir);
+                               absl::string_view assemblies_dir,
+                               const std::string &odata_metadata_path);
 
   IndusRedfishService(const IndusRedfishService &) = delete;
   IndusRedfishService &operator=(const IndusRedfishService &) = delete;
 
  private:
   std::vector<std::unique_ptr<Resource>> resources_;
+  std::unique_ptr<ODataMetadata> metadata_;
 };
 
 }  // namespace ecclesia
