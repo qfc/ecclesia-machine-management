@@ -18,6 +18,7 @@ cc_library(
         "//ecclesia/magent/lib/event_reader",
         "//ecclesia/magent/lib/event_reader:elog_reader",
         "//ecclesia/magent/lib/event_reader:mced_reader",
+        "//ecclesia/magent/lib/io:usb_sysfs",
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/container:flat_hash_map",
         "@com_google_absl//absl/strings",
@@ -104,6 +105,13 @@ cc_library(
     srcs = ["chassis.cc"],
     hdrs = ["chassis.h"],
     visibility = ["//ecclesia:magent_library_users"],
+    deps = [
+        "//ecclesia/lib/logging",
+        "//ecclesia/magent/lib/io:usb",
+        "//ecclesia/magent/lib/io:usb_sysfs",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/types:optional",
+    ],
 )
 
 cc_test(
@@ -113,6 +121,17 @@ cc_test(
     deps = [
         ":sysmodel_fru",
         "//ecclesia/magent/lib/ipmi:ipmi_mock",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "chassis_test",
+    srcs = ["chassis_test.cc"],
+    deps = [
+        ":chassis",
+        "//ecclesia/magent/lib/io:usb_mock",
+        "@com_google_absl//absl/status",
         "@com_google_googletest//:gtest_main",
     ],
 )

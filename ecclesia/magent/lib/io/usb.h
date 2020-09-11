@@ -24,6 +24,7 @@
 #include <cstdint>
 #include <type_traits>
 #include <vector>
+#include <memory>
 
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
@@ -38,7 +39,36 @@ struct UsbSignature {
   uint16_t vendor_id;
   // Product identifier as allocated by the manufacturer.
   uint16_t product_id;
+
+  bool operator==(const UsbSignature &other) const {
+    return (vendor_id == other.vendor_id) && (product_id == other.product_id);
+  }
+  bool operator!=(const UsbSignature &other) const { return !(*this == other); }
 };
+
+// These enums are placeholders for future supported USB devices.
+enum UsbVendorId {
+  kVendorIdGoogle = 0x18d1,
+};
+
+enum UsbProdId {
+  kProdIdSleipnirBmc = 0x0215,
+};
+
+// This enum lists out all the supported USB plugin IDs.
+enum class UsbPluginId {
+  kSleipnirBmc,
+  kUnknown,
+};
+
+// A helper function to return a USB plugin ID by matching the given USB
+// signature. If no match is found, UsbPluginId::kUnknown is returned.
+UsbPluginId GetUsbPluginIdWithSignature(const UsbSignature &signature);
+
+// A helper function to return a USB signature by looking up the given USB
+// plugin ID. If no matched plugin ID is found, a status is returned instead.
+absl::StatusOr<UsbSignature> GetUsbSignatureWithPluginId(
+    UsbPluginId usb_plugin_id);
 
 // The port number a USB device is connected to.
 class UsbPort : public FixedRangeInteger<UsbPort, int, 1, 15> {
@@ -177,27 +207,26 @@ class UsbLocation {
   UsbPortSequence ports_;
 };
 
+// An interface to access a USB device.
+class UsbDeviceIntf {
+ public:
+  virtual ~UsbDeviceIntf() = default;
+
+  virtual const UsbLocation &Location() const = 0;
+
+  virtual absl::StatusOr<UsbSignature> GetSignature() const = 0;
+};
+
 // An interface to discover USB devices.
 class UsbDiscoveryInterface {
  public:
   virtual ~UsbDiscoveryInterface() = default;
 
-  // Enumerate all USB devices and push their location information into the
-  // provided 'devices' vector.
-  virtual absl::Status EnumerateAllUsbDevices(
-      std::vector<UsbLocation> *devices) const = 0;
+  // Enumerate all USB devices.
+  virtual absl::StatusOr<std::vector<std::unique_ptr<UsbDeviceIntf>>>
+  EnumerateAllUsbDevices() const = 0;
 };
 
-// An interface to access USB devices.
-class UsbAccessInterface {
- public:
-  UsbAccessInterface() = default;
-  UsbAccessInterface(const UsbLocation &usb_location);
-  virtual ~UsbAccessInterface() = default;
-
-  // Gets the signature of the device at the given location.
-  virtual absl::StatusOr<UsbSignature> GetSignature() const = 0;
-};
 }  // namespace ecclesia
 
 #endif  // ECCLESIA_MAGENT_LIB_IO_USB_H_

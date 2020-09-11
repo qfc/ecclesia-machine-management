@@ -21,6 +21,8 @@
 #include <cstddef>
 #include <tuple>
 
+#include "absl/status/status.h"
+#include "absl/strings/str_cat.h"
 #include "absl/types/optional.h"
 #include "absl/types/span.h"
 #include "ecclesia/lib/logging/globals.h"
@@ -28,6 +30,33 @@
 #include "ecclesia/lib/types/fixed_range_int.h"
 
 namespace ecclesia {
+namespace {
+
+constexpr std::tuple<UsbPluginId, const UsbSignature> kUsbPluginTable[] = {
+    {UsbPluginId::kSleipnirBmc,
+     UsbSignature{kVendorIdGoogle, kProdIdSleipnirBmc}}};
+
+}  // namespace
+
+UsbPluginId GetUsbPluginIdWithSignature(const UsbSignature &signature) {
+  for (const auto &usb : kUsbPluginTable) {
+    if (std::get<1>(usb) == signature) {
+      return std::get<0>(usb);
+    }
+  }
+  return UsbPluginId::kUnknown;
+}
+
+absl::StatusOr<UsbSignature> GetUsbSignatureWithPluginId(
+    UsbPluginId usb_plugin_id) {
+  for (const auto &usb : kUsbPluginTable) {
+    if (std::get<0>(usb) == usb_plugin_id) {
+      return std::get<1>(usb);
+    }
+  }
+  return absl::NotFoundError(absl::StrCat(
+      "No USB signature found with the given USB plugin ID: ", usb_plugin_id));
+}
 
 absl::optional<UsbPortSequence> UsbPortSequence::TryMake(
     absl::Span<const int> ports) {

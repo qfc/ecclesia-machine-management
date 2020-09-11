@@ -63,7 +63,7 @@ class SysfsUsbTest : public testing::Test {
     fs_.CreateDir(real_devname);
     fs_.CreateSymlink(real_devname, absl::StrCat(kUsbDevicesDir, "/", devname));
     fs_.CreateFile(absl::StrCat(real_devname, "/idVendor"),
-                   absl::StrCat(absl::Hex(vendor, absl::kZeroPad4)));
+                   absl::StrCat(absl::Hex(vendor, absl::kZeroPad4), "\t"));
     fs_.CreateFile(absl::StrCat(real_devname, "/idProduct"),
                    absl::StrCat(absl::Hex(product, absl::kZeroPad4)));
   }
@@ -75,10 +75,10 @@ class SysfsUsbTest : public testing::Test {
 
 // Helper that return true if a matching DeviceLocation in a vector, or
 // returns false if the location isn't found.
-bool FindUsbLocation(const std::vector<UsbLocation> &devices,
+bool FindUsbLocation(const std::vector<std::unique_ptr<UsbDeviceIntf>> &devices,
                      const UsbLocation &loc) {
   for (size_t i = 0; i < devices.size(); ++i) {
-    if (loc == devices[i]) {
+    if (loc == devices[i]->Location()) {
       return true;
     }
   }
@@ -86,8 +86,10 @@ bool FindUsbLocation(const std::vector<UsbLocation> &devices,
 }
 
 TEST_F(SysfsUsbTest, TestDeviceEnumeration) {
-  std::vector<UsbLocation> usb_devices;
-  ASSERT_TRUE(usb_discover_.EnumerateAllUsbDevices(&usb_devices).ok());
+  auto maybe_usb_devices = usb_discover_.EnumerateAllUsbDevices();
+  ASSERT_TRUE(maybe_usb_devices.ok());
+  const std::vector<std::unique_ptr<UsbDeviceIntf>> &usb_devices =
+      maybe_usb_devices.value();
   EXPECT_EQ(usb_devices.size(), 11);
   auto usb_1 = UsbLocation(UsbBusLocation::Make<1>(), UsbPortSequence());
   EXPECT_TRUE(FindUsbLocation(usb_devices, usb_1));
@@ -121,26 +123,26 @@ TEST_F(SysfsUsbTest, TestDeviceEnumeration) {
       usb_devices, UsbLocation(UsbBusLocation::Make<2>(),
                                UsbPortSequence::TryMake({2, 5, 10}).value())));
 
-  SysfsUsbAccess usb_1_access(
+  SysfsUsbDevice usb_1_device(
       usb_1, ApifsDirectory(
                  absl::StrCat(usb_dir_, "/", UsbLocationToDirectory(usb_1))));
-  auto maybe_usb_1_sig = usb_1_access.GetSignature();
+  auto maybe_usb_1_sig = usb_1_device.GetSignature();
   ASSERT_TRUE(maybe_usb_1_sig.ok());
   EXPECT_EQ(0x1d6b, maybe_usb_1_sig->vendor_id);
   EXPECT_EQ(0x0002, maybe_usb_1_sig->product_id);
 
-  SysfsUsbAccess usb_2_1_access(
+  SysfsUsbDevice usb_2_1_device(
       usb_2_1, ApifsDirectory(absl::StrCat(usb_dir_, "/",
                                            UsbLocationToDirectory(usb_2_1))));
-  auto maybe_usb_2_1_sig = usb_2_1_access.GetSignature();
+  auto maybe_usb_2_1_sig = usb_2_1_device.GetSignature();
   ASSERT_TRUE(maybe_usb_2_1_sig.ok());
   EXPECT_EQ(0x0424, maybe_usb_2_1_sig->vendor_id);
   EXPECT_EQ(0x2517, maybe_usb_2_1_sig->product_id);
 
-  SysfsUsbAccess usb_2_2_1_access(
+  SysfsUsbDevice usb_2_2_1_device(
       usb_2_2_1, ApifsDirectory(absl::StrCat(
                      usb_dir_, "/", UsbLocationToDirectory(usb_2_2_1))));
-  auto maybe_usb_2_2_1_sig = usb_2_2_1_access.GetSignature();
+  auto maybe_usb_2_2_1_sig = usb_2_2_1_device.GetSignature();
   ASSERT_TRUE(maybe_usb_2_2_1_sig.ok());
   EXPECT_EQ(0x18d1, maybe_usb_2_2_1_sig->vendor_id);
   EXPECT_EQ(0x0002, maybe_usb_2_2_1_sig->product_id);

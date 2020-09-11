@@ -20,6 +20,8 @@
 #include <string>
 #include <vector>
 
+#include "ecclesia/magent/lib/io/usb.h"
+
 namespace ecclesia {
 
 // The supported Chassis IDs. This enum will be expanded if more chassis are
@@ -81,10 +83,15 @@ inline std::string GetChassisTypeAsString(ChassisId chassis_id) {
   return ChassisTypeToString(GetChassisType(chassis_id));
 }
 
+// This method detects and returns USB-based Chassis (expansion tray) if any
+// matched Chassis is found or nullopt if none was found.
+absl::optional<ChassisId> DetectChassisByUsb(
+    UsbDiscoveryInterface *usb_discover_intf);
+
 // This function returns a vector of Chassis IDs in the system. Those Redfish
 // Chassis resources and their "always-present" assemblies will be created
 // based on the existence of the corresponding chassis ID.
-std::vector<ChassisId> CreateChassis();
+std::vector<ChassisId> CreateChassis(UsbDiscoveryInterface *usb_discover_intf);
 
 }  // namespace ecclesia
 

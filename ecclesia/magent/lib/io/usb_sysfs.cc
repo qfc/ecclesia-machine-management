@@ -17,6 +17,7 @@
 #include "ecclesia/magent/lib/io/usb_sysfs.h"
 
 #include <cstddef>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -36,10 +37,9 @@
 
 namespace ecclesia {
 const char kUsbDevicesDir[] = "/sys/bus/usb/devices";
-const RE2 kHexRegexp = {
-    R"re(([[:xdigit:]]+))re"};
-const RE2 kDecimalRegexp = {
-    R"re((\d+))re"};
+// A regex pattern to match a hex string with possible trailing empty space.
+const RE2 kHexRegexp = {R"re(([[:xdigit:]]+)\s*)re"};
+const RE2 kDecimalRegexp = {R"re((\d+))re"};
 
 namespace {
 // Read a single unsigned integer out of a sysfs file. Writes the value into
@@ -142,38 +142,43 @@ std::string UsbLocationToDirectory(const UsbLocation &loc) {
   return absl::StrFormat("%d-%s", loc.Bus().value(), port_substr.c_str());
 }
 
-absl::Status SysfsUsbDiscovery::EnumerateAllUsbDevices(
-    std::vector<UsbLocation> *devices) const {
+absl::StatusOr<std::vector<std::unique_ptr<UsbDeviceIntf>>>
+SysfsUsbDiscovery::EnumerateAllUsbDevices() const {
   auto maybe_usb_device_entries = api_fs_.ListEntries();
   if (!maybe_usb_device_entries.ok()) {
     return maybe_usb_device_entries.status();
   }
 
-  devices->clear();
-
+  std::vector<std::unique_ptr<UsbDeviceIntf>> devices;
   for (absl::string_view entry : *maybe_usb_device_entries) {
     auto maybe_usb_location = DirectoryToUsbLocation(GetBasename(entry));
 
     if (maybe_usb_location.has_value()) {
-      devices->push_back(maybe_usb_location.value());
+      devices.push_back(
+          std::make_unique<SysfsUsbDevice>(maybe_usb_location.value()));
     }
   }
-  return absl::OkStatus();
+  return devices;
 }
 
-absl::StatusOr<UsbSignature> SysfsUsbAccess::GetSignature() const {
+absl::StatusOr<UsbSignature> SysfsUsbDevice::GetSignature() const {
+  std::cout << "JY GetSignature" << std::endl;
   UsbSignature signature;
   if (auto status = ReadUintFromSysfs(ApifsFile(api_fs_, "idVendor"), true,
                                       &signature.vendor_id);
       !status.ok()) {
+    std::cout << "JY DBG idVendor status:" << status.ToString() << std::endl;
     return status;
   }
 
   if (auto status = ReadUintFromSysfs(ApifsFile(api_fs_, "idProduct"), true,
                                       &signature.product_id);
       !status.ok()) {
+    std::cout << "JY DBG idProduct status:" << status.ToString() << std::endl;
     return status;
   }
+  std::cout << "JY GetSignature: idVendor=" << signature.vendor_id << std::endl;
+  std::cout << "JY GetSignature: idProduct=" << signature.product_id << std::endl;
   return signature;
 }
 

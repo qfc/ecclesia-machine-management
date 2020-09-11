@@ -73,5 +73,24 @@ TEST(UsbLocationTest, ValidateStaticFunctions) {
   EXPECT_EQ(kDevice.NumPorts(), 3);
 }
 
+TEST(GetUsbPluginIdWithSignatureTest, GetCorrectId) {
+  UsbSignature sleipnir_signature{0x18d1, 0x0215};
+  EXPECT_EQ(GetUsbPluginIdWithSignature(sleipnir_signature),
+            UsbPluginId::kSleipnirBmc);
+
+  UsbSignature non_exist_signature{0x1234, 0x5678};
+  EXPECT_EQ(GetUsbPluginIdWithSignature(non_exist_signature),
+            UsbPluginId::kUnknown);
+}
+
+TEST(GetUsbSignatureWithPluginIdTest, GetCorrectSignature) {
+  auto maybe_signature = GetUsbSignatureWithPluginId(UsbPluginId::kSleipnirBmc);
+  ASSERT_TRUE(maybe_signature.ok());
+  EXPECT_EQ(maybe_signature.value(), (UsbSignature{0x18d1, 0x0215}));
+
+  maybe_signature = GetUsbSignatureWithPluginId(UsbPluginId::kUnknown);
+  EXPECT_FALSE(maybe_signature.ok());
+}
+
 }  // namespace
 }  // namespace ecclesia

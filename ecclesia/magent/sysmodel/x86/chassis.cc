@@ -19,14 +19,45 @@
 #include <string>
 #include <vector>
 
+#include "absl/strings/str_cat.h"
+#include "absl/types/optional.h"
+#include "ecclesia/lib/logging/logging.h"
+#include "ecclesia/magent/lib/io/usb.h"
+#include "ecclesia/magent/lib/io/usb_sysfs.h"
+
 namespace ecclesia {
 
-std::vector<ChassisId> CreateChassis() {
+absl::optional<ChassisId> DetectChassisByUsb(
+    UsbDiscoveryInterface *usb_discover_intf) {
+  auto maybe_usb_devices = usb_discover_intf->EnumerateAllUsbDevices();
+  if (!maybe_usb_devices.ok()) {
+    ecclesia::ErrorLog() << "Failed to enumerate USB devices. status: "
+                         << maybe_usb_devices.status();
+  } else {
+    for (auto &usb_device : maybe_usb_devices.value()) {
+      if (auto maybe_signature = usb_device->GetSignature();
+          maybe_signature.ok()) {
+        UsbPluginId usb_id =
+            GetUsbPluginIdWithSignature(maybe_signature.value());
+        if (usb_id == UsbPluginId::kSleipnirBmc) {
+          return ChassisId::kSleipnir;
+        }
+      }
+    }
+  }
+  return absl::nullopt;
+}
+
+std::vector<ChassisId> CreateChassis(UsbDiscoveryInterface *usb_discover_intf) {
   std::vector<ChassisId> chassis_vec;
   // Hardcode the Indus Chassis for now.
   chassis_vec.push_back(ChassisId::kIndus);
-  // Assemblies. Here it expects to dynamically detect and add expenstion
-  // Chassis. e.g., Sleipnir.
+
+  // Detect USB-based chassis and add the chassis if found.
+  if (auto maybe_chassis = DetectChassisByUsb(usb_discover_intf);
+      maybe_chassis.has_value()) {
+    chassis_vec.push_back(maybe_chassis.value());
+  }
   return chassis_vec;
 }
 

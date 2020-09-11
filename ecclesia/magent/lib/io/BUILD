@@ -173,6 +173,7 @@ cc_library(
         "//ecclesia/lib/types:fixed_range_int",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/status:statusor",
+        "@com_google_absl//absl/strings",
         "@com_google_absl//absl/types:optional",
         "@com_google_absl//absl/types:span",
     ],
@@ -197,6 +198,18 @@ cc_library(
         "@com_google_absl//absl/strings:str_format",
         "@com_google_absl//absl/types:optional",
         "@com_googlesource_code_re2//:re2",
+    ],
+)
+
+cc_library(
+    name = "usb_mock",
+    testonly = True,
+    hdrs = ["usb_mock.h"],
+    visibility = ["//ecclesia:magent_library_users"],
+    deps = [
+        ":usb",
+        "@com_google_absl//absl/status:statusor",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 

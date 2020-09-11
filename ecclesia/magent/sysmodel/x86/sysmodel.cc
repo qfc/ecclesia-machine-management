@@ -32,6 +32,7 @@
 #include "ecclesia/magent/lib/event_reader/elog_reader.h"
 #include "ecclesia/magent/lib/event_reader/event_reader.h"
 #include "ecclesia/magent/lib/event_reader/mced_reader.h"
+#include "ecclesia/magent/lib/io/usb_sysfs.h"
 #include "ecclesia/magent/sysmodel/x86/chassis.h"
 #include "ecclesia/magent/sysmodel/x86/cpu.h"
 #include "ecclesia/magent/sysmodel/x86/dimm.h"
@@ -161,7 +162,8 @@ SystemModel::SystemModel(SysmodelParams params)
     cpu_margin_sensors_ = std::move(cpu_margin_sensors);
   }
 
-  auto chassis = CreateChassis();
+  SysfsUsbDiscovery usb_discovery;
+  auto chassis = CreateChassis(&usb_discovery);
   {
     absl::WriterMutexLock ml(&chassis_lock_);
     chassis_ = std::move(chassis);

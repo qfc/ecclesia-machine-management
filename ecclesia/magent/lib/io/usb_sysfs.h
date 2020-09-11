@@ -43,26 +43,31 @@ class SysfsUsbDiscovery : public UsbDiscoveryInterface {
   SysfsUsbDiscovery(const SysfsUsbDiscovery &other) = delete;
   SysfsUsbDiscovery &operator=(const SysfsUsbDiscovery &other) = delete;
 
-  absl::Status EnumerateAllUsbDevices(
-      std::vector<UsbLocation> *devices) const override;
+  absl::StatusOr<std::vector<std::unique_ptr<UsbDeviceIntf>>>
+  EnumerateAllUsbDevices() const override;
 
  private:
   ApifsDirectory api_fs_;
 };
 
-class SysfsUsbAccess : public UsbAccessInterface {
+class SysfsUsbDevice : public UsbDeviceIntf {
  public:
-  SysfsUsbAccess(const UsbLocation &usb_location)
-      : SysfsUsbAccess(
+  SysfsUsbDevice(const UsbLocation &usb_location)
+      : SysfsUsbDevice(
             usb_location,
             ApifsDirectory(absl::StrCat(
                 kUsbDevicesDir, "/", UsbLocationToDirectory(usb_location)))) {}
+
   // This constructor is for testing purpose.
-  SysfsUsbAccess(const UsbLocation &usb_location, const ApifsDirectory &api_fs)
+  SysfsUsbDevice(const UsbLocation &usb_location, const ApifsDirectory &api_fs)
       : usb_location_(usb_location), api_fs_(api_fs) {}
 
-  SysfsUsbAccess(const SysfsUsbAccess &other) = delete;
-  SysfsUsbAccess &operator=(const SysfsUsbAccess &other) = delete;
+  SysfsUsbDevice(const SysfsUsbDevice &other) = delete;
+  SysfsUsbDevice &operator=(const SysfsUsbDevice &other) = delete;
+
+  const UsbLocation &Location() const override {
+    return usb_location_;
+  }
 
   absl::StatusOr<UsbSignature> GetSignature() const override;
 
